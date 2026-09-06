@@ -8,12 +8,13 @@ import { PeakSheet } from './features/checklist/PeakSheet'
 import { MapView } from './features/map/MapView'
 import { Planner } from './features/planner/Planner'
 import { ExportView } from './features/export/ExportView'
+import { InfoView } from './features/info/InfoView'
 import { FieldView } from './features/field/FieldView'
 import { ProgressRing } from './ui/ProgressRing'
 import type { Peak } from './types'
-import { IconList, IconLocate, IconMap, IconRoute, IconShare } from './ui/Icons'
+import { IconInfo, IconList, IconLocate, IconMap, IconRoute, IconShare } from './ui/Icons'
 
-type Tab = 'lista' | 'mapa' | 'plan' | 'teren' | 'dowod'
+type Tab = 'lista' | 'mapa' | 'plan' | 'teren' | 'dowod' | 'info'
 
 const TABS: { id: Tab; label: string; icon: typeof IconList }[] = [
   { id: 'lista', label: 'Szczyty', icon: IconList },
@@ -21,6 +22,7 @@ const TABS: { id: Tab; label: string; icon: typeof IconList }[] = [
   { id: 'plan', label: 'Plan', icon: IconRoute },
   { id: 'teren', label: 'Teren', icon: IconLocate },
   { id: 'dowod', label: 'Dowód', icon: IconShare },
+  { id: 'info', label: 'Info', icon: IconInfo },
 ]
 
 export default function App() {
@@ -101,11 +103,12 @@ export default function App() {
             />
           )}
           {tab === 'dowod' && <ExportView />}
+          {tab === 'info' && <InfoView onGoToPlanner={() => setTab('plan')} />}
         </motion.div>
       </main>
 
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-[900] mx-auto max-w-3xl border-t border-white/8 bg-night-950/90 px-2 pt-1 backdrop-blur-xl">
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-6">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}

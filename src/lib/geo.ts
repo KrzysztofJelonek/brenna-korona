@@ -79,3 +79,16 @@ export function formatTime(h: number): string {
 export function formatDistance(m: number): string {
   return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`
 }
+
+/**
+ * Polska odmiana przez liczbę: 1 etap, 2 etapy, 5 etapów.
+ * Formy: [pojedyncza, mnoga 2-4, mnoga 5+/dopełniacz].
+ */
+export function plural(n: number, forms: [string, string, string]): string {
+  const abs = Math.abs(n)
+  if (abs === 1) return forms[0]
+  const last = abs % 10
+  const lastTwo = abs % 100
+  if (last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14)) return forms[1]
+  return forms[2]
+}

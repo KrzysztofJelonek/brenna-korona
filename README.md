@@ -71,6 +71,15 @@ To najważniejsza funkcja użytkowa, bo odwzorowuje realny proces weryfikacji.
 
 **Ślad wycieczki.** Zapis trasy w tle i eksport do GPX — do własnego archiwum albo do Stravy.
 
+### Informacje i kontakt
+
+Zakładka **Info** zbiera to, po co uczestnik dziś wchodzi na stronę organizatora: zasady i terminy, zapowiedź wideo, przegląd wariantów tras, 10 pytań i odpowiedzi przepisanych z materiałów organizatora, kalendarz imprez towarzyszących, konkursy oraz komplet danych kontaktowych — e-mail organizatora, Facebook (tam idzie weryfikacja), Instagram, YouTube i Informacja Turystyczna w Brennej. Na końcu informacja o autorze i sponsorze aplikacji.
+
+Dwie decyzje w tej sekcji wynikają wprost z obietnicy braku śledzenia:
+
+- **Film ładuje się dopiero po kliknięciu.** Zwykły embed YouTube odpytuje Google przy samym otwarciu strony. Tu do momentu kliknięcia nie leci żaden request, a po kliknięciu używany jest `youtube-nocookie.com`. Zweryfikowane: na zakładce Info nie ma **żadnego** zasobu z obcej domeny.
+- **Logo sponsora leży lokalnie** w `public/`, nie jest wczytywane z `facelove.pl`. Przy okazji zmniejszone z 1400 px / 56 kB do 600 px / 11 kB i działa offline.
+
 ### Świadomie poza zakresem MVP
 
 Grywalizacja (odznaki, rankingi, statystyki roczne), cache kafelków mapy offline, jakikolwiek backend, konta i synchronizacja między urządzeniami (rolę synchronizacji pełni eksport/import pliku).
