@@ -4,8 +4,9 @@ import { PEAKS, peakById } from '../../data/peaks'
 import { ROUTE_PRESETS } from '../../data/routes'
 import { START_POINTS, startPointById } from '../../data/startPoints'
 import { generatePlan } from '../../lib/planGenerator'
+import { useDayRoutes } from '../../lib/useDayRoute'
 import { useProgress } from '../../store/progress'
-import { TERRAIN_FACTOR, estimateDay, formatTime, plural } from '../../lib/geo'
+import { estimateDay, formatTime, plural } from '../../lib/geo'
 import type { Peak } from '../../types'
 import { ElevationProfile } from './ElevationProfile'
 import { DAY_COLORS } from '../map/MapView'
@@ -25,6 +26,18 @@ export function Planner({ onShowDayOnMap }: Props) {
   const [pickerDay, setPickerDay] = useState<string | null>(null)
   const [genDays, setGenDays] = useState(3)
   const generated = useMemo(() => generatePlan(genDays), [genDays])
+
+  const dayInputs = useMemo(
+    () =>
+      plans.map((d) => ({
+        id: d.id,
+        peaks: d.peakIds.map(peakById).filter((p): p is Peak => Boolean(p)),
+        start: startPointById(d.startPointId),
+        loop: d.loop !== false,
+      })),
+    [plans],
+  )
+  const { routes } = useDayRoutes(dayInputs)
 
   const assigned = useMemo(() => new Set(plans.flatMap((d) => d.peakIds)), [plans])
   const unassigned = PEAKS.filter((p) => !assigned.has(p.id))
@@ -131,7 +144,8 @@ export function Planner({ onShowDayOnMap }: Props) {
               const dayPeaks = day.peakIds.map(peakById).filter((p): p is Peak => Boolean(p))
               const start = startPointById(day.startPointId)
               const isLoop = day.loop !== false
-              const stats = estimateDay(dayPeaks, start ? { start, loop: isLoop } : {})
+              const routed = routes.get(day.id) ?? null
+              const stats = routed ?? estimateDay(dayPeaks, start ? { start, loop: isLoop } : {})
               const color = DAY_COLORS[i % DAY_COLORS.length]
               const donePeaks = dayPeaks.filter((p) => progress[p.id]?.status === 'done').length
 
@@ -263,18 +277,24 @@ export function Planner({ onShowDayOnMap }: Props) {
                         <div className="grid grid-cols-3 gap-2 pt-1 text-center">
                           <Stat
                             label="dystans"
-                            value={day.officialDistanceKm ? `${day.officialDistanceKm} km` : `~${stats.distanceKm.toFixed(1)} km`}
+                            value={
+                              day.officialDistanceKm
+                                ? `${day.officialDistanceKm.toLocaleString('pl-PL', { minimumFractionDigits: 1 })} km`
+                                : `${routed ? '' : '~'}${stats.distanceKm.toLocaleString('pl-PL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km`
+                            }
                           />
-                          <Stat label="podejścia" value={`~${Math.round(stats.ascentM)} m`} />
-                          <Stat label="czas" value={day.officialTime ?? `~${formatTime(stats.timeH)}`} />
+                          <Stat label="podejścia" value={`${routed ? '' : '~'}${Math.round(stats.ascentM).toLocaleString('pl-PL')} m`} />
+                          <Stat label="czas" value={day.officialTime ?? `${routed ? '' : '~'}${formatTime(stats.timeH)}`} />
                         </div>
                         <ElevationProfile peaks={dayPeaks} color={color} />
                         <p className="text-[10px] text-muted">
                           {day.officialDistanceKm
                             ? 'Dystans i czas z materiałów gminy Brenna.'
-                            : stats.fromStartPoint
-                              ? `Szacunek dla ${isLoop ? 'pętli z powrotem na start' : 'trasy bez powrotu na start'} — linia prosta × ${TERRAIN_FACTOR.toLocaleString('pl-PL')}, reguła Naismitha, kalibrowane na danych gminy.`
-                              : 'Szacunek bez punktu startowego — wybierz parking, żeby policzyć dojście i powrót.'}
+                            : routed
+                              ? `Policzone po realnych szlakach z OpenStreetMap${routed.straightLegs ? `, ${routed.straightLegs} odcinek poza siecią` : ''}. Profil wysokości z SRTM.`
+                              : start
+                                ? `Szacunek wstępny dla ${isLoop ? 'pętli z powrotem na start' : 'trasy bez powrotu'} — liczę trasę po szlakach…`
+                                : 'Szacunek bez punktu startowego — wybierz parking, żeby policzyć dojście i powrót.'}
                         </p>
                       </>
                     )}

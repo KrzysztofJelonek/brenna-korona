@@ -155,6 +155,26 @@ Trzy rzeczy, których **nie** dało się rozstrzygnąć z materiałów źródło
 
 ---
 
+### Routing po realnych szlakach
+
+Linie na mapie nie są prostymi odcinkami między szczytami. Aplikacja wozi ze sobą sieć dróg i ścieżek z OpenStreetMap dla gminy Brenna i prowadzi trasę po niej, **preferując oznakowane szlaki PTTK** — bo organizator wymaga zdobywania szczytów właśnie nimi. Odległość bierze się z geometrii trasy, a przewyższenie z profilu SRTM próbkowanego co 40 m.
+
+| | |
+|---|---|
+| sieć | 8400 odcinków, 87 tys. punktów, 833 odcinki oznakowanych szlaków |
+| spójność | 98,5% — router zostawia tylko największą składową |
+| rozmiar | 648 KB, **229 KB po gzip**, osobny chunk ładowany przy pierwszym liczeniu |
+| siatka wysokości | SRTM 30 m próbkowany co 90 m, 112 KB (39 KB gzip) |
+| kara za odcinki nieoznakowane | ×4 |
+
+Dane buduje się skryptami [`tools/build-trails.py`](tools/build-trails.py) i [`tools/build-elevation.py`](tools/build-elevation.py); uruchamia się je ręcznie, gdy trzeba odświeżyć OSM. Wszystko jest precache'owane przez Service Workera, więc **routing działa offline**.
+
+**Tempo marszu jest dopasowane do organizatora.** Klasyczna reguła Naismitha (5 km/h, 600 m podejścia na godzinę) okazała się systematycznie o 15% za szybka względem czasów z PDF. Po dopasowaniu do sześciu dni gminy — przy ich dystansach i naszych przewyższeniach z SRTM — wychodzi **4,45 km/h i 455 m/h**, a czasy zgadzają się z organizatorem w granicach 6%, pięć z sześciu dni w granicach 1%.
+
+Czego routing nie zrobi: nie odgadnie redakcyjnych decyzji autora trasy. Gdy gmina świadomie prowadzi dłuższą drogą powrotną albo przez Klimczok, najkrótsza sensowna trasa po szlakach będzie inna. Dlatego dla wariantów gminy UI pokazuje **ich** dystanse i czasy, a policzone wartości służą własnym planom.
+
+Gdy któregoś odcinka nie da się poprowadzić po sieci, ten jeden odcinek spada na linię prostą z dawnym mnożnikiem, a UI mówi, ile odcinków tak potraktowano — zamiast udawać, że wszystko się udało.
+
 ## 4. Architektura
 
 **Stack:** Vite · React · TypeScript · Tailwind CSS · Leaflet (react-leaflet) · Framer Motion · zustand · idb · exifr · vite-plugin-pwa.
@@ -315,7 +335,7 @@ Zrealizowane odstępstwa od pierwotnego planu:
 
 - **Zamiast drag&drop w planerze — przypisywanie dotknięciem.** Przeciąganie na telefonie w terenie jest zawodne; szczyty dodaje się z listy, a kolejność zmienia strzałkami. Mniej kodu, lepsza obsługa jedną ręką.
 - **Profil wysokości pokazuje wierzchołki, nie realny szlak.** Materiały organizatora nie zawierają geometrii tras, więc profil rozkłada wysokości szczytów wzdłuż szacowanego dystansu. Podpis w UI mówi to wprost.
-- **Dystans własnego planu jest szacunkiem** — linia prosta × 1,65 plus 32 m podejścia na każdy kilometr, potem reguła Naismitha. Oba parametry są **dopasowane do sześciodniowej propozycji gminy**, jedynych danych, gdzie znamy prawdziwe dystanse i czasy: suma dystansu zgadza się wtedy w granicach 1%, a błąd pojedynczego dnia mieści się w ±30%. Tam, gdzie PDF podaje realne wartości, UI pokazuje je zamiast szacunku.
+- **Trasy liczone są po realnej sieci ścieżek**, nie po liniach prostych — patrz niżej.
 
 ---
 

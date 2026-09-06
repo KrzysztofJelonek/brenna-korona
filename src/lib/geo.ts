@@ -46,6 +46,22 @@ export const TERRAIN_FACTOR = 1.65
  */
 export const ROUGHNESS_M_PER_KM = 32
 
+/**
+ * Tempo marszu, dopasowane do czasów podanych przez gminę.
+ *
+ * Klasyczna reguła Naismitha (5 km/h + 600 m podejścia na godzinę) okazała się
+ * systematycznie o 15% za szybka względem propozycji gminy. Po dopasowaniu obu
+ * wartości do sześciu dni z PDF — przy dystansach gminy i przewyższeniach
+ * liczonych z SRTM — czasy zgadzają się z organizatorem w granicach 6%,
+ * a pięć z sześciu dni w granicach 1%.
+ */
+export const PACE_KMH = 4.45
+export const ASCENT_M_PER_H = 455
+
+/** Czas przejścia: dystans w poziomie plus czas podejścia. */
+export const walkingTime = (distanceKm: number, ascentM: number): number =>
+  distanceKm / PACE_KMH + ascentM / ASCENT_M_PER_H
+
 export interface DayStats {
   distanceKm: number
   ascentM: number
@@ -69,7 +85,7 @@ export interface DayShape {
  * (dla pętli) parking. Bez niego zostaje przybliżenie — dojście z doliny
  * i zejście do niej — bo inaczej dzień z jednym szczytem wyszedłby zerowy.
  *
- * Czas: reguła Naismitha (5 km/h w poziomie + 1 h na 600 m podejścia).
+ * Czas liczy walkingTime — tempo dopasowane do materiałów gminy.
  */
 export function estimateDay(peaks: Peak[], shape: DayShape = {}): DayStats {
   if (peaks.length === 0) {
@@ -107,7 +123,7 @@ export function estimateDay(peaks: Peak[], shape: DayShape = {}): DayStats {
     distanceKm,
     ascentM: totalAscent,
     descentM: descent + distanceKm * ROUGHNESS_M_PER_KM,
-    timeH: distanceKm / 5 + totalAscent / 600,
+    timeH: walkingTime(distanceKm, totalAscent),
     fromStartPoint: Boolean(start),
   }
 }

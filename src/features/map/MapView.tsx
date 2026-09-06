@@ -4,6 +4,7 @@ import L from 'leaflet'
 import { PEAKS, peakById } from '../../data/peaks'
 import { estimateDay, formatTime, plural } from '../../lib/geo'
 import { startPointById, type StartPoint } from '../../data/startPoints'
+import { useDayRoute } from '../../lib/useDayRoute'
 import { useProgress } from '../../store/progress'
 import type { Peak } from '../../types'
 import { IconLocate, IconRoute } from '../../ui/Icons'
@@ -191,22 +192,9 @@ export function MapView({ onOpenPeak, position, selectedDayId, onSelectDay, onGo
           </LayersControl.Overlay>
         </LayersControl>
 
-        {shown.map((day) => {
-          // Dzień zaczyna się i (dla pętli) kończy na parkingu — tak wygląda realna wycieczka.
-          const pts: [number, number][] = [
-            ...(day.start ? [[day.start.lat, day.start.lon] as [number, number]] : []),
-            ...day.peaks.map((p) => [p.lat, p.lon] as [number, number]),
-            ...(day.start && day.loop ? [[day.start.lat, day.start.lon] as [number, number]] : []),
-          ]
-          if (pts.length < 2) return null
-          return (
-            <div key={day.id}>
-              {/* białe podłoże, żeby linia czytała się na każdym podkładzie */}
-              <Polyline positions={pts} pathOptions={{ color: '#ffffff', weight: 8, opacity: 0.75, lineCap: 'round', lineJoin: 'round' }} />
-              <Polyline positions={pts} pathOptions={{ color: day.color, weight: 4, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }} />
-            </div>
-          )
-        })}
+        {shown.map((day) => (
+          <DayTrack key={day.id} day={day} />
+        ))}
 
         {shown.map((day) =>
           day.start ? (
@@ -338,17 +326,19 @@ interface SummaryDay {
  * i od dołu, żeby nie zasłaniać atrybucji OpenStreetMap.
  */
 function DaySummary({ day }: { day: SummaryDay }) {
-  const stats = estimateDay(day.peaks, day.start ? { start: day.start, loop: day.loop } : {})
+  const { route: routed, loading } = useDayRoute(day.peaks, day.start, day.loop)
+  const stats = routed ?? estimateDay(day.peaks, day.start ? { start: day.start, loop: day.loop } : {})
   const distance = day.officialDistanceKm
     ? `${day.officialDistanceKm.toLocaleString('pl-PL', { minimumFractionDigits: 1 })} km`
-    : `~${stats.distanceKm.toLocaleString('pl-PL', { maximumFractionDigits: 1 })} km`
-  const time = day.officialTime ?? `~${formatTime(stats.timeH)}`
+    : `${routed ? '' : '~'}${stats.distanceKm.toLocaleString('pl-PL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km`
+  const time = day.officialTime ?? `${routed ? '' : '~'}${formatTime(stats.timeH)}`
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[500] pb-6 pl-14 pr-2">
       <div className="pointer-events-auto flex items-center gap-2 overflow-x-auto no-scrollbar rounded-xl border border-line bg-surface/95 px-3 py-2 text-xs shadow-lg backdrop-blur">
         <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: day.color }} />
         <span className="shrink-0 font-semibold">{day.name}</span>
+        {loading && <span className="shrink-0 text-muted">liczę trasę…</span>}
         <span className="shrink-0 text-muted">
           {day.peaks.length} {plural(day.peaks.length, ['szczyt', 'szczyty', 'szczytów'])}
         </span>
@@ -362,6 +352,47 @@ function DaySummary({ day }: { day: SummaryDay }) {
         )}
       </div>
     </div>
+  )
+}
+
+interface TrackDay {
+  peaks: Peak[]
+  color: string
+  start?: StartPoint
+  loop: boolean
+}
+
+/**
+ * Trasa dnia poprowadzona po realnych ścieżkach z OSM. Do czasu policzenia
+ * rysujemy przebieg orientacyjny, żeby mapa nie była pusta.
+ */
+function DayTrack({ day }: { day: TrackDay }) {
+  const { route } = useDayRoute(day.peaks, day.start, day.loop)
+
+  const fallback: [number, number][] = [
+    ...(day.start ? [[day.start.lat, day.start.lon] as [number, number]] : []),
+    ...day.peaks.map((p) => [p.lat, p.lon] as [number, number]),
+    ...(day.start && day.loop ? [[day.start.lat, day.start.lon] as [number, number]] : []),
+  ]
+  const points = route?.points ?? fallback
+  if (points.length < 2) return null
+
+  return (
+    <>
+      {/* białe podłoże, żeby linia czytała się na każdym podkładzie */}
+      <Polyline positions={points} pathOptions={{ color: '#ffffff', weight: 8, opacity: 0.75, lineCap: 'round', lineJoin: 'round' }} />
+      <Polyline
+        positions={points}
+        pathOptions={{
+          color: day.color,
+          weight: 4,
+          opacity: 0.95,
+          lineCap: 'round',
+          lineJoin: 'round',
+          dashArray: route ? undefined : '2 9',
+        }}
+      />
+    </>
   )
 }
 
