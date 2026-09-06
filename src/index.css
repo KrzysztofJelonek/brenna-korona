@@ -1,0 +1,166 @@
+@import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
+
+@theme {
+  --color-night-950: #070b16;
+  --color-night-900: #0b1120;
+  --color-night-850: #101a30;
+  --color-night-800: #16223c;
+  --color-night-700: #22304f;
+  --color-night-600: #33436b;
+
+  --color-dusk-400: #8b7bd8;
+  --color-dusk-500: #7c66d9;
+  --color-dusk-600: #6247c4;
+
+  --color-summit-300: #7dd3a8;
+  --color-summit-400: #46c08a;
+  --color-summit-500: #2ba36f;
+
+  --color-ember-400: #f2a65a;
+  --color-ember-500: #e8893a;
+
+  --font-display: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse 90% 55% at 50% -10%, #24306090 0%, transparent 60%),
+      radial-gradient(ellipse 70% 45% at 90% 100%, #6247c430 0%, transparent 55%),
+      var(--color-night-950);
+    background-attachment: fixed;
+    color: #e7ecf7;
+    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  /* Cele dotykowe w rękawiczkach — nic klikalnego poniżej 44 px. */
+  button,
+  [role='button'] {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* iOS nie zoomuje przy focusie */
+  }
+
+  ::selection {
+    background: var(--color-dusk-500);
+    color: white;
+  }
+}
+
+/* Bazowy przycisk jako @utility — tylko wtedy Tailwind v4 pozwala na @apply w wariantach. */
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition-property: color, background-color, border-color, transform, opacity;
+  transition-duration: 150ms;
+}
+@utility btn {
+  &:active {
+    transform: scale(0.97);
+  }
+  &:disabled {
+    opacity: 0.4;
+  }
+  &:disabled:active {
+    transform: none;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl;
+  }
+
+  .btn-primary {
+    @apply btn bg-dusk-500 text-white hover:bg-dusk-400;
+  }
+
+  .btn-ghost {
+    @apply btn border border-white/12 bg-white/5 text-slate-200 hover:bg-white/10;
+  }
+
+  .btn-summit {
+    @apply btn bg-summit-500 text-night-950 hover:bg-summit-400;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-white/12 bg-night-900/70 px-3 py-2.5
+           text-sm text-slate-100 outline-none placeholder:text-slate-500
+           focus:border-dusk-400 focus:ring-2 focus:ring-dusk-500/30;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+  .safe-top {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+/* Leaflet w ciemnym motywie */
+.leaflet-container {
+  background: var(--color-night-900);
+  font-family: inherit;
+}
+.leaflet-tile-pane {
+  filter: brightness(0.72) saturate(0.85) hue-rotate(185deg) contrast(1.05);
+}
+.leaflet-control-attribution {
+  background: rgba(11, 17, 32, 0.85) !important;
+  color: #94a3b8 !important;
+  font-size: 10px !important;
+}
+.leaflet-control-attribution a {
+  color: #a5b4fc !important;
+}
+.leaflet-bar a {
+  background: var(--color-night-850) !important;
+  color: #e7ecf7 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--color-night-850);
+  color: #e7ecf7;
+  border-radius: 14px;
+}
+.leaflet-popup-content {
+  margin: 12px 14px;
+}

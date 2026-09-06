@@ -4,7 +4,9 @@ Statyczna aplikacja webowa, która prowadzi uczestnika przez wyzwanie **Korona G
 
 Bez logowania, bez rejestracji, bez backendu. Wszystkie dane zostają w przeglądarce użytkownika. Wgrywasz katalog na dowolny hosting i działa — na komputerze i na telefonie.
 
-> Ten dokument jest jednocześnie opisem projektu i planem implementacji. Sekcje 1–5 mówią *co* powstaje, sekcje 6–8 *jak* to zbudować.
+> Ten dokument jest jednocześnie opisem projektu i planem implementacji. Sekcje 1–5 mówią *co* powstało, sekcje 6–8 *jak* to zbudować i sprawdzić.
+>
+> **Stan: aplikacja zaimplementowana.** Wszystkie etapy E1–E7 są gotowe, build produkcyjny przechodzi, `dist/` jest gotowe do wgrania na serwer.
 
 ---
 
@@ -221,34 +223,78 @@ Wdrożenie: skopiuj zawartość `dist/` na dowolny hosting statyczny (FTP, GitHu
 
 **Wymagany HTTPS** — geolokalizacja, aparat i Service Worker nie działają po HTTP (poza `localhost`).
 
+### Uwaga o miejscu na dysku
+
+Repozytorium leży na zaszyfrowanym wolumenie `/mnt/l` (2 GB, wolne ~40 MB), a `node_modules` tego stacku waży ~400 MB i **tam się nie zmieści**. Symlink na `node_modules` nie wystarcza — npm go usuwa i tworzy katalog w miejscu docelowym.
+
+Działający obejście, użyte przy budowaniu tego projektu: workspace poza wolumenem, z dowiązaniami do źródeł w repo (edycja plików w repo działa na żywo):
+
+```bash
+WS=~/.kgb-workspace
+mkdir -p "$WS" && cd "$WS"
+for f in src public index.html package.json vite.config.ts \
+         tsconfig.json tsconfig.app.json tsconfig.node.json; do
+  ln -sf /mnt/l/CODE/priv-brenna-korona/$f .
+done
+# Vite rozwiązuje symlinki do ścieżek w repo, gdzie nie ma node_modules:
+sed 's|^export default defineConfig({|&\n  resolve: { preserveSymlinks: true },|' \
+  /mnt/l/CODE/priv-brenna-korona/vite.config.ts > vite.config.ts
+npm install && npm run build
+cp -r dist /mnt/l/CODE/priv-brenna-korona/dist
+```
+
+Docelowo lepiej zwolnić ~500 MB na wolumenie albo przenieść repo — wtedy wystarczy zwykłe `npm install`.
+
 ---
 
 ## 6. Plan implementacji
 
-| Etap | Zakres | Gotowe, gdy |
+| Etap | Zakres | Status |
 |---|---|---|
-| **E1** | Szkielet: Vite + React + TS + Tailwind, `peaks.json`, routing, layout mobilny, motyw | aplikacja startuje, widać listę 20 szczytów z danych |
-| **E2** | Checklista + store: odhaczanie, `zustand/persist`, tryb pieszo/rower, notatki, pasek postępu | postęp przeżywa odświeżenie strony |
-| **E3** | Zdjęcia: upload z aparatu/galerii, kompresja `canvas`→WebP, IndexedDB, EXIF (data + GPS), walidacja terminu wydarzenia | zdjęcie z sierpnia pokazuje ostrzeżenie o terminie |
-| **E4** | Mapa: Leaflet + OSM, nakładka szlaków, markery wg statusu, panel szczytu | z mapy da się odhaczyć szczyt |
-| **E5** | Planer: warianty z PDF, własny plan (drag&drop), dystans / przewyższenie / czas (Naismith+Tobler), profil wysokościowy | wariant 6-dniowy zgadza się z tabelą 3.2 |
-| **E6** | Eksport: kolaż na FB (PNG/PDF), karta podsumowania, backup i import stanu | plik z backupu odtwarza pełny stan na czystej przeglądarce |
-| **E7** | Teren: PWA + Service Worker, geolokalizacja, promień odhaczenia, zapis i eksport GPX | aplikacja działa w trybie samolotowym (bez kafelków mapy) |
-| **E8** | Szlif: animacje, dostępność, Lighthouse, deploy | Lighthouse ≥ 90 w każdej kategorii na mobile |
+| **E1** | Szkielet: Vite + React + TS + Tailwind, `peaks.json`, layout mobilny, motyw nocny | ✅ 20 szczytów renderuje się z danych |
+| **E2** | Checklista + store: odhaczanie, `zustand/persist`, tryb pieszo/rower, notatki, ring postępu, sortowanie | ✅ postęp zapisuje się w localStorage wraz z datą |
+| **E3** | Zdjęcia: upload z aparatu/galerii, kompresja `canvas`→WebP, IndexedDB, EXIF (data + GPS), walidacja terminu | ✅ zdjęcie poza terminem i z GPS ≠ szczyt jest oznaczane |
+| **E4** | Mapa: Leaflet + OSM/OpenTopo, nakładka szlaków, markery wg statusu, linie tras, pozycja GPS | ✅ 20 markerów, 5 linii dni, panel szczytu z popupu |
+| **E5** | Planer: 4 warianty, własny plan, dystans / przewyższenie / czas, profil wysokościowy | ✅ wariant 6-dniowy zgadza się z tabelą 3.2 co do szczytów, czasów i dystansów |
+| **E6** | Eksport: kolaż na FB (JPG), PDF, karta podsumowania, backup i import stanu | ✅ zaimplementowane; jsPDF ładowany dynamicznie |
+| **E7** | Teren: PWA + Service Worker, geolokalizacja, promień 150 m, zapis i eksport GPX | ✅ manifest + SW generowane, kafelki OSM cache'owane |
+| **E8** | Szlif: Lighthouse, test na realnym telefonie, deploy | ⬜ do zrobienia na docelowym serwerze po HTTPS |
 
-**Kolejność ma znaczenie.** E1–E3 dają produkt już użyteczny na wyzwaniu (checklista + zdjęcia to minimum). E6 to funkcja o najwyższej wartości — warto go zrobić przed E7, jeśli czasu jest mało.
+Zrealizowane odstępstwa od pierwotnego planu:
+
+- **Zamiast drag&drop w planerze — przypisywanie dotknięciem.** Przeciąganie na telefonie w terenie jest zawodne; szczyty dodaje się z listy, a kolejność zmienia strzałkami. Mniej kodu, lepsza obsługa jedną ręką.
+- **Profil wysokości pokazuje wierzchołki, nie realny szlak.** Materiały organizatora nie zawierają geometrii tras, więc profil rozkłada wysokości szczytów wzdłuż szacowanego dystansu. Podpis w UI mówi to wprost.
+- **Dystans własnego planu jest szacunkiem** (linia prosta × 1,35 + reguła Naismitha). Tam, gdzie PDF gminy podaje realne wartości (wariant 6-dniowy), UI pokazuje je zamiast szacunku.
 
 ---
 
 ## 7. Weryfikacja
 
-- **Dane:** `peaks.json` ma 20 wpisów, unikalne `id`, wysokości 557…1082 rosnąco, każdy wpis z `lat`/`lon`.
-- **Trasy:** suma szczytów w wariancie 6-dniowym = 20, bez powtórzeń.
-- **Persystencja:** odhaczenie szczytu + dodanie zdjęcia → twardy refresh → stan zachowany.
-- **Limity:** 20 zdjęć naraz nie wywala `QuotaExceededError`; sprawdzić w DevTools → Application → Storage.
-- **Offline:** DevTools → Network → Offline; checklista i zdjęcia działają, mapa pokazuje komunikat o braku kafelków.
-- **Mobile:** test na realnym telefonie po HTTPS — aparat, geolokalizacja, instalacja PWA.
-- **Backup:** eksport → tryb prywatny → import → stan identyczny.
+Sprawdzone automatycznie na buildzie produkcyjnym (headless Chrome, sterowanie DOM):
+
+| Co | Wynik |
+|---|---|
+| `peaks.json` — 20 wpisów, unikalne `id`, wysokości 557…1082 rosnąco, komplet `lat`/`lon` | ✅ |
+| Tabela szczytów w README zgodna z `peaks.json` (nazwy, wysokości, współrzędne) | ✅ |
+| Wariant 6-dniowy — 20 szczytów, bez powtórzeń i braków | ✅ |
+| Odhaczenie szczytu → zapis w `localStorage` wraz z datą zdobycia | ✅ |
+| Wczytanie wariantu 6-dniowego → 6 dni, 20 szczytów, dzień I = Kotarz/Hyrca/Beskidek, 5:17 h, 16,7 km | ✅ |
+| Wczytanie wariantu **nie kasuje** już zaliczonych szczytów | ✅ |
+| Wszystkie 5 zakładek montuje właściwą treść; panel szczytu otwiera się i zamyka | ✅ |
+| Mapa: kontener Leaflet, 20 markerów, 5 linii dni | ✅ |
+| Zakładka Dowód ostrzega o brakujących zdjęciach | ✅ |
+| Brak poziomego przewijania strony (`scrollWidth` 415 przy viewport 430) | ✅ |
+| `tsc -b` bez błędów, `vite build` przechodzi | ✅ |
+
+Do sprawdzenia ręcznie na docelowym serwerze (wymaga HTTPS i realnego urządzenia):
+
+- aparat, EXIF i geolokalizacja na telefonie,
+- instalacja PWA i praca w trybie samolotowym,
+- 20 zdjęć naraz bez `QuotaExceededError` (DevTools → Application → Storage),
+- backup: eksport → tryb prywatny → import → stan identyczny,
+- Lighthouse na mobile.
+
+**Ograniczenie testów automatycznych:** w użytym headless Chrome `requestAnimationFrame` w ogóle nie tyka (0 klatek na 2 s), więc animacje Framer Motion nie dają się w nim zweryfikować — sprawdzona została logika i zawartość DOM, nie płynność przejść.
 
 ---
 
