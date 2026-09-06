@@ -25,7 +25,12 @@ export interface DayPlan {
   id: string
   name: string
   date?: string
+  /** Wolny tekst — zostaje dla planów sprzed wprowadzenia punktów startowych. */
   startPoint?: string
+  /** Punkt startowy ze współrzędnymi (src/data/startPoints.ts). */
+  startPointId?: string
+  /** Powrót na miejsce startu. Domyślnie tak — zwykle zostawia się tam samochód. */
+  loop?: boolean
   peakIds: string[]
   /** Oficjalne dane z PDF gminy — jeśli są, mają pierwszeństwo przed szacunkiem. */
   officialDistanceKm?: number

@@ -20,6 +20,8 @@ export const ROUTE_PRESETS: RoutePreset[] = [
     plans: [
       {
         id: 'p6d1',
+        startPointId: 'holcyna',
+        loop: true,
         name: 'Dzień I',
         startPoint: 'Parking przy skręcie w Dolinę Hołcyny',
         peakIds: ['kotarz', 'hyrca', 'beskidek'],
@@ -28,6 +30,8 @@ export const ROUTE_PRESETS: RoutePreset[] = [
       },
       {
         id: 'p6d2',
+        startPointId: 'dolina-lesnicy',
+        loop: true,
         name: 'Dzień II',
         startPoint: 'Brenna Leśnica, ośrodek „Dolina Leśnicy”',
         peakIds: [
@@ -44,6 +48,8 @@ export const ROUTE_PRESETS: RoutePreset[] = [
       },
       {
         id: 'p6d3',
+        startPointId: 'gorki-kosciol',
+        loop: false,
         name: 'Dzień III',
         startPoint: 'Górki Wielkie, parking przy kościele',
         peakIds: ['zebrzydka', 'czupel', 'maly-cisowy'],
@@ -52,6 +58,8 @@ export const ROUTE_PRESETS: RoutePreset[] = [
       },
       {
         id: 'p6d4',
+        startPointId: 'lesnica-szkola',
+        loop: true,
         name: 'Dzień IV',
         startPoint: 'Brenna Leśnica, parking przy szkole podstawowej',
         peakIds: ['orlowa', 'swiniorka'],
@@ -60,6 +68,8 @@ export const ROUTE_PRESETS: RoutePreset[] = [
       },
       {
         id: 'p6d5',
+        startPointId: 'brenna-skrzyzowanie',
+        loop: true,
         name: 'Dzień V',
         startPoint: 'Brenna Skrzyżowanie',
         peakIds: ['rownica'],
@@ -68,6 +78,8 @@ export const ROUTE_PRESETS: RoutePreset[] = [
       },
       {
         id: 'p6d6',
+        startPointId: 'brenna-ug',
+        loop: false,
         name: 'Dzień VI',
         startPoint: 'Parkingi Brenna Centrum (20 zł/doba)',
         peakIds: ['wielka-cisowa', 'blatnia', 'stolow', 'trzy-kopce'],
@@ -85,18 +97,24 @@ export const ROUTE_PRESETS: RoutePreset[] = [
     plans: [
       {
         id: 'p4d1',
+        startPointId: 'brenna-ug',
+        loop: true,
         name: 'Dzień I',
         startPoint: 'Parking przy Urzędzie Gminy Brenna, ul. Wyzwolenia 77 (czarny → zielony, ul. Jastrzębiec)',
         peakIds: ['wielka-cisowa', 'blatnia', 'stolow', 'trzy-kopce'],
       },
       {
         id: 'p4d2',
+        startPointId: 'holcyna',
+        loop: true,
         name: 'Dzień II',
         startPoint: 'Początek ul. Leśnica, okolice stacji benzynowej (czarny)',
         peakIds: ['kotarz', 'hyrca', 'beskidek'],
       },
       {
         id: 'p4d3',
+        startPointId: 'dolina-lesnicy',
+        loop: true,
         name: 'Dzień III',
         startPoint: 'Początek ul. Leśnica, okolice stacji benzynowej (zielony)',
         peakIds: [
@@ -111,6 +129,8 @@ export const ROUTE_PRESETS: RoutePreset[] = [
       },
       {
         id: 'p4d4',
+        startPointId: 'brenna-stacja',
+        loop: true,
         name: 'Dzień IV',
         startPoint: 'Okolice stacji benzynowej ul. Wyzwolenia (zielony, ul. Józefa Madzi)',
         peakIds: ['zebrzydka', 'czupel', 'maly-cisowy', 'rownica', 'orlowa', 'swiniorka'],
@@ -126,6 +146,8 @@ export const ROUTE_PRESETS: RoutePreset[] = [
     plans: [
       {
         id: 'p2d1',
+        startPointId: 'brenna-ug',
+        loop: true,
         name: 'Dzień I',
         startPoint: 'Początek ul. Leśnica, okolice stacji benzynowej i Ośrodka Zdrowia (czarny)',
         peakIds: [
@@ -143,6 +165,8 @@ export const ROUTE_PRESETS: RoutePreset[] = [
       },
       {
         id: 'p2d2',
+        startPointId: 'gorki-kosciol',
+        loop: true,
         name: 'Dzień II',
         startPoint: 'Górki Wielkie, parking przy kościele lub ośrodek „Pod Brandysem” (zielony)',
         peakIds: [
@@ -169,6 +193,8 @@ export const ROUTE_PRESETS: RoutePreset[] = [
     plans: [
       {
         id: 'p1d1',
+        startPointId: 'gorki-kosciol',
+        loop: true,
         name: 'Cały dzień',
         startPoint:
           'Parking przy kościele pw. Wszystkich Świętych w Górkach Wielkich lub ośrodek „Pod Brandysem”, ul. Pod Zebrzydkę (zielony)',

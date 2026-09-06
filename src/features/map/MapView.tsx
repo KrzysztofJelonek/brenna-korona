@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, LayersControl
 import L from 'leaflet'
 import { PEAKS, peakById } from '../../data/peaks'
 import { estimateDay, formatTime, plural } from '../../lib/geo'
+import { startPointById, type StartPoint } from '../../data/startPoints'
 import { useProgress } from '../../store/progress'
 import type { Peak } from '../../types'
 import { IconLocate, IconRoute } from '../../ui/Icons'
@@ -61,6 +62,15 @@ function peakIcon(status: string, no: number, opts: MarkerOpts = {}): L.DivIcon 
     popupAnchor: [0, -size / 2 - 2],
   })
 }
+
+const startIcon = (color: string) =>
+  L.divIcon({
+    className: '',
+    html: `<div style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#fff;border:3px solid ${color};box-shadow:0 2px 8px rgba(20,49,31,.35);font:800 12px/1 ui-sans-serif,system-ui;color:${color}">P</div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -14],
+  })
 
 const userIcon = L.divIcon({
   className: '',
@@ -126,6 +136,8 @@ export function MapView({ onOpenPeak, position, selectedDayId, onSelectDay, onGo
         peaks: day.peakIds.map(peakById).filter((p): p is Peak => Boolean(p)),
         officialDistanceKm: day.officialDistanceKm,
         officialTime: day.officialTime,
+        start: startPointById(day.startPointId),
+        loop: day.loop !== false,
       })),
     [plans],
   )
@@ -143,7 +155,11 @@ export function MapView({ onOpenPeak, position, selectedDayId, onSelectDay, onGo
   }, [selected])
 
   const fitPoints = useMemo<[number, number][]>(
-    () => shown.flatMap((d) => d.peaks.map((p) => [p.lat, p.lon] as [number, number])),
+    () =>
+      shown.flatMap((d) => [
+        ...(d.start ? [[d.start.lat, d.start.lon] as [number, number]] : []),
+        ...d.peaks.map((p) => [p.lat, p.lon] as [number, number]),
+      ]),
     [shown],
   )
 
@@ -176,7 +192,12 @@ export function MapView({ onOpenPeak, position, selectedDayId, onSelectDay, onGo
         </LayersControl>
 
         {shown.map((day) => {
-          const pts = day.peaks.map((p) => [p.lat, p.lon] as [number, number])
+          // Dzień zaczyna się i (dla pętli) kończy na parkingu — tak wygląda realna wycieczka.
+          const pts: [number, number][] = [
+            ...(day.start ? [[day.start.lat, day.start.lon] as [number, number]] : []),
+            ...day.peaks.map((p) => [p.lat, p.lon] as [number, number]),
+            ...(day.start && day.loop ? [[day.start.lat, day.start.lon] as [number, number]] : []),
+          ]
           if (pts.length < 2) return null
           return (
             <div key={day.id}>
@@ -186,6 +207,28 @@ export function MapView({ onOpenPeak, position, selectedDayId, onSelectDay, onGo
             </div>
           )
         })}
+
+        {shown.map((day) =>
+          day.start ? (
+            <Marker
+              key={`start-${day.id}`}
+              position={[day.start.lat, day.start.lon]}
+              icon={startIcon(day.color)}
+              zIndexOffset={300}
+            >
+              <Popup>
+                <div className="min-w-40">
+                  <div className="font-semibold">{day.start.name}</div>
+                  <div className="text-xs text-muted">
+                    Start {day.name} · {day.start.ele} m n.p.m.
+                    {day.loop ? ' · powrót na to samo miejsce' : ' · bez powrotu na start'}
+                  </div>
+                  {day.start.detail && <div className="mt-1 text-xs text-muted">{day.start.detail}</div>}
+                </div>
+              </Popup>
+            </Marker>
+          ) : null,
+        )}
 
         {PEAKS.map((peak) => {
           const inRoute = orderByPeak.get(peak.id)
@@ -286,6 +329,8 @@ interface SummaryDay {
   peaks: Peak[]
   officialDistanceKm?: number
   officialTime?: string
+  start?: StartPoint
+  loop: boolean
 }
 
 /**
@@ -293,7 +338,7 @@ interface SummaryDay {
  * i od dołu, żeby nie zasłaniać atrybucji OpenStreetMap.
  */
 function DaySummary({ day }: { day: SummaryDay }) {
-  const stats = estimateDay(day.peaks)
+  const stats = estimateDay(day.peaks, day.start ? { start: day.start, loop: day.loop } : {})
   const distance = day.officialDistanceKm
     ? `${day.officialDistanceKm.toLocaleString('pl-PL', { minimumFractionDigits: 1 })} km`
     : `~${stats.distanceKm.toLocaleString('pl-PL', { maximumFractionDigits: 1 })} km`
@@ -310,6 +355,11 @@ function DaySummary({ day }: { day: SummaryDay }) {
         <span className="shrink-0 tabular-nums">{distance}</span>
         <span className="shrink-0 tabular-nums">{time}</span>
         <span className="shrink-0 tabular-nums text-muted">↑&nbsp;{Math.round(stats.ascentM)}&nbsp;m</span>
+        {day.start && (
+          <span className="shrink-0 text-muted" title={day.start.name}>
+            {day.loop ? '⭮ pętla' : '→ bez powrotu'}
+          </span>
+        )}
       </div>
     </div>
   )

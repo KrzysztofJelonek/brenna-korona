@@ -24,6 +24,9 @@ interface ProgressState {
   renameDay: (dayId: string, name: string) => void
   setDayDate: (dayId: string, date: string | undefined) => void
   setDayStart: (dayId: string, start: string) => void
+  setDayStartPoint: (dayId: string, startPointId: string | undefined) => void
+  toggleDayLoop: (dayId: string) => void
+  loadGenerated: (days: DayPlan[]) => void
   assignPeak: (peakId: string, dayId: string | null) => void
   movePeakInDay: (dayId: string, peakId: string, dir: -1 | 1) => void
 
@@ -133,6 +136,30 @@ export const useProgress = create<ProgressState>()(
 
       setDayStart: (dayId, startPoint) =>
         set((s) => ({ plans: s.plans.map((d) => (d.id === dayId ? { ...d, startPoint } : d)) })),
+
+      setDayStartPoint: (dayId, startPointId) =>
+        set((s) => ({ plans: s.plans.map((d) => (d.id === dayId ? { ...d, startPointId } : d)) })),
+
+      toggleDayLoop: (dayId) =>
+        set((s) => ({
+          plans: s.plans.map((d) => (d.id === dayId ? { ...d, loop: d.loop === false } : d)),
+        })),
+
+      loadGenerated: (days) =>
+        set((s) => {
+          const planned = new Set(days.flatMap((d) => d.peakIds))
+          const progress = { ...s.progress }
+          for (const peak of PEAKS) {
+            const cur = progress[peak.id] ?? emptyProgress()
+            if (cur.status === 'done') continue
+            progress[peak.id] = { ...cur, status: planned.has(peak.id) ? 'planned' : 'todo' }
+          }
+          return {
+            activePresetId: null,
+            plans: days.map((d) => ({ ...d, id: nextDayId(), peakIds: [...d.peakIds] })),
+            progress,
+          }
+        }),
 
       assignPeak: (peakId, dayId) =>
         set((s) => {

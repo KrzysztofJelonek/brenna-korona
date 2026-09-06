@@ -49,7 +49,11 @@ Szczegóły, które wpływają na projekt aplikacji:
 - **ostrzega, jeśli data wypada poza 1–30.09.2026** — czyli zanim organizator odrzuci zgłoszenie,
 - pozwala trzymać kilka zdjęć na szczyt i wybrać to jedno „do zgłoszenia".
 
-**Planer trasy.** Cztery gotowe warianty przygotowane przez gminę (1, 2, 4 i 6 dni) plus własny plan: przeciągasz szczyty na kolejne dni, a aplikacja na bieżąco liczy dystans, sumę podejść i szacowany czas (reguła Naismitha z korektą Toblera). Dla każdego dnia widzisz profil wysokościowy.
+**Planer trasy — dzień jest pętlą.** Prawie każdy zostawia samochód na parkingu i musi po niego wrócić, więc dzień domyślnie zaczyna się i kończy w tym samym miejscu. Punkty startowe wymienione w PDF gminy mają w [`src/data/startPoints.ts`](src/data/startPoints.ts) realne współrzędne z OpenStreetMap i wysokości z SRTM — dopiero dzięki temu da się policzyć dojście i powrót. Każdy dzień ma przełącznik **Pętla / Punkt-punkt**, bo część tras gminy kończy się gdzie indziej i wraca się autobusem (tak jest w dniu III i VI wariantu sześciodniowego).
+
+**Generator alternatywnych wariantów.** Propozycje gminy dzielą szczyty tak, jak wygodnie było je opisać. Generator wychodzi od pętli: suwakiem wybierasz liczbę dni (1–8), a on grupuje 20 szczytów geograficznie (k-means), dobiera do każdej grupy najbliższy parking z listy gminy, układa kolejność (najbliższy sąsiad + 2-opt na zamkniętej pętli) i wyrównuje dni tak, żeby skrócić ten najdłuższy. Wynik widać przed wczytaniem — dystans, podejścia, najdłuższy dzień i skład każdego etapu. To heurystyka po liniach prostych, nie planowanie po szlakach, i UI mówi to wprost.
+
+**Gotowe warianty gminy.** Cztery propozycje (1, 2, 4 i 6 dni) plus własny plan: przeciągasz szczyty na kolejne dni, a aplikacja na bieżąco liczy dystans, sumę podejść i szacowany czas (reguła Naismitha z korektą Toblera). Dla każdego dnia widzisz profil wysokościowy.
 
 **Mapa.** Leaflet + OpenStreetMap (lub OpenTopoMap) z nakładką szlaków turystycznych. Markery 20 szczytów kolorowane statusem, kliknięcie otwiera panel szczytu.
 
@@ -311,7 +315,7 @@ Zrealizowane odstępstwa od pierwotnego planu:
 
 - **Zamiast drag&drop w planerze — przypisywanie dotknięciem.** Przeciąganie na telefonie w terenie jest zawodne; szczyty dodaje się z listy, a kolejność zmienia strzałkami. Mniej kodu, lepsza obsługa jedną ręką.
 - **Profil wysokości pokazuje wierzchołki, nie realny szlak.** Materiały organizatora nie zawierają geometrii tras, więc profil rozkłada wysokości szczytów wzdłuż szacowanego dystansu. Podpis w UI mówi to wprost.
-- **Dystans własnego planu jest szacunkiem** (linia prosta × 1,35 + reguła Naismitha). Tam, gdzie PDF gminy podaje realne wartości (wariant 6-dniowy), UI pokazuje je zamiast szacunku.
+- **Dystans własnego planu jest szacunkiem** — linia prosta × 1,65 plus 32 m podejścia na każdy kilometr, potem reguła Naismitha. Oba parametry są **dopasowane do sześciodniowej propozycji gminy**, jedynych danych, gdzie znamy prawdziwe dystanse i czasy: suma dystansu zgadza się wtedy w granicach 1%, a błąd pojedynczego dnia mieści się w ±30%. Tam, gdzie PDF podaje realne wartości, UI pokazuje je zamiast szacunku.
 
 ---
 
