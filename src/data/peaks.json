@@ -1,0 +1,32 @@
+{
+  "$comment": "Korona Gór Brennej 2026 — 20 szczytów. Wysokości: checklist-2026.pdf organizatora (wiążące). Współrzędne: OpenStreetMap (Overpass API), stan na 2026-09-06.",
+  "edition": 2026,
+  "challengeStart": "2026-09-01",
+  "challengeEnd": "2026-09-30",
+  "source": {
+    "peaks": "https://www.koronagorbrennej.pl/assets/checklist-2026.pdf",
+    "coordinates": "https://overpass-api.de/api/interpreter (natural=peak)"
+  },
+  "peaks": [
+    { "id": "zebrzydka", "no": 1, "name": "Zebrzydka", "ele": 557, "lat": 49.77055, "lon": 18.88253, "verify": "OSM podaje 577 m — wiążąca jest wysokość 557 m z checklisty organizatora." },
+    { "id": "swiniorka", "no": 2, "name": "Świniorka", "ele": 700, "lat": 49.68498, "lon": 18.90001 },
+    { "id": "czupel", "no": 3, "name": "Czupel", "ele": 736, "lat": 49.75607, "lon": 18.90118, "note": "W okolicy istnieje drugi Czupel (882 m) — nie ten." },
+    { "id": "stary-gron", "no": 4, "name": "Stary Groń", "ele": 792, "lat": 49.69353, "lon": 18.92349, "note": "Jedyna wieża widokowa w gminie." },
+    { "id": "horzelica", "no": 5, "name": "Horzelica", "ele": 797, "lat": 49.70086, "lon": 18.91576 },
+    { "id": "jaworzyna", "no": 6, "name": "Jaworzyna", "ele": 802, "lat": 49.65770, "lon": 18.94223 },
+    { "id": "trzy-kopce-wislanskie", "no": 7, "name": "Trzy Kopce Wiślańskie", "ele": 810, "lat": 49.66429, "lon": 18.90730, "note": "Nie mylić z Trzema Kopcami 1082 m (poz. 20)." },
+    { "id": "orlowa", "no": 8, "name": "Orłowa", "ele": 813, "lat": 49.69698, "lon": 18.87847 },
+    { "id": "gosciejow", "no": 9, "name": "Gościejów", "ele": 818, "lat": 49.65858, "lon": 18.92162 },
+    { "id": "maly-cisowy", "no": 10, "name": "Mały Cisowy", "ele": 829, "lat": 49.74966, "lon": 18.91480 },
+    { "id": "beskidek", "no": 11, "name": "Beskidek", "ele": 830, "lat": 49.70635, "lon": 18.94328, "verify": "Węzeł OSM o nazwie 'Beskidek' (700 m) leży gdzie indziej. Przyjęto nienazwany węzeł OSM 831 m na grani Karkoszczonka–Hyrca, zgodny z opisem trasy. Do potwierdzenia w terenie.", "note": "Liczy się Beskidek 830 m, a NIE Beskid 860 m — przez Beskid nie przechodzi szlak." },
+    { "id": "wielka-cisowa", "no": 12, "name": "Wielka Cisowa", "ele": 878, "lat": 49.74511, "lon": 18.93170 },
+    { "id": "rownica", "no": 13, "name": "Równica", "ele": 884, "lat": 49.72470, "lon": 18.85656, "note": "Po drodze warto odbić na Lipowski Groń (ławeczka, miejsce odpoczynku)." },
+    { "id": "grabowa", "no": 14, "name": "Grabowa", "ele": 907, "lat": 49.67780, "lon": 18.95456 },
+    { "id": "blatnia", "no": 15, "name": "Błatnia", "ele": 917, "lat": 49.74835, "lon": 18.94533, "note": "Schronisko PTTK." },
+    { "id": "hyrca", "no": 16, "name": "Hyrca", "ele": 929, "lat": 49.70080, "lon": 18.98066 },
+    { "id": "bialy-krzyz", "no": 17, "name": "Biały Krzyż", "ele": 940, "lat": 49.67013, "lon": 18.95904 },
+    { "id": "kotarz", "no": 18, "name": "Kotarz", "ele": 974, "lat": 49.68908, "lon": 18.96364 },
+    { "id": "stolow", "no": 19, "name": "Stołów", "ele": 1035, "lat": 49.74516, "lon": 18.96529 },
+    { "id": "trzy-kopce", "no": 20, "name": "Trzy Kopce", "ele": 1082, "lat": 49.73662, "lon": 18.98631, "note": "Najwyższy szczyt gminy Brenna." }
+  ]
+}

@@ -1,0 +1,43 @@
+# zależności
+node_modules/
+.pnp/
+.pnp.js
+
+# build
+dist/
+dist-ssr/
+build/
+*.local
+
+# cache narzędzi
+.vite/
+.cache/
+.eslintcache
+*.tsbuildinfo
+
+# środowisko
+.env
+.env.*
+!.env.example
+
+# edytory
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# system
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# logi
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# materiały robocze (dane źródłowe wyekstrahowane do src/data/ i README)
+tmp/
+*.pdf
