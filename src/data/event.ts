@@ -121,6 +121,8 @@ export const AUTHOR = {
 export const SPONSOR = {
   name: 'FaceLove®',
   city: 'Jaworze',
+  /** Dopełniacz do zdania „z ...” — mianownik brzmiałby „z Jaworze”. */
+  cityGenitive: 'Jaworza',
   tagline: 'Visage & Permanent Makeup',
   url: 'https://facelove.pl',
   /** Logo trzymamy lokalnie — wczytywanie z serwera firmy byłoby zapytaniem do zewnętrznej domeny. */

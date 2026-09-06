@@ -209,7 +209,7 @@ export function InfoView({ onGoToPlanner }: Props) {
           />
         </a>
         <p className="mt-2 text-center text-sm text-slate-300">
-          {SPONSOR.name} z {SPONSOR.city}
+          {SPONSOR.name} z {SPONSOR.cityGenitive}
         </p>
         <p className="mt-1 text-center text-[11px] text-slate-500">
           Dzięki wsparciu sponsora aplikacja jest dostępna dla wszystkich za darmo.{' '}
