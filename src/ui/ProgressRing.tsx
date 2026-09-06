@@ -11,7 +11,7 @@ export function ProgressRing({ done, total, size = 72 }: Props) {
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth="6" className="text-white/10" />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth="6" className="text-line" />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -26,14 +26,14 @@ export function ProgressRing({ done, total, size = 72 }: Props) {
         />
         <defs>
           <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#8b7bd8" />
-            <stop offset="1" stopColor="#46c08a" />
+            <stop offset="0" stopColor="#226b31" />
+            <stop offset="1" stopColor="#72bb43" />
           </linearGradient>
         </defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-lg font-bold leading-none tabular-nums">{done}</span>
-        <span className="text-[10px] text-slate-400">z {total}</span>
+        <span className="text-[10px] text-muted">z {total}</span>
       </div>
     </div>
   )

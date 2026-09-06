@@ -46,8 +46,8 @@ export function ElevationProfile({ peaks, color }: Props) {
       <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
       {peaks.map((p, i) => (
         <g key={p.id}>
-          <circle cx={x(i)} cy={y(p.ele)} r="3" fill={color} stroke="#0b1120" strokeWidth="1.5" />
-          <text x={x(i)} y={y(p.ele) - 7} textAnchor="middle" fontSize="8" fill="#94a3b8">
+          <circle cx={x(i)} cy={y(p.ele)} r="3" fill={color} stroke="var(--s-surface)" strokeWidth="1.5" />
+          <text x={x(i)} y={y(p.ele) - 7} textAnchor="middle" fontSize="8" fill="var(--s-muted)">
             {p.ele}
           </text>
         </g>

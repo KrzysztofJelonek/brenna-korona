@@ -53,21 +53,21 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
   if (!ctx) throw new Error('Brak kontekstu canvas')
 
   const bg = ctx.createLinearGradient(0, 0, width, height)
-  bg.addColorStop(0, '#0d1428')
-  bg.addColorStop(1, '#070b16')
+  bg.addColorStop(0, '#f6fbf2')
+  bg.addColorStop(1, '#e4f0dd')
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, width, height)
 
   const doneCount = PEAKS.filter((p) => progress[p.id]?.status === 'done').length
   const dates = PEAKS.map((p) => progress[p.id]?.conqueredAt).filter(Boolean).sort() as string[]
 
-  ctx.fillStyle = '#e7ecf7'
+  ctx.fillStyle = '#185122'
   ctx.font = 'bold 58px ui-sans-serif, system-ui, sans-serif'
   ctx.textBaseline = 'middle'
   ctx.fillText('Korona Gór Brennej 2026', GAP + 24, 58)
 
   ctx.font = '30px ui-sans-serif, system-ui, sans-serif'
-  ctx.fillStyle = '#8b9bbd'
+  ctx.fillStyle = '#5f6c61'
   const range =
     dates.length > 0
       ? `${new Date(dates[0]).toLocaleDateString('pl-PL')} – ${new Date(dates[dates.length - 1]).toLocaleDateString('pl-PL')}`
@@ -93,13 +93,13 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
       try {
         drawCover(ctx, await loadImage(photo.blob), x, y, CELL, CELL)
       } catch {
-        ctx.fillStyle = '#16223c'
+        ctx.fillStyle = '#dfeed8'
         ctx.fillRect(x, y, CELL, CELL)
       }
     } else {
-      ctx.fillStyle = '#131d33'
+      ctx.fillStyle = '#e6f1e0'
       ctx.fillRect(x, y, CELL, CELL)
-      ctx.fillStyle = '#3b4a6b'
+      ctx.fillStyle = '#9bb094'
       ctx.font = '26px ui-sans-serif, system-ui, sans-serif'
       ctx.textAlign = 'center'
       ctx.fillText('brak zdjęcia', x + CELL / 2, y + CELL / 2)
@@ -108,21 +108,21 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
     ctx.restore()
 
     // numer szczytu
-    ctx.fillStyle = 'rgba(7,11,22,.82)'
+    ctx.fillStyle = 'rgba(34,107,49,.92)'
     ctx.beginPath()
     ctx.roundRect(x + 14, y + 14, 62, 44, 12)
     ctx.fill()
-    ctx.fillStyle = '#e7ecf7'
+    ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 26px ui-sans-serif, system-ui, sans-serif'
     ctx.textAlign = 'center'
     ctx.fillText(String(peak.no), x + 45, y + 37)
     ctx.textAlign = 'left'
 
     // podpis
-    ctx.fillStyle = '#e7ecf7'
+    ctx.fillStyle = '#20312b'
     ctx.font = 'bold 30px ui-sans-serif, system-ui, sans-serif'
     ctx.fillText(peak.name, x + 6, y + CELL + 26)
-    ctx.fillStyle = '#8b9bbd'
+    ctx.fillStyle = '#5f6c61'
     ctx.font = '25px ui-sans-serif, system-ui, sans-serif'
     const date = prog?.conqueredAt ? new Date(prog.conqueredAt).toLocaleDateString('pl-PL') : '—'
     ctx.fillText(`${peak.ele} m n.p.m.  ·  ${date}`, x + 6, y + CELL + 58)
@@ -146,8 +146,8 @@ export async function renderSummaryCard(
   if (!ctx) throw new Error('Brak kontekstu canvas')
 
   const bg = ctx.createLinearGradient(0, 0, S, S)
-  bg.addColorStop(0, '#1b2547')
-  bg.addColorStop(1, '#070b16')
+  bg.addColorStop(0, '#8ac95f')
+  bg.addColorStop(1, '#14401f')
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, S, S)
 
@@ -164,12 +164,12 @@ export async function renderSummaryCard(
   ctx.lineTo(S, S)
   ctx.closePath()
   const mg = ctx.createLinearGradient(0, 470, 0, S)
-  mg.addColorStop(0, '#7c66d9')
-  mg.addColorStop(1, '#1b2547')
+  mg.addColorStop(0, '#1c5527')
+  mg.addColorStop(1, '#0e2c15')
   ctx.fillStyle = mg
   ctx.fill()
 
-  ctx.fillStyle = '#f2a65a'
+  ctx.fillStyle = '#ffd84d'
   ctx.beginPath()
   ctx.arc(830, 220, 78, 0, Math.PI * 2)
   ctx.fill()
@@ -180,11 +180,11 @@ export async function renderSummaryCard(
 
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
-  ctx.fillStyle = '#8b9bbd'
+  ctx.fillStyle = '#dff0d3'
   ctx.font = '34px ui-sans-serif, system-ui, sans-serif'
   ctx.fillText('KORONA GÓR BRENNEJ 2026', 70, 130)
 
-  ctx.fillStyle = '#e7ecf7'
+  ctx.fillStyle = '#ffffff'
   ctx.font = 'bold 190px ui-sans-serif, system-ui, sans-serif'
   ctx.fillText(`${done.length}/20`, 66, 310)
 
@@ -193,15 +193,15 @@ export async function renderSummaryCard(
 
   if (participant) {
     ctx.font = '38px ui-sans-serif, system-ui, sans-serif'
-    ctx.fillStyle = '#c7d2e8'
+    ctx.fillStyle = '#eaf6e2'
     ctx.fillText(participant, 70, 428)
   }
 
-  ctx.fillStyle = '#e7ecf7'
+  ctx.fillStyle = '#ffffff'
   ctx.font = 'bold 40px ui-sans-serif, system-ui, sans-serif'
   ctx.fillText(`${ascent.toLocaleString('pl-PL')} m`, 70, 940)
   ctx.fillText(done.length ? `${dates.length} wejść` : '—', 480, 940)
-  ctx.fillStyle = '#8b9bbd'
+  ctx.fillStyle = '#cfe6c2'
   ctx.font = '26px ui-sans-serif, system-ui, sans-serif'
   ctx.fillText('suma wysokości szczytów', 70, 980)
   ctx.fillText(

@@ -15,7 +15,7 @@ export function InfoView({ onGoToPlanner }: Props) {
   return (
     <div className="space-y-4">
       <Section title="O wyzwaniu">
-        <p className="text-sm leading-relaxed text-slate-300">
+        <p className="text-sm leading-relaxed text-ink-soft">
           Korona Gór Brennej to zdobycie <strong>{PEAKS.length} szczytów</strong> leżących na terenie gminy
           Brenna. Bez zapisów i wpisowego, w dowolnej kolejności, pieszo lub rowerem bez wspomagania
           elektrycznego. Wejście potwierdza się zdjęciem na tle tabliczki wysokościowej, a po skompletowaniu
@@ -32,7 +32,7 @@ export function InfoView({ onGoToPlanner }: Props) {
           />
         </dl>
 
-        <p className="mt-3 text-xs text-slate-400">
+        <p className="mt-3 text-xs text-muted">
           Motyw edycji 2026: nietoperze — „Nietoperze przejmują tegoroczną edycję. Ty przejmij szlak”.
         </p>
 
@@ -46,7 +46,7 @@ export function InfoView({ onGoToPlanner }: Props) {
       <VideoSection />
 
       <Section title="Trasy">
-        <p className="text-sm leading-relaxed text-slate-300">
+        <p className="text-sm leading-relaxed text-ink-soft">
           Gmina Brenna przygotowała propozycje przejścia w{' '}
           {[...ROUTE_PRESETS].map((r) => r.days).sort((a, b) => a - b).join(', ')} dni. Wariant sześciodniowy
           jest opisany w materiałach gminy najdokładniej — z punktami startowymi, czasami i dystansami.
@@ -60,10 +60,10 @@ export function InfoView({ onGoToPlanner }: Props) {
               return (
                 <li
                   key={preset.id}
-                  className="flex items-baseline gap-2 rounded-lg bg-white/4 px-3 py-2 text-sm"
+                  className="flex items-baseline gap-2 rounded-lg bg-tint px-3 py-2 text-sm"
                 >
                   <span className="font-semibold">{preset.name}</span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-muted">
                     {total > 0
                       ? `${total.toLocaleString('pl-PL', { minimumFractionDigits: 1 })} km łącznie`
                       : `${preset.plans.length} ${plural(preset.plans.length, ['etap', 'etapy', 'etapów'])}`}
@@ -77,7 +77,7 @@ export function InfoView({ onGoToPlanner }: Props) {
           <IconRoute className="h-4 w-4" /> Otwórz planer tras
         </button>
 
-        <p className="mt-2 text-[11px] text-slate-500">
+        <p className="mt-2 text-[11px] text-muted">
           Wszystkie szczyty leżą na oznakowanych szlakach PTTK. W terenie kieruj się oznakowaniem szlaku,
           nie aplikacją.
         </p>
@@ -89,14 +89,14 @@ export function InfoView({ onGoToPlanner }: Props) {
       <Section title="Dla uczestników">
         <div className="space-y-2">
           {FAQ.map((item) => (
-            <details key={item.q} className="group rounded-xl border border-white/10 bg-white/4">
+            <details key={item.q} className="group rounded-xl border border-line bg-tint">
               <summary className="cursor-pointer list-none px-3 py-2.5 text-sm font-medium">
                 <span className="flex items-center justify-between gap-2">
                   {item.q}
-                  <span className="shrink-0 text-slate-500 transition group-open:rotate-45">+</span>
+                  <span className="shrink-0 text-muted transition group-open:rotate-45">+</span>
                 </span>
               </summary>
-              <p className="border-t border-white/8 px-3 py-2.5 text-sm leading-relaxed text-slate-300">
+              <p className="border-t border-line px-3 py-2.5 text-sm leading-relaxed text-ink-soft">
                 {item.a}
               </p>
             </details>
@@ -107,13 +107,13 @@ export function InfoView({ onGoToPlanner }: Props) {
       <Section title="Imprezy towarzyszące">
         <ul className="space-y-1.5">
           {SIDE_EVENTS.map((e, i) => (
-            <li key={`${e.date}-${i}`} className="flex items-start gap-3 rounded-lg bg-white/4 px-3 py-2">
-              <span className="chip shrink-0 bg-dusk-500/20 tabular-nums text-dusk-400">{e.date}</span>
-              <span className="min-w-0 text-sm text-slate-200">{e.name}</span>
+            <li key={`${e.date}-${i}`} className="flex items-start gap-3 rounded-lg bg-tint px-3 py-2">
+              <span className="chip shrink-0 bg-brand-soft tabular-nums text-brand">{e.date}</span>
+              <span className="min-w-0 text-sm text-ink">{e.name}</span>
             </li>
           ))}
         </ul>
-        <p className="mt-2 flex items-start gap-2 text-[11px] text-slate-500">
+        <p className="mt-2 flex items-start gap-2 text-[11px] text-muted">
           <IconCalendar className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           Godziny i szczegóły organizator publikuje osobno — sprawdź aktualności i Facebook.
         </p>
@@ -127,13 +127,13 @@ export function InfoView({ onGoToPlanner }: Props) {
                 href={c.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 rounded-lg bg-white/4 px-3 py-2.5 text-sm hover:bg-white/8"
+                className="flex items-center gap-2 rounded-lg bg-tint px-3 py-2.5 text-sm hover:bg-tint-strong"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{c.name}</span>
-                  <span className="text-xs text-slate-500">{c.kind}</span>
+                  <span className="text-xs text-muted">{c.kind}</span>
                 </span>
-                <IconLink className="h-4 w-4 shrink-0 text-slate-500" />
+                <IconLink className="h-4 w-4 shrink-0 text-muted" />
               </a>
             </li>
           ))}
@@ -141,7 +141,7 @@ export function InfoView({ onGoToPlanner }: Props) {
       </Section>
 
       <Section title="Kontakt z organizatorem">
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-ink-soft">
           Wyzwanie prowadzi {ORGANIZER.foundation} wspólnie z {ORGANIZER.commune}. W sprawach weryfikacji,
           zgłoszeń i medali pisz bezpośrednio do organizatora.
         </p>
@@ -154,7 +154,7 @@ export function InfoView({ onGoToPlanner }: Props) {
           <Row href={ORGANIZER.youtube} icon={<IconLink className="h-4 w-4" />} label="YouTube" sub="kanał wydarzenia" />
         </div>
 
-        <h3 className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <h3 className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-muted">
           Informacja Turystyczna w Brennej
         </h3>
         <div className="space-y-1.5">
@@ -165,11 +165,11 @@ export function InfoView({ onGoToPlanner }: Props) {
       </Section>
 
       <Section title="O tej aplikacji">
-        <p className="text-sm leading-relaxed text-slate-300">
+        <p className="text-sm leading-relaxed text-ink-soft">
           To nieoficjalny pomocnik uczestnika — nie jest powiązany z organizatorem. Jedyną wiążącą procedurą
           zaliczenia jest ta opisana przez organizatora. Aplikacja niczego nie zgłasza za Ciebie.
         </p>
-        <ul className="mt-3 space-y-1.5 text-sm text-slate-300">
+        <ul className="mt-3 space-y-1.5 text-sm text-ink-soft">
           <Bullet>Brak kont, logowania i zbierania danych osobowych.</Bullet>
           <Bullet>Brak analityki, ciasteczek i skryptów śledzących.</Bullet>
           <Bullet>
@@ -186,17 +186,17 @@ export function InfoView({ onGoToPlanner }: Props) {
       </Section>
 
       <Section title="Autor i sponsor">
-        <p className="text-sm leading-relaxed text-slate-300">
+        <p className="text-sm leading-relaxed text-ink-soft">
           Aplikację napisał <strong>{AUTHOR.name}</strong> — uczestnik wyzwania, z potrzeby uporządkowania
           własnych wejść i zdjęć. Jest bezpłatna i niekomercyjna: nie ma w niej reklam ani płatnych funkcji.
         </p>
 
-        <p className="mt-3 text-xs uppercase tracking-wide text-slate-500">Sponsor aplikacji</p>
+        <p className="mt-3 text-xs uppercase tracking-wide text-muted">Sponsor aplikacji</p>
         <a
           href={SPONSOR.url}
           target="_blank"
           rel="noreferrer"
-          className="mt-2 block rounded-xl border border-white/10 bg-white p-4 transition hover:border-white/25"
+          className="mt-2 block rounded-xl border border-line bg-white p-4 transition hover:border-line-strong"
           aria-label={`${SPONSOR.name} — otwórz stronę facelove.pl`}
         >
           <img
@@ -208,16 +208,16 @@ export function InfoView({ onGoToPlanner }: Props) {
             loading="lazy"
           />
         </a>
-        <p className="mt-2 text-center text-sm text-slate-300">
+        <p className="mt-2 text-center text-sm text-ink-soft">
           {SPONSOR.name} z {SPONSOR.cityGenitive}
         </p>
-        <p className="mt-1 text-center text-[11px] text-slate-500">
+        <p className="mt-1 text-center text-[11px] text-muted">
           Dzięki wsparciu sponsora aplikacja jest dostępna dla wszystkich za darmo.{' '}
           <a
             href={SPONSOR.url}
             target="_blank"
             rel="noreferrer"
-            className="whitespace-nowrap text-dusk-400 underline"
+            className="whitespace-nowrap text-brand underline"
           >
             {sponsorDomain}
           </a>
@@ -236,7 +236,7 @@ function VideoSection() {
 
   return (
     <Section title="Zapowiedź wydarzenia">
-      <div className="overflow-hidden rounded-xl border border-white/10 bg-night-950">
+      <div className="overflow-hidden rounded-xl border border-line bg-bg">
         {loaded ? (
           <iframe
             className="aspect-video w-full"
@@ -254,15 +254,15 @@ function VideoSection() {
           >
             <span
               aria-hidden
-              className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_30%,#2a3766_0%,#0b1120_70%)]"
+              className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_25%,#8ac95f_0%,#185122_72%)]"
             />
             <span aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 opacity-70">
               <svg viewBox="0 0 400 120" preserveAspectRatio="none" className="h-full w-full">
-                <path d="M0 120 L0 78 L70 34 L118 68 L182 18 L246 70 L310 40 L400 84 L400 120 Z" fill="#1b2547" />
-                <path d="M0 120 L0 98 L88 62 L150 92 L232 52 L300 88 L400 60 L400 120 Z" fill="#131d33" />
+                <path d="M0 120 L0 78 L70 34 L118 68 L182 18 L246 70 L310 40 L400 84 L400 120 Z" fill="#1c5527" />
+                <path d="M0 120 L0 98 L88 62 L150 92 L232 52 L300 88 L400 60 L400 120 Z" fill="#14401f" />
               </svg>
             </span>
-            <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-dusk-500 text-white shadow-xl transition group-hover:scale-105">
+            <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-brand text-white shadow-xl transition group-hover:scale-105">
               <IconPlay className="ml-0.5 h-7 w-7" />
             </span>
           </button>
@@ -270,11 +270,11 @@ function VideoSection() {
       </div>
 
       <p className="mt-2 text-sm font-medium">{PROMO_VIDEO.title}</p>
-      <p className="mt-1 text-[11px] text-slate-500">
+      <p className="mt-1 text-[11px] text-muted">
         {loaded
           ? 'Film odtwarza YouTube w trybie ograniczonych ciasteczek.'
           : 'Film ładuje się z YouTube dopiero po kliknięciu — do tego momentu strona nie wysyła żadnych zapytań do Google.'}{' '}
-        <a href={PROMO_VIDEO.url} target="_blank" rel="noreferrer" className="text-dusk-400 underline">
+        <a href={PROMO_VIDEO.url} target="_blank" rel="noreferrer" className="text-brand underline">
           Otwórz w YouTube
         </a>
       </p>
@@ -293,10 +293,10 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function Fact({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-lg bg-white/4 px-3 py-2">
-      <dt className="text-[10px] uppercase tracking-wide text-slate-500">{label}</dt>
+    <div className="rounded-lg bg-tint px-3 py-2">
+      <dt className="text-[10px] uppercase tracking-wide text-muted">{label}</dt>
       <dd className="text-sm font-semibold">{value}</dd>
-      {hint && <dd className="text-[10px] text-slate-500">{hint}</dd>}
+      {hint && <dd className="text-[10px] text-muted">{hint}</dd>}
     </div>
   )
 }
@@ -307,12 +307,12 @@ function Row({ href, icon, label, sub }: { href: string; icon: ReactNode; label:
     <a
       href={href}
       {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
-      className="flex items-center gap-3 rounded-lg bg-white/4 px-3 py-2.5 hover:bg-white/8"
+      className="flex items-center gap-3 rounded-lg bg-tint px-3 py-2.5 hover:bg-tint-strong"
     >
-      <span className="shrink-0 text-dusk-400">{icon}</span>
+      <span className="shrink-0 text-brand">{icon}</span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium">{label}</span>
-        <span className="block truncate text-xs text-slate-500">{sub}</span>
+        <span className="block truncate text-xs text-muted">{sub}</span>
       </span>
     </a>
   )
@@ -320,7 +320,7 @@ function Row({ href, icon, label, sub }: { href: string; icon: ReactNode; label:
 
 function Ext({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <a href={href} target="_blank" rel="noreferrer" className="chip bg-white/6 text-slate-300 hover:bg-white/10">
+    <a href={href} target="_blank" rel="noreferrer" className="chip bg-tint text-ink-soft hover:bg-tint-strong">
       {children} <IconLink className="h-3 w-3" />
     </a>
   )
@@ -329,7 +329,7 @@ function Ext({ href, children }: { href: string; children: ReactNode }) {
 function Bullet({ children }: { children: ReactNode }) {
   return (
     <li className="flex gap-2">
-      <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-summit-400" />
+      <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-done-strong" />
       <span className="min-w-0">{children}</span>
     </li>
   )

@@ -46,14 +46,14 @@ export default function App() {
 
   return (
     <div className="mx-auto flex min-h-full max-w-3xl flex-col">
-      <header className="safe-top sticky top-0 z-[900] border-b border-white/8 bg-night-950/80 backdrop-blur-xl">
+      <header className="safe-top sticky top-0 z-[900] border-b border-line bg-bg/85 backdrop-blur-xl">
         <div className="flex items-center gap-4 px-4 py-3">
           <ProgressRing done={done} total={PEAKS.length} size={62} />
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-base font-bold leading-tight">Korona Gór Brennej</h1>
-            <p className="mt-0.5 text-xs text-slate-400">
+            <p className="mt-0.5 text-xs text-muted">
               {done === PEAKS.length ? (
-                <span className="text-summit-300">Komplet! Zostaw dowód organizatorowi.</span>
+                <span className="text-done">Komplet! Zostaw dowód organizatorowi.</span>
               ) : left > 0 ? (
                 <>
                   {left} {left === 1 ? 'dzień' : left < 5 ? 'dni' : 'dni'} do końca ·{' '}
@@ -68,7 +68,7 @@ export default function App() {
       </header>
 
       {needsBackup && (
-        <div className="mx-4 mt-3 rounded-xl border border-ember-400/30 bg-ember-500/10 px-3 py-2.5 text-xs text-ember-400">
+        <div className="mx-4 mt-3 rounded-xl border border-warn bg-warn-soft px-3 py-2.5 text-xs text-warn">
           Masz już {done} szczytów. Zrób backup w zakładce <strong>Dowód</strong> — wyczyszczenie danych
           przeglądarki kasuje wszystko.{' '}
           <button onClick={() => setReminderClosed(true)} className="!min-h-0 underline">
@@ -107,7 +107,7 @@ export default function App() {
         </motion.div>
       </main>
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-[900] mx-auto max-w-3xl border-t border-white/8 bg-night-950/90 px-2 pt-1 backdrop-blur-xl">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-[900] mx-auto max-w-3xl border-t border-line bg-bg/90 px-2 pt-1 backdrop-blur-xl">
         <div className="grid grid-cols-6">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
@@ -115,13 +115,13 @@ export default function App() {
               onClick={() => setTab(id)}
               aria-current={tab === id ? 'page' : undefined}
               className={`relative flex flex-col items-center gap-1 py-2 text-[10px] font-medium transition ${
-                tab === id ? 'text-dusk-400' : 'text-slate-500'
+                tab === id ? 'text-brand' : 'text-muted'
               }`}
             >
               {tab === id && (
                 <motion.span
                   layoutId="tab-pill"
-                  className="absolute inset-x-2 inset-y-1 -z-10 rounded-xl bg-dusk-500/15"
+                  className="absolute inset-x-2 inset-y-1 -z-10 rounded-xl bg-brand-soft"
                   transition={{ type: 'spring', damping: 26, stiffness: 380 }}
                 />
               )}

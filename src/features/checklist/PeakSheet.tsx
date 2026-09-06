@@ -76,7 +76,7 @@ export function PeakSheet({ peak, onClose }: Props) {
       title={
         <span className="flex items-baseline gap-2">
           <span className="truncate">{peak.name}</span>
-          <span className="shrink-0 text-sm font-normal text-slate-400">{peak.ele} m n.p.m.</span>
+          <span className="shrink-0 text-sm font-normal text-muted">{peak.ele} m n.p.m.</span>
         </span>
       }
     >
@@ -91,7 +91,7 @@ export function PeakSheet({ peak, onClose }: Props) {
       {done && (
         <div className="mt-4 space-y-3">
           <label className="block">
-            <span className="mb-1.5 block text-xs font-medium text-slate-400">Data zdobycia</span>
+            <span className="mb-1.5 block text-xs font-medium text-muted">Data zdobycia</span>
             <input
               type="date"
               className="field"
@@ -104,7 +104,7 @@ export function PeakSheet({ peak, onClose }: Props) {
             />
           </label>
           {!dateOk && (
-            <p className="flex items-start gap-2 rounded-xl bg-ember-500/12 px-3 py-2.5 text-xs text-ember-400">
+            <p className="flex items-start gap-2 rounded-xl bg-warn-soft px-3 py-2.5 text-xs text-warn">
               <IconWarn className="mt-0.5 h-4 w-4 shrink-0" />
               <span>
                 Ta data jest poza terminem wydarzenia ({CHALLENGE_START.slice(8)}–{CHALLENGE_END.slice(8)}.09.2026).
@@ -114,7 +114,7 @@ export function PeakSheet({ peak, onClose }: Props) {
           )}
 
           <div>
-            <span className="mb-1.5 block text-xs font-medium text-slate-400">Sposób zdobycia</span>
+            <span className="mb-1.5 block text-xs font-medium text-muted">Sposób zdobycia</span>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setAscentMode(peak.id, 'foot')}
@@ -130,7 +130,7 @@ export function PeakSheet({ peak, onClose }: Props) {
               </button>
             </div>
             {p.ascentMode === 'bike' && (
-              <p className="mt-2 text-xs text-ember-400/90">
+              <p className="mt-2 text-xs text-warn">
                 Przy zdobywaniu rowerem zdjęcie musi obejmować także rower — i musi to być rower bez wspomagania.
               </p>
             )}
@@ -140,7 +140,7 @@ export function PeakSheet({ peak, onClose }: Props) {
 
       <div className="mt-5">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-400">
+          <span className="text-xs font-medium text-muted">
             Zdjęcia ({photos.length}) — na tle tabliczki wysokościowej
           </span>
         </div>
@@ -154,33 +154,33 @@ export function PeakSheet({ peak, onClose }: Props) {
               <div
                 key={photo.id}
                 className={`group relative aspect-square overflow-hidden rounded-xl border ${
-                  isPrimary ? 'border-summit-400' : 'border-white/10'
+                  isPrimary ? 'border-done' : 'border-line'
                 }`}
               >
                 <img src={photoUrl(photo)} alt="" className="h-full w-full object-cover" loading="lazy" />
-                <div className="absolute inset-x-0 bottom-0 flex justify-between bg-night-950/75 px-1 py-1">
+                <div className="absolute inset-x-0 bottom-0 flex justify-between bg-bg/80 px-1 py-1">
                   <button
                     onClick={() => setPrimaryPhoto(peak.id, photo.id)}
                     title={isPrimary ? 'To zdjęcie trafi do kolażu' : 'Ustaw jako główne'}
-                    className={`!min-h-0 rounded-lg p-1 ${isPrimary ? 'text-summit-300' : 'text-slate-400'}`}
+                    className={`!min-h-0 rounded-lg p-1 ${isPrimary ? 'text-done' : 'text-muted'}`}
                   >
                     <IconStar className="h-4 w-4" filled={isPrimary} />
                   </button>
                   <button
                     onClick={() => onDelete(photo.id)}
                     title="Usuń zdjęcie"
-                    className="!min-h-0 rounded-lg p-1 text-slate-400 hover:text-red-400"
+                    className="!min-h-0 rounded-lg p-1 text-muted hover:text-red-400"
                   >
                     <IconTrash className="h-4 w-4" />
                   </button>
                 </div>
                 {photo.takenAt && !isWithinChallenge(photo.takenAt) && (
-                  <span className="absolute left-1 top-1 rounded-md bg-ember-500/90 px-1.5 py-0.5 text-[10px] font-semibold text-night-950">
+                  <span className="absolute left-1 top-1 rounded-md bg-warn px-1.5 py-0.5 text-[10px] font-semibold text-onbrand">
                     zła data
                   </span>
                 )}
                 {offSite && (
-                  <span className="absolute right-1 top-1 rounded-md bg-night-950/85 px-1.5 py-0.5 text-[10px] text-slate-300">
+                  <span className="absolute right-1 top-1 rounded-md bg-bg/90 px-1.5 py-0.5 text-[10px] text-ink-soft">
                     GPS ≠ szczyt
                   </span>
                 )}
@@ -191,7 +191,7 @@ export function PeakSheet({ peak, onClose }: Props) {
           <button
             onClick={() => fileRef.current?.click()}
             disabled={busy}
-            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/20 bg-white/3 text-slate-400 hover:bg-white/8"
+            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-line-strong bg-tint text-muted hover:bg-tint-strong"
           >
             <IconCamera className="h-6 w-6" />
             <span className="text-[11px]">{busy ? 'przetwarzam…' : 'dodaj'}</span>
@@ -208,14 +208,14 @@ export function PeakSheet({ peak, onClose }: Props) {
           onChange={(e) => onFiles(e.target.files)}
         />
         {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
-        <p className="mt-2 text-[11px] text-slate-500">
+        <p className="mt-2 text-[11px] text-muted">
           Zdjęcia są zmniejszane i zapisywane wyłącznie w Twojej przeglądarce. Gwiazdka wskazuje zdjęcie,
           które trafi do kolażu dla organizatora.
         </p>
       </div>
 
       <label className="mt-5 block">
-        <span className="mb-1.5 block text-xs font-medium text-slate-400">Notatka</span>
+        <span className="mb-1.5 block text-xs font-medium text-muted">Notatka</span>
         <textarea
           className="field min-h-20 resize-y"
           placeholder="Pogoda, dojście, gdzie zaparkować…"
@@ -227,10 +227,10 @@ export function PeakSheet({ peak, onClose }: Props) {
       {(peak.note || peak.verify) && (
         <div className="mt-4 space-y-2 text-xs">
           {peak.note && (
-            <p className="rounded-xl bg-white/5 px-3 py-2.5 text-slate-300">{peak.note}</p>
+            <p className="rounded-xl bg-tint px-3 py-2.5 text-ink-soft">{peak.note}</p>
           )}
           {peak.verify && (
-            <p className="flex items-start gap-2 rounded-xl bg-ember-500/10 px-3 py-2.5 text-ember-400/90">
+            <p className="flex items-start gap-2 rounded-xl bg-warn-soft px-3 py-2.5 text-warn">
               <IconWarn className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{peak.verify}</span>
             </p>
@@ -238,10 +238,10 @@ export function PeakSheet({ peak, onClose }: Props) {
         </div>
       )}
 
-      <p className="mt-4 text-[11px] text-slate-500">
+      <p className="mt-4 text-[11px] text-muted">
         Współrzędne: {peak.lat.toFixed(5)}, {peak.lon.toFixed(5)} ·{' '}
         <a
-          className="text-dusk-400 underline"
+          className="text-brand underline"
           href={`https://www.google.com/maps/dir/?api=1&destination=${peak.lat},${peak.lon}`}
           target="_blank"
           rel="noreferrer"

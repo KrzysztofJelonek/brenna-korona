@@ -215,7 +215,25 @@ Wpychanie zdjęć do localStorage (choćby jako base64) to najczęstszy błąd w
 
 ### Design
 
-Mobile-first, bo aplikacja jest używana w terenie, na telefonie, często w rękawiczkach: duże cele dotykowe, dolna nawigacja, kluczowe akcje w zasięgu kciuka. Tryb ciemny domyślny, w motywie nietoperzowym edycji 2026. Na desktopie układ bento-grid. Płynne przejścia (View Transitions API), animacje sprężynowe (Framer Motion), zmienne fonty.
+Mobile-first, bo aplikacja jest używana w terenie, na telefonie, często w rękawiczkach: cele dotykowe min. 44 px, dolna nawigacja, kluczowe akcje w zasięgu kciuka. Animacje sprężynowe (Framer Motion).
+
+**Kolorystyka jest przejęta z materiałów organizatora** — plakatu 2026 i strony koronagorbrennej.pl:
+
+| Rola | Kolor |
+|---|---|
+| kolor wiodący | ciemna zieleń `#226b31` |
+| zaliczone / akcent | zieleń liścia `#72bb43` |
+| wyróżnienie | złoto `#ffd84d` |
+| tło | krem `#f3f9ef` |
+| ostrzeżenia | pomarańcz `#e26c3b` |
+
+Dzięki temu aplikacja czyta się jako część tego samego wydarzenia, a nie osobny produkt.
+
+**Motyw jasny jest domyślny**, bo aplikacja jest używana we wrześniu, w dzień, w terenie — ciemne tło wypłowiałoby w słońcu. Wersja ciemna włącza się automatycznie przy systemowym trybie nocnym (wyjście o świcie, wieczór w schronisku).
+
+**Kolory żyją w tokenach semantycznych** (`--s-bg`, `--s-surface`, `--s-brand`, `--s-done`, `--s-warn`…) zdefiniowanych w [`src/index.css`](src/index.css) i wystawionych Tailwindowi przez `@theme`. Komponenty używają nazw znaczeniowych (`bg-surface`, `text-brand`, `border-line`), nie konkretnych barw — zmiana motywu to edycja jednego pliku.
+
+**Kolaż i karta podsumowania zostają jasne niezależnie od motywu.** Trafiają na Facebooka, gdzie kremowo-zielona wersja odpowiada plakatowi organizatora.
 
 ---
 

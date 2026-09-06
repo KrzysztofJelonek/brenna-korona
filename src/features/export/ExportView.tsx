@@ -159,7 +159,7 @@ export function ExportView() {
       </div>
 
       <label className="block">
-        <span className="mb-1.5 block text-xs font-medium text-slate-400">Twoje imię / nick (na kolażu i karcie)</span>
+        <span className="mb-1.5 block text-xs font-medium text-muted">Twoje imię / nick (na kolażu i karcie)</span>
         <input
           className="field"
           placeholder="np. Anna K."
@@ -170,13 +170,13 @@ export function ExportView() {
 
       <section className="card px-4 py-4">
         <h2 className="text-sm font-semibold">Komplet zdjęć do weryfikacji</h2>
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-muted">
           Organizator weryfikuje zgłoszenie na podstawie kompletu zdjęć opublikowanego w dyskusji wydarzenia
           na Facebooku. Aplikacja składa je w jeden plik.
         </p>
 
         {missing.length > 0 && (
-          <p className="mt-3 flex items-start gap-2 rounded-xl bg-ember-500/12 px-3 py-2.5 text-xs text-ember-400">
+          <p className="mt-3 flex items-start gap-2 rounded-xl bg-warn-soft px-3 py-2.5 text-xs text-warn">
             <IconWarn className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
               Brakuje zdjęć dla {missing.length} {missing.length === 1 ? 'szczytu' : 'szczytów'}:{' '}
@@ -197,7 +197,7 @@ export function ExportView() {
 
       <section className="card px-4 py-4">
         <h2 className="text-sm font-semibold">Karta podsumowania</h2>
-        <p className="mt-1 text-xs text-slate-400">Kwadratowy obrazek do wrzucenia na social media.</p>
+        <p className="mt-1 text-xs text-muted">Kwadratowy obrazek do wrzucenia na social media.</p>
         <button onClick={makeCard} disabled={busy !== null} className="btn-ghost mt-3 w-full">
           <IconShare className="h-4 w-4" /> {busy === 'card' ? 'rysuję…' : 'Utwórz i udostępnij'}
         </button>
@@ -205,7 +205,7 @@ export function ExportView() {
 
       <section className="card px-4 py-4">
         <h2 className="text-sm font-semibold">Backup danych</h2>
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-muted">
           Wszystko trzymane jest wyłącznie w tej przeglądarce. Wyczyszczenie danych witryny kasuje postęp
           bezpowrotnie — a backup przenosi go też na inny telefon.
         </p>
@@ -228,11 +228,11 @@ export function ExportView() {
             e.target.value = ''
           }}
         />
-        <p className="mt-2 text-[11px] text-ember-400/80">Import zastępuje bieżące dane i zdjęcia.</p>
+        <p className="mt-2 text-[11px] text-warn">Import zastępuje bieżące dane i zdjęcia.</p>
       </section>
 
       {msg && (
-        <p className={`rounded-xl px-3 py-2.5 text-xs ${msg.kind === 'ok' ? 'bg-summit-500/12 text-summit-300' : 'bg-red-500/12 text-red-400'}`}>
+        <p className={`rounded-xl px-3 py-2.5 text-xs ${msg.kind === 'ok' ? 'bg-done-soft text-done' : 'bg-red-500/12 text-red-400'}`}>
           {msg.text}
         </p>
       )}
@@ -250,7 +250,7 @@ function Metric({ value, label }: { value: string; label: string }) {
   return (
     <div>
       <div className="text-lg font-bold tabular-nums">{value}</div>
-      <div className="text-[10px] text-slate-500">{label}</div>
+      <div className="text-[10px] text-muted">{label}</div>
     </div>
   )
 }

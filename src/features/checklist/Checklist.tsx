@@ -48,7 +48,7 @@ export function Checklist({ onOpenPeak, position }: Props) {
             onClick={() => setSort(s.id)}
             disabled={s.id === 'near' && !position}
             className={`chip shrink-0 !py-1.5 transition ${
-              sort === s.id ? 'bg-dusk-500 text-white' : 'bg-white/6 text-slate-300 hover:bg-white/10'
+              sort === s.id ? 'bg-brand text-white' : 'bg-tint text-ink-soft hover:bg-tint-strong'
             } disabled:opacity-35`}
           >
             {s.label}
@@ -56,7 +56,7 @@ export function Checklist({ onOpenPeak, position }: Props) {
         ))}
         <button
           onClick={() => setHideDone((v) => !v)}
-          className={`chip shrink-0 !py-1.5 ${hideDone ? 'bg-summit-500/25 text-summit-300' : 'bg-white/6 text-slate-300'}`}
+          className={`chip shrink-0 !py-1.5 ${hideDone ? 'bg-done-soft text-done' : 'bg-tint text-ink-soft'}`}
         >
           {hideDone ? 'pokaż zdobyte' : 'ukryj zdobyte'}
         </button>
@@ -75,7 +75,7 @@ export function Checklist({ onOpenPeak, position }: Props) {
       </div>
 
       {list.length === 0 && (
-        <p className="card px-4 py-8 text-center text-sm text-summit-300">
+        <p className="card px-4 py-8 text-center text-sm text-done">
           Wszystkie 20 szczytów zdobyte. Przejdź do zakładki Dowód i wygeneruj komplet zdjęć.
         </p>
       )}

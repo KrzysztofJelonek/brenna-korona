@@ -27,7 +27,7 @@ export function Sheet({ open, onClose, title, children }: Props) {
       {open && (
         <div className="fixed inset-0 z-[1200] flex items-end justify-center sm:items-center">
           <motion.div
-            className="absolute inset-0 bg-night-950/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-bg/85 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -36,13 +36,13 @@ export function Sheet({ open, onClose, title, children }: Props) {
           <motion.div
             role="dialog"
             aria-modal="true"
-            className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl border border-white/10 bg-night-900/95 shadow-2xl sm:max-w-lg sm:rounded-3xl"
+            className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl border border-line bg-surface shadow-2xl sm:max-w-lg sm:rounded-3xl"
             initial={{ y: '100%', opacity: 0.6 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0.6 }}
             transition={{ type: 'spring', damping: 30, stiffness: 320 }}
           >
-            <div className="flex items-center justify-between gap-3 border-b border-white/8 px-5 py-3.5">
+            <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
               <div className="min-w-0 text-base font-semibold">{title}</div>
               <button onClick={onClose} aria-label="Zamknij" className="btn-ghost !min-h-0 !px-2 !py-2">
                 <IconClose className="h-4 w-4" />

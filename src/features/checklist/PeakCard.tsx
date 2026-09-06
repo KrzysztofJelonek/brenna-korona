@@ -28,7 +28,7 @@ export function PeakCard({ peak, onOpen, distanceM, index }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.02, 0.3) }}
       className={`card relative overflow-hidden transition-colors ${
-        done ? 'border-summit-500/40 bg-summit-500/8' : planned ? 'border-dusk-400/30' : ''
+        done ? 'border-done bg-done-soft' : planned ? 'border-brand' : ''
       }`}
     >
       <div className="flex items-stretch">
@@ -38,8 +38,8 @@ export function PeakCard({ peak, onOpen, distanceM, index }: Props) {
           aria-label={done ? `Cofnij zaliczenie: ${peak.name}` : `Zalicz szczyt ${peak.name}`}
           className={`flex w-16 shrink-0 flex-col items-center justify-center gap-1 border-r transition ${
             done
-              ? 'border-summit-500/30 bg-summit-500/20 text-summit-300'
-              : 'border-white/8 bg-white/3 text-slate-500 hover:bg-white/8'
+              ? 'border-done bg-done-soft text-done'
+              : 'border-line bg-tint text-muted hover:bg-tint-strong'
           }`}
         >
           <motion.span
@@ -58,35 +58,35 @@ export function PeakCard({ peak, onOpen, distanceM, index }: Props) {
 
         <button onClick={() => onOpen(peak)} className="min-w-0 flex-1 px-4 py-3 text-left !min-h-0">
           <div className="flex items-baseline gap-2">
-            <span className={`truncate font-semibold ${done ? 'text-summit-300' : 'text-slate-100'}`}>
+            <span className={`truncate font-semibold ${done ? 'text-done' : 'text-ink'}`}>
               {peak.name}
             </span>
-            <span className="shrink-0 text-sm tabular-nums text-slate-400">{peak.ele} m</span>
+            <span className="shrink-0 text-sm tabular-nums text-muted">{peak.ele} m</span>
           </div>
 
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            {planned && <span className="chip bg-dusk-500/20 text-dusk-400">zaplanowany</span>}
+            {planned && <span className="chip bg-brand-soft text-brand">zaplanowany</span>}
             {done && p.conqueredAt && (
-              <span className="chip bg-white/6 text-slate-300">
+              <span className="chip bg-tint text-ink-soft">
                 {new Date(p.conqueredAt).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })}
               </span>
             )}
             {p.ascentMode === 'bike' && (
-              <span className="chip bg-ember-500/15 text-ember-400"><IconBike className="h-3.5 w-3.5" /> rower</span>
+              <span className="chip bg-warn-soft text-warn"><IconBike className="h-3.5 w-3.5" /> rower</span>
             )}
             {p.ascentMode === 'foot' && (
-              <span className="chip bg-white/6 text-slate-400"><IconBoot className="h-3.5 w-3.5" /> pieszo</span>
+              <span className="chip bg-tint text-muted"><IconBoot className="h-3.5 w-3.5" /> pieszo</span>
             )}
-            <span className={`chip ${hasPhoto ? 'bg-summit-500/15 text-summit-300' : 'bg-white/6 text-slate-500'}`}>
+            <span className={`chip ${hasPhoto ? 'bg-done-soft text-done' : 'bg-tint text-muted'}`}>
               <IconCamera className="h-3.5 w-3.5" />
               {hasPhoto ? `${p.photoIds.length}` : 'brak zdjęcia'}
             </span>
             {dateWarning && (
-              <span className="chip bg-ember-500/20 text-ember-400"><IconWarn className="h-3.5 w-3.5" /> data poza terminem</span>
+              <span className="chip bg-warn-soft text-warn"><IconWarn className="h-3.5 w-3.5" /> data poza terminem</span>
             )}
-            {peak.verify && <span className="chip bg-white/6 text-slate-500">do weryfikacji</span>}
+            {peak.verify && <span className="chip bg-tint text-muted">do weryfikacji</span>}
             {distanceM !== undefined && (
-              <span className="chip bg-dusk-500/15 text-dusk-400">{formatDistance(distanceM)} stąd</span>
+              <span className="chip bg-brand-soft text-brand">{formatDistance(distanceM)} stąd</span>
             )}
           </div>
         </button>

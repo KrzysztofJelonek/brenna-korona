@@ -1,33 +1,118 @@
 @import 'tailwindcss';
 @import 'leaflet/dist/leaflet.css';
 
+/*
+ * Paleta przejęta z materiałów organizatora (koronagorbrennej.pl, plakat 2026):
+ * ciemna zieleń #226b31, zieleń liścia #72bb43, złoto #ffd84d, krem #f3f9ef.
+ * Motyw jasny jest domyślny — aplikacja jest używana we wrześniu, w dzień,
+ * w terenie, gdzie ciemne tło wypłowiałoby w słońcu. Wersja ciemna włącza się
+ * automatycznie, gdy system ma tryb nocny.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* stała paleta marki */
+  --brand-forest-900: #14401f;
+  --brand-forest-700: #226b31;
+  --brand-forest-600: #347f36;
+  --brand-leaf-500: #72bb43;
+  --brand-leaf-400: #8ac95f;
+  --brand-gold-400: #ffd84d;
+  --brand-gold-600: #a8842a;
+  --brand-orange: #e26c3b;
+  --brand-cream: #f3f9ef;
+  --brand-ink: #20312b;
+
+  /* tokeny semantyczne — motyw jasny */
+  --s-bg: #f3f9ef;
+  --s-surface: #ffffff;
+  --s-tint: #eaf3e5;
+  --s-tint-strong: #dcebd4;
+  --s-line: #cbdcc4;
+  --s-line-strong: #a9c5a0;
+  --s-ink: #20312b;
+  --s-ink-soft: #3c4d44;
+  --s-muted: #5f6c61;
+
+  --s-brand: #226b31;
+  --s-brand-strong: #185226;
+  --s-brand-soft: #e3f1de;
+  --s-on-brand: #ffffff;
+
+  --s-done: #2f7d32;
+  --s-done-strong: #256527;
+  --s-done-soft: #e4f3de;
+  --s-on-done: #ffffff;
+
+  --s-warn: #b4531f;
+  --s-warn-soft: #fbeade;
+
+  --s-gold: #a8842a;
+  --s-gold-soft: #fdf3d3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --s-bg: #0d1f13;
+    --s-surface: #14301c;
+    --s-tint: #17331e;
+    --s-tint-strong: #21422a;
+    --s-line: #2a5233;
+    --s-line-strong: #3a6b45;
+    --s-ink: #e8f2e4;
+    --s-ink-soft: #cfe0c9;
+    --s-muted: #9db3a2;
+
+    --s-brand: #72bb43;
+    --s-brand-strong: #8ac95f;
+    --s-brand-soft: #1c3f22;
+    --s-on-brand: #0d1f13;
+
+    --s-done: #7ad14f;
+    --s-done-strong: #93dd6c;
+    --s-done-soft: #1b3d1f;
+    --s-on-done: #0d1f13;
+
+    --s-warn: #f0a06a;
+    --s-warn-soft: #3a2415;
+
+    --s-gold: #ffd84d;
+    --s-gold-soft: #38300f;
+  }
+}
+
 @theme {
-  --color-night-950: #070b16;
-  --color-night-900: #0b1120;
-  --color-night-850: #101a30;
-  --color-night-800: #16223c;
-  --color-night-700: #22304f;
-  --color-night-600: #33436b;
+  --color-bg: var(--s-bg);
+  --color-surface: var(--s-surface);
+  --color-tint: var(--s-tint);
+  --color-tint-strong: var(--s-tint-strong);
+  --color-line: var(--s-line);
+  --color-line-strong: var(--s-line-strong);
+  --color-ink: var(--s-ink);
+  --color-ink-soft: var(--s-ink-soft);
+  --color-muted: var(--s-muted);
 
-  --color-dusk-400: #8b7bd8;
-  --color-dusk-500: #7c66d9;
-  --color-dusk-600: #6247c4;
+  --color-brand: var(--s-brand);
+  --color-brand-strong: var(--s-brand-strong);
+  --color-brand-soft: var(--s-brand-soft);
+  --color-onbrand: var(--s-on-brand);
 
-  --color-summit-300: #7dd3a8;
-  --color-summit-400: #46c08a;
-  --color-summit-500: #2ba36f;
+  --color-done: var(--s-done);
+  --color-done-strong: var(--s-done-strong);
+  --color-done-soft: var(--s-done-soft);
+  --color-ondone: var(--s-on-done);
 
-  --color-ember-400: #f2a65a;
-  --color-ember-500: #e8893a;
+  --color-warn: var(--s-warn);
+  --color-warn-soft: var(--s-warn-soft);
 
-  --font-display: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --color-gold: var(--s-gold);
+  --color-gold-soft: var(--s-gold-soft);
 }
 
 @layer base {
-  :root {
-    color-scheme: dark;
-  }
-
   html,
   body,
   #root {
@@ -37,11 +122,11 @@
   body {
     margin: 0;
     background:
-      radial-gradient(ellipse 90% 55% at 50% -10%, #24306090 0%, transparent 60%),
-      radial-gradient(ellipse 70% 45% at 90% 100%, #6247c430 0%, transparent 55%),
-      var(--color-night-950);
+      radial-gradient(ellipse 95% 42% at 50% -12%, color-mix(in srgb, var(--brand-leaf-500) 13%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 40% at 95% 100%, color-mix(in srgb, var(--brand-forest-700) 7%, transparent) 0%, transparent 60%),
+      var(--s-bg);
     background-attachment: fixed;
-    color: #e7ecf7;
+    color: var(--s-ink);
     font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     overscroll-behavior-y: none;
@@ -61,8 +146,8 @@
   }
 
   ::selection {
-    background: var(--color-dusk-500);
-    color: white;
+    background: var(--s-brand);
+    color: var(--s-on-brand);
   }
 }
 
@@ -93,25 +178,25 @@
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl;
+    @apply rounded-2xl border border-line bg-surface shadow-[0_1px_2px_rgb(20_49_31/0.06),0_4px_12px_-6px_rgb(20_49_31/0.10)];
   }
 
   .btn-primary {
-    @apply btn bg-dusk-500 text-white hover:bg-dusk-400;
+    @apply btn bg-brand text-onbrand hover:bg-brand-strong;
   }
 
   .btn-ghost {
-    @apply btn border border-white/12 bg-white/5 text-slate-200 hover:bg-white/10;
+    @apply btn border border-line bg-surface text-ink hover:bg-tint;
   }
 
   .btn-summit {
-    @apply btn bg-summit-500 text-night-950 hover:bg-summit-400;
+    @apply btn bg-done text-ondone hover:bg-done-strong;
   }
 
   .field {
-    @apply w-full rounded-xl border border-white/12 bg-night-900/70 px-3 py-2.5
-           text-sm text-slate-100 outline-none placeholder:text-slate-500
-           focus:border-dusk-400 focus:ring-2 focus:ring-dusk-500/30;
+    @apply w-full rounded-xl border border-line bg-surface px-3 py-2.5
+           text-sm text-ink outline-none placeholder:text-muted
+           focus:border-brand focus:ring-2 focus:ring-brand/25;
   }
 
   .chip {
@@ -134,31 +219,34 @@
   }
 }
 
-/* Leaflet w ciemnym motywie */
+/* Leaflet dopasowany do motywu */
 .leaflet-container {
-  background: var(--color-night-900);
+  background: var(--s-tint);
   font-family: inherit;
 }
-.leaflet-tile-pane {
-  filter: brightness(0.72) saturate(0.85) hue-rotate(185deg) contrast(1.05);
+@media (prefers-color-scheme: dark) {
+  /* Kafelki OSM są jasne — w trybie nocnym przyciemniamy je i chłodzimy. */
+  .leaflet-tile-pane {
+    filter: brightness(0.72) saturate(0.8) hue-rotate(65deg) contrast(1.05) invert(0.03);
+  }
 }
 .leaflet-control-attribution {
-  background: rgba(11, 17, 32, 0.85) !important;
-  color: #94a3b8 !important;
+  background: color-mix(in srgb, var(--s-surface) 88%, transparent) !important;
+  color: var(--s-muted) !important;
   font-size: 10px !important;
 }
 .leaflet-control-attribution a {
-  color: #a5b4fc !important;
+  color: var(--s-brand) !important;
 }
 .leaflet-bar a {
-  background: var(--color-night-850) !important;
-  color: #e7ecf7 !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: var(--s-surface) !important;
+  color: var(--s-ink) !important;
+  border-color: var(--s-line) !important;
 }
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
-  background: var(--color-night-850);
-  color: #e7ecf7;
+  background: var(--s-surface);
+  color: var(--s-ink);
   border-radius: 14px;
 }
 .leaflet-popup-content {

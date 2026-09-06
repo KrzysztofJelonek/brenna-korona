@@ -73,7 +73,7 @@ export function FieldView({
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold">Lokalizacja</h2>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-muted">
               {position
                 ? `Dokładność ±${Math.round(position.accuracy)} m`
                 : enabled
@@ -86,7 +86,7 @@ export function FieldView({
           </button>
         </div>
         {error && (
-          <p className="mt-3 flex items-start gap-2 rounded-xl bg-ember-500/12 px-3 py-2.5 text-xs text-ember-400">
+          <p className="mt-3 flex items-start gap-2 rounded-xl bg-warn-soft px-3 py-2.5 text-xs text-warn">
             <IconWarn className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{error} Geolokalizacja wymaga połączenia HTTPS.</span>
           </p>
@@ -94,12 +94,12 @@ export function FieldView({
       </section>
 
       {suggestion && (
-        <section className="card border-summit-400/50 bg-summit-500/10 px-4 py-4">
+        <section className="card border-done bg-done-soft px-4 py-4">
           <p className="text-sm">
             Jesteś <strong>{formatDistance(suggestion.distance)}</strong> od szczytu{' '}
             <strong>{suggestion.peak.name}</strong>. Zaliczyć?
           </p>
-          <p className="mt-1 text-[11px] text-slate-400">
+          <p className="mt-1 text-[11px] text-muted">
             Pamiętaj o zdjęciu na tle tabliczki — bez niego organizator nie uzna wejścia.
           </p>
           <div className="mt-3 grid grid-cols-2 gap-2">
@@ -123,7 +123,7 @@ export function FieldView({
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold">Zapis śladu</h2>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-muted">
               {recording ? `Nagrywam — ${trackLen} punktów.` : 'Zapisz trasę i wyeksportuj do GPX.'}
             </p>
           </div>
@@ -138,7 +138,7 @@ export function FieldView({
         <button onClick={exportTrack} className="btn-ghost mt-3 w-full !py-2 !text-xs">
           <IconDownload className="h-4 w-4" /> Eksportuj GPX (ślad + 20 szczytów jako waypointy)
         </button>
-        <p className="mt-2 text-[11px] text-slate-500">
+        <p className="mt-2 text-[11px] text-muted">
           Ślad GPS jest dla Ciebie. Organizator uznaje go tylko wyjątkowo, po wcześniejszym ustaleniu — dowodem
           są zdjęcia.
         </p>
@@ -146,7 +146,7 @@ export function FieldView({
 
       {ranked.length > 0 && (
         <section>
-          <h2 className="mb-2 text-sm font-semibold text-slate-300">Najbliższe szczyty</h2>
+          <h2 className="mb-2 text-sm font-semibold text-ink-soft">Najbliższe szczyty</h2>
           <div className="space-y-1.5">
             {ranked.slice(0, 8).map(({ peak, distance, dir }) => {
               const done = progress[peak.id]?.status === 'done'
@@ -154,15 +154,15 @@ export function FieldView({
                 <button
                   key={peak.id}
                   onClick={() => onOpenPeak(peak)}
-                  className="card flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-white/8"
+                  className="card flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-tint-strong"
                 >
-                  <span className={`min-w-0 flex-1 truncate ${done ? 'text-summit-300' : ''}`}>
+                  <span className={`min-w-0 flex-1 truncate ${done ? 'text-done' : ''}`}>
                     {done && '✓ '}
                     {peak.name}
                   </span>
-                  <span className="shrink-0 text-xs text-slate-500">{peak.ele} m</span>
-                  <span className="shrink-0 tabular-nums text-slate-300">{formatDistance(distance)}</span>
-                  <span className="w-7 shrink-0 text-right text-xs text-dusk-400">{dir}</span>
+                  <span className="shrink-0 text-xs text-muted">{peak.ele} m</span>
+                  <span className="shrink-0 tabular-nums text-ink-soft">{formatDistance(distance)}</span>
+                  <span className="w-7 shrink-0 text-right text-xs text-brand">{dir}</span>
                 </button>
               )
             })}

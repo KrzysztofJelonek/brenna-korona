@@ -22,39 +22,39 @@ export function Planner() {
   return (
     <div className="space-y-4">
       <section>
-        <h2 className="mb-2 text-sm font-semibold text-slate-300">Gotowe warianty</h2>
+        <h2 className="mb-2 text-sm font-semibold text-ink-soft">Gotowe warianty</h2>
         <div className="grid grid-cols-2 gap-2">
           {ROUTE_PRESETS.map((preset) => (
             <button
               key={preset.id}
               onClick={() => loadPreset(preset.id, preset.plans)}
               className={`card px-3 py-3 text-left transition ${
-                activePresetId === preset.id ? 'border-dusk-400/60 bg-dusk-500/12' : 'hover:bg-white/8'
+                activePresetId === preset.id ? 'border-brand bg-brand-soft' : 'hover:bg-tint-strong'
               }`}
             >
               <div className="flex items-center justify-between">
                 <span className="font-semibold">{preset.name}</span>
-                {activePresetId === preset.id && <IconCheck className="h-4 w-4 text-dusk-400" />}
+                {activePresetId === preset.id && <IconCheck className="h-4 w-4 text-brand" />}
               </div>
-              <p className="mt-1 line-clamp-3 text-[11px] leading-snug text-slate-400">{preset.description}</p>
+              <p className="mt-1 line-clamp-3 text-[11px] leading-snug text-muted">{preset.description}</p>
             </button>
           ))}
         </div>
-        <p className="mt-2 text-[11px] text-slate-500">
+        <p className="mt-2 text-[11px] text-muted">
           Wczytanie wariantu nadpisuje plan dni, ale nie rusza zaliczonych szczytów.
         </p>
       </section>
 
       <section>
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-300">Twój plan</h2>
+          <h2 className="text-sm font-semibold text-ink-soft">Twój plan</h2>
           <button onClick={addDay} className="btn-ghost !min-h-0 !py-1.5 !text-xs">
             + dzień
           </button>
         </div>
 
         {plans.length === 0 && (
-          <p className="card px-4 py-6 text-center text-sm text-slate-400">
+          <p className="card px-4 py-6 text-center text-sm text-muted">
             Wybierz gotowy wariant powyżej albo dodaj własny dzień.
           </p>
         )}
@@ -76,7 +76,7 @@ export function Planner() {
                   exit={{ opacity: 0, height: 0 }}
                   className="card overflow-hidden"
                 >
-                  <div className="flex items-center gap-2 border-b border-white/8 px-3 py-2.5">
+                  <div className="flex items-center gap-2 border-b border-line px-3 py-2.5">
                     <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: color }} />
                     <input
                       value={day.name}
@@ -84,13 +84,13 @@ export function Planner() {
                       className="min-w-0 flex-1 bg-transparent text-sm font-semibold outline-none"
                       aria-label="Nazwa dnia"
                     />
-                    <span className="chip bg-white/6 text-slate-400">
+                    <span className="chip bg-tint text-muted">
                       {donePeaks}/{dayPeaks.length}
                     </span>
                     <button
                       onClick={() => removeDay(day.id)}
                       aria-label={`Usuń ${day.name}`}
-                      className="!min-h-0 rounded-lg p-1.5 text-slate-500 hover:text-red-400"
+                      className="!min-h-0 rounded-lg p-1.5 text-muted hover:text-red-400"
                     >
                       <IconTrash className="h-4 w-4" />
                     </button>
@@ -120,21 +120,21 @@ export function Planner() {
                           return (
                             <li
                               key={peak.id}
-                              className="flex items-center gap-2 rounded-lg bg-white/4 px-2 py-1.5 text-sm"
+                              className="flex items-center gap-2 rounded-lg bg-tint px-2 py-1.5 text-sm"
                             >
-                              <span className={`w-4 shrink-0 text-center text-xs ${done ? 'text-summit-400' : 'text-slate-500'}`}>
+                              <span className={`w-4 shrink-0 text-center text-xs ${done ? 'text-done' : 'text-muted'}`}>
                                 {done ? '✓' : idx + 1}
                               </span>
-                              <span className={`min-w-0 flex-1 truncate ${done ? 'text-summit-300' : ''}`}>
+                              <span className={`min-w-0 flex-1 truncate ${done ? 'text-done' : ''}`}>
                                 {peak.name}
                               </span>
-                              <span className="shrink-0 text-xs tabular-nums text-slate-500">{peak.ele} m</span>
+                              <span className="shrink-0 text-xs tabular-nums text-muted">{peak.ele} m</span>
                               <span className="flex shrink-0">
                                 <button
                                   onClick={() => movePeakInDay(day.id, peak.id, -1)}
                                   disabled={idx === 0}
                                   aria-label="W górę"
-                                  className="!min-h-0 px-1 text-slate-500 disabled:opacity-25"
+                                  className="!min-h-0 px-1 text-muted disabled:opacity-25"
                                 >
                                   ↑
                                 </button>
@@ -142,14 +142,14 @@ export function Planner() {
                                   onClick={() => movePeakInDay(day.id, peak.id, 1)}
                                   disabled={idx === dayPeaks.length - 1}
                                   aria-label="W dół"
-                                  className="!min-h-0 px-1 text-slate-500 disabled:opacity-25"
+                                  className="!min-h-0 px-1 text-muted disabled:opacity-25"
                                 >
                                   ↓
                                 </button>
                                 <button
                                   onClick={() => assignPeak(peak.id, null)}
                                   aria-label="Usuń z dnia"
-                                  className="!min-h-0 px-1 text-slate-500 hover:text-red-400"
+                                  className="!min-h-0 px-1 text-muted hover:text-red-400"
                                 >
                                   ×
                                 </button>
@@ -159,7 +159,7 @@ export function Planner() {
                         })}
                       </ol>
                     ) : (
-                      <p className="py-2 text-center text-xs text-slate-500">Brak szczytów w tym dniu.</p>
+                      <p className="py-2 text-center text-xs text-muted">Brak szczytów w tym dniu.</p>
                     )}
 
                     <button onClick={() => setPickerDay(day.id)} className="btn-ghost w-full !py-2 !text-xs">
@@ -177,7 +177,7 @@ export function Planner() {
                           <Stat label="czas" value={day.officialTime ?? `~${formatTime(stats.timeH)}`} />
                         </div>
                         <ElevationProfile peaks={dayPeaks} color={color} />
-                        <p className="text-[10px] text-slate-500">
+                        <p className="text-[10px] text-muted">
                           {day.officialDistanceKm
                             ? 'Dystans i czas z materiałów gminy Brenna.'
                             : 'Wartości szacunkowe (linia prosta × 1,35, reguła Naismitha) — traktuj orientacyjnie.'}
@@ -192,7 +192,7 @@ export function Planner() {
         </div>
 
         {unassigned.length > 0 && plans.length > 0 && (
-          <p className="mt-3 rounded-xl bg-ember-500/10 px-3 py-2.5 text-xs text-ember-400/90">
+          <p className="mt-3 rounded-xl bg-warn-soft px-3 py-2.5 text-xs text-warn">
             Poza planem {unassigned.length === 1 ? 'został' : 'zostało'} {unassigned.length}{' '}
             {unassigned.length === 1 ? 'szczyt' : 'szczytów'}: {unassigned.map((p) => p.name).join(', ')}.
           </p>
@@ -215,14 +215,14 @@ export function Planner() {
                 key={peak.id}
                 onClick={() => assignPeak(peak.id, inThisDay ? null : pickerDay)}
                 className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition ${
-                  inThisDay ? 'border-dusk-400/50 bg-dusk-500/15' : 'border-white/10 bg-white/4 hover:bg-white/8'
+                  inThisDay ? 'border-brand bg-brand-soft' : 'border-line bg-tint hover:bg-tint-strong'
                 }`}
               >
-                <span className="w-5 shrink-0 text-center text-xs tabular-nums text-slate-500">{peak.no}</span>
+                <span className="w-5 shrink-0 text-center text-xs tabular-nums text-muted">{peak.no}</span>
                 <span className="min-w-0 flex-1 truncate">{peak.name}</span>
-                <span className="shrink-0 text-xs tabular-nums text-slate-400">{peak.ele} m</span>
-                {otherDay && <span className="chip shrink-0 bg-white/8 text-[10px] text-slate-400">{otherDay.name}</span>}
-                {inThisDay && <IconCheck className="h-4 w-4 shrink-0 text-dusk-400" />}
+                <span className="shrink-0 text-xs tabular-nums text-muted">{peak.ele} m</span>
+                {otherDay && <span className="chip shrink-0 bg-tint-strong text-[10px] text-muted">{otherDay.name}</span>}
+                {inThisDay && <IconCheck className="h-4 w-4 shrink-0 text-brand" />}
               </button>
             )
           })}
@@ -234,9 +234,9 @@ export function Planner() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-white/4 px-2 py-1.5">
+    <div className="rounded-lg bg-tint px-2 py-1.5">
       <div className="text-sm font-semibold tabular-nums">{value}</div>
-      <div className="text-[10px] text-slate-500">{label}</div>
+      <div className="text-[10px] text-muted">{label}</div>
     </div>
   )
 }
