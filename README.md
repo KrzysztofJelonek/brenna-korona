@@ -51,7 +51,16 @@ Szczegóły, które wpływają na projekt aplikacji:
 
 **Planer trasy.** Cztery gotowe warianty przygotowane przez gminę (1, 2, 4 i 6 dni) plus własny plan: przeciągasz szczyty na kolejne dni, a aplikacja na bieżąco liczy dystans, sumę podejść i szacowany czas (reguła Naismitha z korektą Toblera). Dla każdego dnia widzisz profil wysokościowy.
 
-**Mapa.** Leaflet + OpenStreetMap z nakładką szlaków turystycznych. Markery 20 szczytów kolorowane statusem, trasa zaplanowanego dnia jako linia, kliknięcie w marker otwiera panel szczytu (zdjęcie, notatka, odhaczenie).
+**Mapa.** Leaflet + OpenStreetMap (lub OpenTopoMap) z nakładką szlaków turystycznych. Markery 20 szczytów kolorowane statusem, kliknięcie otwiera panel szczytu.
+
+Trasy z planu są rysowane wprost na mapie, a nad nią stoi **pasek dni, który jest jednocześnie legendą i filtrem**:
+
+- *Wszystkie* — każdy dzień innym kolorem, widok dopasowany do całego planu.
+- Wybrany dzień — tylko jego trasa, szczyty **ponumerowane w kolejności przejścia**, pozostałe wierzchołki przygaszone do małych kropek, widok przybliżony do tego dnia.
+- Pod mapą pasek z konkretami dnia: liczba szczytów, dystans, czas, suma podejść — z materiałów gminy tam, gdzie je podano, inaczej szacunek.
+- Bez planu mapa pokazuje podpowiedź prowadzącą do planera.
+
+Każdy dzień w planerze ma przycisk **Na mapie**, który przenosi na mapę z tym dniem już wybranym. Linie mają białe podłoże, żeby czytały się na każdym podkładzie, a nakładka szlaków PTTK jest przyciemniona, żeby nie konkurowała z trasą.
 
 ### Eksport dowodu i udostępnianie
 

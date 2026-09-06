@@ -8,9 +8,13 @@ import type { Peak } from '../../types'
 import { ElevationProfile } from './ElevationProfile'
 import { DAY_COLORS } from '../map/MapView'
 import { Sheet } from '../../ui/Sheet'
-import { IconCheck, IconMountain, IconTrash } from '../../ui/Icons'
+import { IconCheck, IconMap, IconMountain, IconTrash } from '../../ui/Icons'
 
-export function Planner() {
+interface Props {
+  onShowDayOnMap: (dayId: string) => void
+}
+
+export function Planner({ onShowDayOnMap }: Props) {
   const { plans, activePresetId, loadPreset, addDay, removeDay, renameDay, setDayDate, setDayStart, assignPeak, movePeakInDay } =
     useProgress()
   const progress = useProgress((s) => s.progress)
@@ -162,9 +166,18 @@ export function Planner() {
                       <p className="py-2 text-center text-xs text-muted">Brak szczytów w tym dniu.</p>
                     )}
 
-                    <button onClick={() => setPickerDay(day.id)} className="btn-ghost w-full !py-2 !text-xs">
-                      <IconMountain className="h-4 w-4" /> Dodaj szczyty
-                    </button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button onClick={() => setPickerDay(day.id)} className="btn-ghost !py-2 !text-xs">
+                        <IconMountain className="h-4 w-4" /> Dodaj szczyty
+                      </button>
+                      <button
+                        onClick={() => onShowDayOnMap(day.id)}
+                        disabled={dayPeaks.length === 0}
+                        className="btn-ghost !py-2 !text-xs"
+                      >
+                        <IconMap className="h-4 w-4" /> Na mapie
+                      </button>
+                    </div>
 
                     {dayPeaks.length > 0 && (
                       <>

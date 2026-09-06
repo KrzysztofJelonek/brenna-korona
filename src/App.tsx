@@ -29,6 +29,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('lista')
   const [openPeak, setOpenPeak] = useState<Peak | null>(null)
   const [geoOn, setGeoOn] = useState(false)
+  const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
   const [recording, setRecording] = useState(false)
 
   const progress = useProgress((s) => s.progress)
@@ -88,8 +89,23 @@ export default function App() {
           className={tab === 'mapa' ? 'h-[calc(100vh-13rem)] min-h-96' : ''}
         >
           {tab === 'lista' && <Checklist onOpenPeak={setOpenPeak} position={position} />}
-          {tab === 'mapa' && <MapView onOpenPeak={setOpenPeak} position={position} showPlanLines />}
-          {tab === 'plan' && <Planner />}
+          {tab === 'mapa' && (
+            <MapView
+              onOpenPeak={setOpenPeak}
+              position={position}
+              selectedDayId={selectedDayId}
+              onSelectDay={setSelectedDayId}
+              onGoToPlanner={() => setTab('plan')}
+            />
+          )}
+          {tab === 'plan' && (
+            <Planner
+              onShowDayOnMap={(dayId) => {
+                setSelectedDayId(dayId)
+                setTab('mapa')
+              }}
+            />
+          )}
           {tab === 'teren' && (
             <FieldView
               position={position}
