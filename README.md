@@ -223,9 +223,20 @@ Wdrożenie: skopiuj zawartość `dist/` na dowolny hosting statyczny (FTP, GitHu
 
 **Wymagany HTTPS** — geolokalizacja, aparat i Service Worker nie działają po HTTP (poza `localhost`).
 
+### GitHub Pages
+
+W repo jest workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), który przy każdym pushu na `main` buduje projekt i publikuje `dist/` na GitHub Pages.
+
+Żeby ruszył, trzeba raz włączyć Pages w ustawieniach repozytorium:
+**Settings → Pages → Build and deployment → Source: `GitHub Actions`**.
+
+Strona wyląduje pod `https://<użytkownik>.github.io/brenna-korona/`. Działa z podkatalogu, bo `vite.config.ts` ma `base: './'`, a wszystkie ścieżki w buildzie (assety, manifest, Service Worker) są względne. Pages daje HTTPS, więc aparat, geolokalizacja i instalacja PWA działają bez dodatkowej konfiguracji.
+
+Uwaga: dla repozytorium **prywatnego** Pages wymaga płatnego planu. Przy publicznym działa bez opłat.
+
 ### Uwaga o miejscu na dysku
 
-Repozytorium leży na zaszyfrowanym wolumenie `/mnt/l` (2 GB, wolne ~40 MB), a `node_modules` tego stacku waży ~400 MB i **tam się nie zmieści**. Symlink na `node_modules` nie wystarcza — npm go usuwa i tworzy katalog w miejscu docelowym.
+Repozytorium leży na zaszyfrowanym wolumenie `/mnt/l` (2 GB, wolne ~40 MB) — ścieżka `~/CODE/priv-brenna-korona` to tylko dowiązanie do tego samego katalogu, nie druga kopia. `node_modules` tego stacku waży ~400 MB i **tam się nie zmieści**. Symlink na `node_modules` nie wystarcza — npm go usuwa i tworzy katalog w miejscu docelowym.
 
 Działający obejście, użyte przy budowaniu tego projektu: workspace poza wolumenem, z dowiązaniami do źródeł w repo (edycja plików w repo działa na żywo):
 

@@ -13,6 +13,7 @@ export default defineConfig({
       includeAssets: ['icon.svg'],
       manifest: {
         name: 'Korona Gór Brennej',
+        lang: 'pl',
         short_name: 'Korona Brennej',
         description: 'Pomocnik uczestnika wyzwania Korona Gór Brennej 2026',
         theme_color: '#0b1120',
