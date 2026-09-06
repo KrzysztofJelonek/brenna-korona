@@ -213,7 +213,14 @@ export function InfoView({ onGoToPlanner }: Props) {
         </p>
         <p className="mt-1 text-center text-[11px] text-slate-500">
           Dzięki wsparciu sponsora aplikacja jest dostępna dla wszystkich za darmo.{' '}
-          <span className="whitespace-nowrap text-dusk-400">facelove.pl</span>
+          <a
+            href={SPONSOR.url}
+            target="_blank"
+            rel="noreferrer"
+            className="whitespace-nowrap text-dusk-400 underline"
+          >
+            {sponsorDomain}
+          </a>
         </p>
       </Section>
     </div>
@@ -329,3 +336,5 @@ function Bullet({ children }: { children: ReactNode }) {
 }
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })
+
+const sponsorDomain = SPONSOR.url.replace(/^https?:\/\//, '').replace(/\/$/, '')
