@@ -1,6 +1,6 @@
 /**
  * Informacje o wydarzeniu — wszystkie pochodzą z materiałów organizatora
- * (koronagorbrennej.pl, checklist-2026.pdf, kg-2025.pdf OPKiS Brenna).
+ * (koronagorbrennej.pl, checklist-2026.pdf, kg-2026.pdf OPKiS Brenna).
  * Aplikacja jest nieoficjalna, więc nic tu nie jest domysłem.
  */
 
@@ -12,7 +12,7 @@ export const ORGANIZER = {
   partners: 'https://www.koronagorbrennej.pl/partnerzy.php',
   news: 'https://www.koronagorbrennej.pl/aktualnosci.php',
   checklistPdf: 'https://www.koronagorbrennej.pl/assets/checklist-2026.pdf',
-  routesPdf: 'https://turysta.brenna.org.pl/uploads/gallery/kg-2025.pdf',
+  routesPdf: 'https://turysta.brenna.org.pl/uploads/gallery/kg-2026.pdf',
   facebook: 'https://www.facebook.com/KoronaGorBrennej',
   instagram: 'https://www.instagram.com/korona_gor_brennej/',
   youtube: 'https://www.youtube.com/@KoronaG%C3%B3rBrennej',

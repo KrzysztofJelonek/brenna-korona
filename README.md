@@ -60,7 +60,7 @@ Każda z tych zasad wymusiła konkretną decyzję w kodzie:
 | Szczyty leżą na oznakowanych szlakach PTTK | router preferuje szlaki znakowane (kara ×4 za pozostałe) |
 | Koronę można zdobywać wielokrotnie | brak blokad, postęp da się wyzerować |
 
-Źródła: [koronagorbrennej.pl](https://www.koronagorbrennej.pl/) · [checklist 2026 (PDF)](https://www.koronagorbrennej.pl/assets/checklist-2026.pdf) · [propozycje tras, OPKiS Brenna (PDF)](https://turysta.brenna.org.pl/uploads/gallery/kg-2025.pdf)
+Źródła: [koronagorbrennej.pl](https://www.koronagorbrennej.pl/) · [checklist 2026 (PDF)](https://www.koronagorbrennej.pl/assets/checklist-2026.pdf) · [propozycje tras, OPKiS Brenna (PDF)](https://turysta.brenna.org.pl/uploads/gallery/kg-2026.pdf)
 
 ---
 

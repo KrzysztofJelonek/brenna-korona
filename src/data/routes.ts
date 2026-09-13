@@ -1,7 +1,7 @@
 import type { RoutePreset } from '../types'
 
 /**
- * Warianty tras zaproponowane przez OPKiS Brenna (kg-2025.pdf).
+ * Warianty tras zaproponowane przez OPKiS Brenna (kg-2026.pdf).
  *
  * Pełne rozbicie na dni PDF podaje tekstowo wyłącznie dla wariantu 6-dniowego —
  * i tylko ten wariant ma tu przypisane szczyty oraz oficjalne czasy i dystanse.
