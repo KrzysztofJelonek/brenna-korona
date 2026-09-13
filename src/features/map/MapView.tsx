@@ -7,10 +7,10 @@ import { PEAKS, peakById } from '../../data/peaks'
 import { estimateDay, formatDistance, formatTime, haversine, plural } from '../../lib/geo'
 import { START_POINTS, startPointById, type StartPoint } from '../../data/startPoints'
 import { useDayRoute } from '../../lib/useDayRoute'
-import { resolveToday, type ResolvedToday } from '../../lib/todayRoute'
+import { customParkingName, resolveToday, type ResolvedToday } from '../../lib/todayRoute'
 import { elevationAt, loadGrid } from '../../lib/elevation'
 import { useProgress } from '../../store/progress'
-import type { Peak, TrackPoint } from '../../types'
+import type { CustomParking, Peak, TrackPoint } from '../../types'
 import { IconLocate, IconMountain, IconRoute, IconTrash } from '../../ui/Icons'
 
 const BRENNA_CENTER: [number, number] = [49.7175, 18.9265]
@@ -193,10 +193,15 @@ export function MapView({
   const today = useProgress((s) => s.today)
   const toggleTodayPeak = useProgress((s) => s.toggleTodayPeak)
   const setTodayParking = useProgress((s) => s.setTodayParking)
+  const customParkings = useProgress((s) => s.customParkings)
+  const addCustomParking = useProgress((s) => s.addCustomParking)
+  const updateCustomParking = useProgress((s) => s.updateCustomParking)
 
   const [map, setMap] = useState<L.Map | null>(null)
   const todayMode = selectedDayId === TODAY_ID
   const [placing, setPlacing] = useState(false)
+  /** Świeżo wskazane miejsce — otwieramy jego dymek, żeby od razu dało się wpisać nazwę. */
+  const [openParkingId, setOpenParkingId] = useState<string | null>(null)
   useEffect(() => {
     if (!todayMode) setPlacing(false)
   }, [todayMode])
@@ -216,7 +221,7 @@ export function MapView({
     [plans],
   )
 
-  const resolved = useMemo(() => resolveToday(today), [today])
+  const resolved = useMemo(() => resolveToday(today, customParkings), [today, customParkings])
   const todayDay = useMemo(
     () => ({
       id: TODAY_ID,
@@ -262,9 +267,12 @@ export function MapView({
   const placeParking = (lat: number, lon: number) => {
     setPlacing(false)
     loadGrid().then((grid) =>
-      setTodayParking({ kind: 'custom', lat, lon, ele: Math.round(elevationAt(grid, lat, lon)) }),
+      setOpenParkingId(addCustomParking({ lat, lon, ele: Math.round(elevationAt(grid, lat, lon)) })),
     )
   }
+
+  const moveParking = (id: string, lat: number, lon: number) =>
+    loadGrid().then((grid) => updateCustomParking(id, { lat, lon, ele: Math.round(elevationAt(grid, lat, lon)) }))
 
   return (
     <div className="map-shell relative h-full w-full overflow-hidden">
@@ -318,22 +326,18 @@ export function MapView({
                 eventHandlers={{ click: () => setTodayParking({ kind: 'point', id: sp.id }) }}
               />
             ))}
-            {today.parking.kind === 'custom' && (
-              <Marker
-                key="today-start-custom"
-                position={[today.parking.lat, today.parking.lon]}
-                icon={startIcon(TODAY_COLOR)}
-                zIndexOffset={600}
-                title="Własne miejsce — przeciągnij, żeby przesunąć"
-                draggable
-                eventHandlers={{
-                  dragend: (e) => {
-                    const { lat, lng } = (e.target as L.Marker).getLatLng()
-                    placeParking(lat, lng)
-                  },
-                }}
+            {/* Zapisane własne miejsca — dotknięcie wybiera i otwiera dymek z nazwą. */}
+            {customParkings.map((spot) => (
+              <CustomParkingMarker
+                key={spot.id}
+                spot={spot}
+                active={resolved.start?.id.startsWith(`custom:${spot.id}:`) ?? false}
+                autoOpen={openParkingId === spot.id}
+                onOpened={() => setOpenParkingId(null)}
+                onSelect={() => setTodayParking({ kind: 'custom', id: spot.id })}
+                onMove={(lat, lon) => moveParking(spot.id, lat, lon)}
               />
-            )}
+            ))}
             {placing && <PlaceOnClick onPlace={placeParking} />}
           </>
         ) : (
@@ -589,6 +593,7 @@ function TodayPanel({ today, placing, onPlacingChange, onOpenPeak }: TodayPanelP
   const toggleTodayLoop = useProgress((s) => s.toggleTodayLoop)
   const toggleTodayReversed = useProgress((s) => s.toggleTodayReversed)
   const clearToday = useProgress((s) => s.clearToday)
+  const customParkings = useProgress((s) => s.customParkings)
 
   const { peaks, start, loop, autoStart, canReverse } = today
   const { route: routed, loading } = useDayRoute(peaks, start, loop)
@@ -596,14 +601,22 @@ function TodayPanel({ today, placing, onPlacingChange, onOpenPeak }: TodayPanelP
   // Jeden szczyt bez parkingu to jeszcze nie trasa — nie ma skąd dokąd liczyć.
   const routable = peaks.length + (start ? 1 : 0) >= 2
 
-  const parkingValue = placing ? 'custom' : plan.parking.kind === 'point' ? plan.parking.id : plan.parking.kind
+  // Wartości listy: id punktu gminy, `custom:<id>` dla własnego miejsca, `new` dla wskazywania nowego.
+  const parkingValue = placing
+    ? 'new'
+    : plan.parking.kind === 'point'
+      ? plan.parking.id
+      : plan.parking.kind === 'custom'
+        ? `custom:${plan.parking.id}`
+        : plan.parking.kind
   const onParkingChange = (value: string) => {
-    if (value === 'custom') {
-      if (plan.parking.kind !== 'custom') onPlacingChange(true)
+    if (value === 'new') {
+      onPlacingChange(true)
       return
     }
     onPlacingChange(false)
     if (value === 'auto' || value === 'none') setTodayParking({ kind: value })
+    else if (value.startsWith('custom:')) setTodayParking({ kind: 'custom', id: value.slice('custom:'.length) })
     else setTodayParking({ kind: 'point', id: value })
   }
 
@@ -679,16 +692,21 @@ function TodayPanel({ today, placing, onPlacingChange, onOpenPeak }: TodayPanelP
           <option value="auto">
             {autoStart && start ? `Najbliższy: ${start.name}` : 'Najbliższy parking (automatycznie)'}
           </option>
-          {START_POINTS.map((sp) => (
-            <option key={sp.id} value={sp.id}>
-              {sp.name}
-            </option>
-          ))}
-          <option value="custom">
-            {plan.parking.kind === 'custom'
-              ? `Własne miejsce · ${plan.parking.ele} m n.p.m.`
-              : 'Własne miejsce — wskaż na mapie'}
-          </option>
+          <optgroup label="Parkingi gminy">
+            {START_POINTS.map((sp) => (
+              <option key={sp.id} value={sp.id}>
+                {sp.name}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Moje miejsca">
+            {customParkings.map((spot) => (
+              <option key={spot.id} value={`custom:${spot.id}`}>
+                {customParkingName(spot)} · {spot.ele} m n.p.m.
+              </option>
+            ))}
+            <option value="new">+ Nowe miejsce — wskaż na mapie</option>
+          </optgroup>
           <option value="none">Bez parkingu</option>
         </select>
         <button
@@ -720,6 +738,102 @@ function TodayPanel({ today, placing, onPlacingChange, onOpenPeak }: TodayPanelP
         </button>
       </div>
     </div>
+  )
+}
+
+interface CustomParkingMarkerProps {
+  spot: CustomParking
+  /** Miejsce ustawione jako parking na dziś. */
+  active: boolean
+  /** Otwórz dymek od razu po pojawieniu się markera. */
+  autoOpen: boolean
+  onOpened: () => void
+  onSelect: () => void
+  onMove: (lat: number, lon: number) => void
+}
+
+/**
+ * Własne miejsce na mapie. Dotknięcie wybiera je jako parking i otwiera dymek,
+ * w którym można nadać nazwę albo usunąć miejsce z listy. Marker da się przeciągnąć.
+ */
+function CustomParkingMarker({ spot, active, autoOpen, onOpened, onSelect, onMove }: CustomParkingMarkerProps) {
+  const updateCustomParking = useProgress((s) => s.updateCustomParking)
+  const removeCustomParking = useProgress((s) => s.removeCustomParking)
+  const markerRef = useRef<L.Marker | null>(null)
+  const [name, setName] = useState(spot.name)
+  useEffect(() => setName(spot.name), [spot.name])
+
+  useEffect(() => {
+    if (!autoOpen) return
+    markerRef.current?.openPopup()
+    onOpened()
+  }, [autoOpen, onOpened])
+
+  // Leaflet ustawia `title` tylko przy tworzeniu markera — po zmianie nazwy odświeżamy go sami.
+  const title = `${customParkingName(spot)} — przeciągnij, żeby przesunąć`
+  useEffect(() => {
+    markerRef.current?.getElement()?.setAttribute('title', title)
+  }, [title])
+
+  const save = () => {
+    updateCustomParking(spot.id, { name: name.trim() })
+    markerRef.current?.closePopup()
+  }
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={[spot.lat, spot.lon]}
+      icon={startIcon(TODAY_COLOR, !active)}
+      zIndexOffset={active ? 600 : 350}
+      title={title}
+      draggable
+      eventHandlers={{
+        click: onSelect,
+        dragend: (e) => {
+          const { lat, lng } = (e.target as L.Marker).getLatLng()
+          onMove(lat, lng)
+        },
+      }}
+    >
+      <Popup>
+        <form
+          className="min-w-52 space-y-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            save()
+          }}
+        >
+          <div>
+            <div className="font-semibold">{customParkingName(spot)}</div>
+            <div className="text-xs text-muted">
+              {spot.ele} m n.p.m. · {active ? 'parking na dziś' : 'własne miejsce'}
+            </div>
+          </div>
+          <input
+            className="field !py-2"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nazwa lub opis, np. pod kościołem"
+            aria-label="Nazwa miejsca"
+            maxLength={60}
+          />
+          <div className="flex gap-1.5">
+            <button type="submit" disabled={name.trim() === spot.name} className="btn-primary flex-1 !py-1.5 !text-xs">
+              Zapisz
+            </button>
+            <button
+              type="button"
+              onClick={() => removeCustomParking(spot.id)}
+              className="btn-ghost shrink-0 !px-2.5 !py-1.5 !text-xs text-warn"
+            >
+              <IconTrash className="h-4 w-4" />
+              Usuń
+            </button>
+          </div>
+        </form>
+      </Popup>
+    </Marker>
   )
 }
 

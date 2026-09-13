@@ -101,7 +101,8 @@ Przycisk **Na dziś** na pasku nad mapą przełącza mapę w tryb układania tra
 
 - **dotknięcie szczytu** dodaje go do trasy albo z niej usuwa — bez dymka, jeden wybór to jedno dotknięcie,
 - po każdym wyborze aplikacja **sama układa kolejność** i liczy przebieg po szlakach. Użytkownik wybiera zbiór szczytów, nie kolejność. Kolejność układa ta sama funkcja co w generatorze planów (najbliższy sąsiad + 2-opt, [sekcja 6](#6-generator-planów)),
-- **parking** domyślnie dobierany jest automatycznie: z ośmiu punktów gminy wygrywa ten, z którego wybrane szczyty najszybciej się przejdzie. Liczone z pełnym ułożeniem kolejności, więc z uwzględnieniem powrotu. Można też dotknąć dowolnego `P` na mapie, wybrać parking z listy, **wskazać własne miejsce** dotknięciem mapy (marker da się potem przeciągnąć, wysokość pochodzi z siatki SRTM) albo zrezygnować z parkingu,
+- **parking** domyślnie dobierany jest automatycznie: z ośmiu punktów gminy wygrywa ten, z którego wybrane szczyty najszybciej się przejdzie. Liczone z pełnym ułożeniem kolejności, więc z uwzględnieniem powrotu. Można też dotknąć dowolnego `P` na mapie, wybrać parking z listy, **wskazać własne miejsce** dotknięciem mapy albo zrezygnować z parkingu,
+- **własne miejsca** zapisują się na liście „Moje miejsca” i zostają na mapie na kolejne dni. Wysokość pochodzi z siatki SRTM, marker da się przeciągnąć. Dotknięcie markera wybiera miejsce i otwiera dymek z polem nazwy (np. „pod kościołem”) oraz przyciskami **Zapisz** i **Usuń**. Świeżo wskazane miejsce otwiera dymek samo. Usunięcie miejsca wybranego na dziś wraca do automatycznego doboru parkingu,
 - **Powrót / Bez powrotu** — z powrotem optymalizowana jest zamknięta pętla, bez powrotu droga od parkingu do ostatniego szczytu,
 - **⇄** odwraca kierunek przejścia. Działa dla pętli i dla trasy bez parkingu; dla trasy bez powrotu jest zablokowany, bo zmieniłby miejsce startu. Dystans się nie zmienia, ale czas i podejścia tak: Kotarz–Hyrca–Beskidek bez parkingu to 1:09 h i ↑ 202 m w jedną stronę, a 0:51 h i ↑ 70 m w drugą,
 - panel pod mapą: dystans, czas, podejścia i kolejność przejścia. Dotknięcie nazwy otwiera panel szczytu, × usuwa szczyt z trasy.
@@ -559,9 +560,16 @@ interface DayPlan {
 interface TodayPlan {         // localStorage — trasa na dziś
   peakIds: string[]           // zbiór; kolejność liczona za każdym razem
   parking: { kind: 'auto' } | { kind: 'none' } | { kind: 'point'; id: string }
-         | { kind: 'custom'; lat: number; lon: number; ele: number }
+         | { kind: 'custom'; id: string }  // id z CustomParking
   loop: boolean               // powrót na parking
   reversed: boolean           // kierunek przejścia
+}
+
+interface CustomParking {     // localStorage — własne miejsca wskazane na mapie
+  id: string
+  name: string                // pusty → „Własne miejsce”
+  lat: number; lon: number
+  ele: number                 // z siatki SRTM
 }
 
 interface StoredPhoto {       // IndexedDB
@@ -577,7 +585,7 @@ interface StoredPhoto {       // IndexedDB
 
 | Co | Gdzie | Dlaczego |
 |---|---|---|
-| postęp, plan, trasa na dziś, ustawienia | **localStorage** (`zustand/persist`) | kilkanaście kB, synchroniczny odczyt przy starcie |
+| postęp, plan, trasa na dziś, własne miejsca, ustawienia | **localStorage** (`zustand/persist`, wersja 2 z migracją) | kilkanaście kB, synchroniczny odczyt przy starcie |
 | zdjęcia | **IndexedDB** (`idb`) | localStorage ma limit ~5 MB i trzyma tylko stringi; 20 zdjęć × ~300 KB ≈ 6 MB |
 | trasy | **cache w pamięci** | wynik deterministyczny, przeliczalny w każdej chwili |
 
@@ -717,6 +725,7 @@ Sprawdzone tą drogą:
 | Każdy plik wskazany w `peakInfo.json` istnieje w `dist/peaks` | ✅ |
 | Trasa na dziś: 20 szczytów + 8 parkingów na mapie, wybór dotknięciem markera, przeliczenie i nowa kolejność po każdym wyborze | ✅ |
 | Parking: automatyczny, dotknięcie `P`, lista, własne miejsce dotknięciem mapy (wysokość z SRTM, marker przeciągalny), bez parkingu | ✅ |
+| Własne miejsca: migracja zapisu v1 (jedno miejsce w parkingu) do listy; dotknięcie markera otwiera dymek; zapis nazwy trafia na listę i do podpowiedzi markera; nowe miejsce otwiera dymek samo i zostaje wybrane; Usuń wraca do parkingu automatycznego; wybór z listy „Moje miejsca”; bez poziomego przewijania przy 390 px | ✅ |
 | Powrót / bez powrotu; odwrócenie kierunku zablokowane dla trasy bez powrotu; × usuwa szczyt z trasy | ✅ |
 | Wybór na dziś zapisany w `localStorage`, wyjście z trybu przywraca pasek dni | ✅ |
 | Panel trasy na dziś przy 390 px: bez poziomego przewijania, kontrolka warstw nie wchodzi pod pasek | ✅ |
@@ -752,6 +761,8 @@ Sam zapis GPX w [`gpx.ts`](src/lib/gpx.ts) jest poprawny: GPX 1.1, 20 szczytów 
 ### Pozostałe
 
 - **Profil wysokości w planerze rysuje wierzchołki, nie trasę.** [`ElevationProfile`](src/features/planner/ElevationProfile.tsx) rozkłada wysokości szczytów wzdłuż szacowanego dystansu. Od czasu wprowadzenia routingu prawdziwy profil SRTM jest już dostępny w `dayRoute` — komponent go po prostu jeszcze nie używa. Komentarz w pliku jest w tym miejscu nieaktualny.
+- **Trasa na dziś i własne miejsca nie wchodzą do backupu** — plik eksportu niesie tylko postęp, zdjęcia i plan dni.
+- **Dymek własnego miejsca nie jest sprawdzony na urządzeniu.** Headless nie tyka `requestAnimationFrame`, więc nie widać w nim, czy mapa przesuwa się, gdy dymek przy krawędzi ekranu wystaje poza widok, ani czy wpisywanie `+`/`-` w polu nazwy nie zoomuje mapy. Z kodu Leaflet wynika, że nie powinno: skróty klawiszowe mapy odpinają się, gdy fokus przechodzi do pola.
 - **Trasa na dziś układa kolejność po linii prostej**, tak jak generator, a nie po czasie przejścia po szlakach. Gdy szczyty leżą po dwóch stronach doliny, wybrana kolejność po szlakach nie musi być najkrótsza. Kolejności nie da się też przestawić ręcznie, a trasy — zapisać jako dnia planu ani wyeksportować do GPX.
 - **Podział szczytów w wariantach 1-, 2- i 4-dniowym jest mój**, nie gminy. Oznaczone w UI, ale warto by odczytać go z map w PDF.
 - **Zebrzydka** — rozbieżność wysokości opisana w [3.4](#34-rozbieżności-wymagające-potwierdzenia), do potwierdzenia w terenie.

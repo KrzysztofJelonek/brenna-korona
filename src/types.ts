@@ -63,12 +63,23 @@ export interface DayPlan {
   officialTime?: string
 }
 
-/** Parking trasy „na dziś”: dobrany automatycznie, z listy gminy, wskazany na mapie albo żaden. */
+/** Własne miejsce parkowania wskazane na mapie — zapisane, żeby dało się do niego wracać. */
+export interface CustomParking {
+  id: string
+  /** Nazwa lub opis wpisany przez użytkownika; pusty — pokazujemy „Własne miejsce”. */
+  name: string
+  lat: number
+  lon: number
+  /** Wysokość z siatki SRTM. */
+  ele: number
+}
+
+/** Parking trasy „na dziś”: dobrany automatycznie, z listy gminy, jedno z własnych miejsc albo żaden. */
 export type TodayParking =
   | { kind: 'auto' }
   | { kind: 'none' }
   | { kind: 'point'; id: string }
-  | { kind: 'custom'; lat: number; lon: number; ele: number }
+  | { kind: 'custom'; id: string }
 
 /**
  * Trasa ułożona na mapie na bieżący dzień. Trzyma tylko wybór użytkownika —

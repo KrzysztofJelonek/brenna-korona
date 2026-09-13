@@ -1,6 +1,6 @@
 import { peakById } from '../data/peaks'
 import { START_POINTS, startPointById, type StartPoint } from '../data/startPoints'
-import type { Peak, TodayParking, TodayPlan } from '../types'
+import type { CustomParking, Peak, TodayParking, TodayPlan } from '../types'
 import { estimateDay } from './geo'
 import { orderPeaks } from './planGenerator'
 
@@ -25,10 +25,13 @@ export interface ResolvedToday {
   canReverse: boolean
 }
 
-export const customStartPoint = (p: { lat: number; lon: number; ele: number }): StartPoint => ({
-  // id z współrzędnymi: przesunięcie markera to inna trasa w cache'u
-  id: `custom:${p.lat.toFixed(5)},${p.lon.toFixed(5)}`,
-  name: 'Własne miejsce',
+/** Nazwa własnego miejsca do pokazania — bez wpisanej zostaje ogólna. */
+export const customParkingName = (p: CustomParking) => p.name.trim() || 'Własne miejsce'
+
+export const customStartPoint = (p: CustomParking): StartPoint => ({
+  // id ze współrzędnymi: przesunięcie markera to inna trasa w cache'u
+  id: `custom:${p.id}:${p.lat.toFixed(5)},${p.lon.toFixed(5)}`,
+  name: customParkingName(p),
   detail: 'Wskazane na mapie',
   lat: p.lat,
   lon: p.lon,
@@ -50,13 +53,16 @@ function bestStart(peaks: Peak[], loop: boolean): { start: StartPoint; peaks: Pe
   return best
 }
 
-function explicitStart(parking: TodayParking): StartPoint | undefined {
+function explicitStart(parking: TodayParking, customParkings: CustomParking[]): StartPoint | undefined {
   if (parking.kind === 'point') return startPointById(parking.id)
-  if (parking.kind === 'custom') return customStartPoint(parking)
+  if (parking.kind === 'custom') {
+    const spot = customParkings.find((p) => p.id === parking.id)
+    return spot && customStartPoint(spot)
+  }
   return undefined
 }
 
-export function resolveToday(plan: TodayPlan): ResolvedToday {
+export function resolveToday(plan: TodayPlan, customParkings: CustomParking[]): ResolvedToday {
   const picked = plan.peakIds.map(peakById).filter((p): p is Peak => Boolean(p))
   const autoStart = plan.parking.kind === 'auto'
 
@@ -66,7 +72,7 @@ export function resolveToday(plan: TodayPlan): ResolvedToday {
     if (picked.length > 0) ({ start, peaks } = bestStart(picked, plan.loop))
     else peaks = []
   } else {
-    start = explicitStart(plan.parking)
+    start = explicitStart(plan.parking, customParkings)
     peaks = orderPeaks(picked, start, plan.loop)
   }
 

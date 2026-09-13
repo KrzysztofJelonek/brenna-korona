@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { AscentMode, DayPlan, PeakProgress, TodayParking, TodayPlan } from '../types'
+import type { AscentMode, CustomParking, DayPlan, PeakProgress, TodayParking, TodayPlan } from '../types'
 import { PEAKS } from '../data/peaks'
 
 interface ProgressState {
@@ -9,12 +9,18 @@ interface ProgressState {
   activePresetId: string | null
   backupReminderAt: number
   today: TodayPlan
+  customParkings: CustomParking[]
 
   toggleTodayPeak: (peakId: string) => void
   setTodayParking: (parking: TodayParking) => void
   toggleTodayLoop: () => void
   toggleTodayReversed: () => void
   clearToday: () => void
+
+  /** Zapisuje nowe własne miejsce i od razu ustawia je jako parking na dziś; zwraca jego id. */
+  addCustomParking: (spot: Omit<CustomParking, 'id' | 'name'>) => string
+  updateCustomParking: (id: string, patch: Partial<Omit<CustomParking, 'id'>>) => void
+  removeCustomParking: (id: string) => void
 
   toggleDone: (peakId: string) => void
   setStatus: (peakId: string, status: PeakProgress['status']) => void
@@ -60,6 +66,9 @@ const emptyToday = (): TodayPlan => ({ peakIds: [], parking: { kind: 'auto' }, l
 let dayCounter = 0
 const nextDayId = () => `day-${Date.now()}-${dayCounter++}`
 
+let parkingCounter = 0
+const nextParkingId = () => `parking-${Date.now()}-${parkingCounter++}`
+
 export const useProgress = create<ProgressState>()(
   persist(
     (set) => ({
@@ -68,6 +77,7 @@ export const useProgress = create<ProgressState>()(
       activePresetId: null,
       backupReminderAt: 0,
       today: emptyToday(),
+      customParkings: [],
 
       toggleTodayPeak: (peakId) =>
         set((s) => {
@@ -84,6 +94,28 @@ export const useProgress = create<ProgressState>()(
 
       // Parking i powrót zostają — to raczej stały zwyczaj niż wybór na jeden dzień.
       clearToday: () => set((s) => ({ today: { ...s.today, peakIds: [], reversed: false } })),
+
+      addCustomParking: (spot) => {
+        const id = nextParkingId()
+        set((s) => ({
+          customParkings: [...s.customParkings, { ...spot, id, name: '' }],
+          today: { ...s.today, parking: { kind: 'custom', id } },
+        }))
+        return id
+      },
+
+      updateCustomParking: (id, patch) =>
+        set((s) => ({ customParkings: s.customParkings.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
+
+      // Usunięcie miejsca wybranego na dziś wraca do automatycznego doboru parkingu.
+      removeCustomParking: (id) =>
+        set((s) => ({
+          customParkings: s.customParkings.filter((p) => p.id !== id),
+          today:
+            s.today.parking.kind === 'custom' && s.today.parking.id === id
+              ? { ...s.today, parking: { kind: 'auto' } }
+              : s.today,
+        })),
 
       toggleDone: (peakId) =>
         set((s) =>
@@ -224,9 +256,36 @@ export const useProgress = create<ProgressState>()(
         set({ progress: data.progress, plans: data.plans, activePresetId: null }),
 
       resetAll: () =>
-        set({ progress: {}, plans: [], activePresetId: null, backupReminderAt: 0, today: emptyToday() }),
+        set({
+          progress: {},
+          plans: [],
+          activePresetId: null,
+          backupReminderAt: 0,
+          today: emptyToday(),
+          customParkings: [],
+        }),
     }),
-    { name: 'kgb-progress', version: 1 },
+    {
+      name: 'kgb-progress',
+      version: 2,
+      migrate: (persisted, version) => {
+        const state = persisted as ProgressState
+        // v1 trzymała jedno własne miejsce wprost w parkingu na dziś — w v2 staje się pierwszym wpisem listy.
+        const parking = state.today?.parking as
+          | TodayParking
+          | { kind: 'custom'; lat: number; lon: number; ele: number }
+          | undefined
+        if (version < 2 && parking?.kind === 'custom' && 'lat' in parking) {
+          const id = nextParkingId()
+          return {
+            ...state,
+            customParkings: [{ id, name: '', lat: parking.lat, lon: parking.lon, ele: parking.ele }],
+            today: { ...state.today, parking: { kind: 'custom', id } },
+          }
+        }
+        return state
+      },
+    },
   ),
 )
 
