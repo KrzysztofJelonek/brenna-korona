@@ -72,11 +72,11 @@ function pickStart(group: Peak[]): StartPoint {
   return best
 }
 
-/** Najbliższy sąsiad od parkingu, potem 2-opt na zamkniętej pętli. */
-function order(group: Peak[], start: StartPoint): Peak[] {
+/** Najbliższy sąsiad od punktu `from`. */
+function nearestNeighbour(group: Peak[], from: { lat: number; lon: number }): Peak[] {
   const left = [...group]
   const route: Peak[] = []
-  let cur: { lat: number; lon: number } = start
+  let cur = from
   while (left.length) {
     let bi = 0
     let bd = Infinity
@@ -90,12 +90,28 @@ function order(group: Peak[], start: StartPoint): Peak[] {
     cur = left[bi]
     route.push(left.splice(bi, 1)[0])
   }
+  return route
+}
 
-  const loopLength = (r: Peak[]) => {
-    let total = dist(start, r[0])
+/**
+ * Kolejność przejścia: najbliższy sąsiad, potem 2-opt.
+ *
+ * Z parkingiem i powrotem optymalizuje zamkniętą pętlę, z parkingiem bez powrotu —
+ * drogę od parkingu do ostatniego szczytu. Bez parkingu nie wiadomo, skąd zacząć,
+ * więc najbliższego sąsiada puszczamy od każdego szczytu i bierzemy najkrótszy wynik.
+ */
+export function orderPeaks(group: Peak[], start?: { lat: number; lon: number }, loop = true): Peak[] {
+  if (group.length < 2) return [...group]
+
+  const length = (r: Peak[]) => {
+    let total = start ? dist(start, r[0]) : 0
     for (let i = 1; i < r.length; i++) total += dist(r[i - 1], r[i])
-    return total + dist(r[r.length - 1], start)
+    return start && loop ? total + dist(r[r.length - 1], start) : total
   }
+
+  let route = start
+    ? nearestNeighbour(group, start)
+    : group.map((p) => nearestNeighbour(group, p)).reduce((a, b) => (length(b) < length(a) ? b : a))
 
   let improved = true
   let guard = 0
@@ -104,8 +120,8 @@ function order(group: Peak[], start: StartPoint): Peak[] {
     for (let i = 0; i < route.length - 1; i++) {
       for (let j = i + 1; j < route.length; j++) {
         const candidate = [...route.slice(0, i), ...route.slice(i, j + 1).reverse(), ...route.slice(j + 1)]
-        if (loopLength(candidate) < loopLength(route) - 1) {
-          route.splice(0, route.length, ...candidate)
+        if (length(candidate) < length(route) - 1) {
+          route = candidate
           improved = true
         }
       }
@@ -116,7 +132,7 @@ function order(group: Peak[], start: StartPoint): Peak[] {
 
 const timeOf = (group: Peak[]) => {
   const sp = pickStart(group)
-  return estimateDay(order(group, sp), { start: sp, loop: true }).timeH
+  return estimateDay(orderPeaks(group, sp), { start: sp, loop: true }).timeH
 }
 
 /** Przesuwa pojedyncze szczyty z najcięższego dnia do lżejszego, jeśli to skraca najdłuższy dzień. */
@@ -180,7 +196,7 @@ export function generatePlan(dayCount: number): GeneratedPlan {
 
   const days = groups.map((group, i): GeneratedDay => {
     const start = pickStart(group)
-    const peaks = order(group, start)
+    const peaks = orderPeaks(group, start)
     const stats = estimateDay(peaks, { start, loop: true })
     totalKm += stats.distanceKm
     totalAscentM += stats.ascentM

@@ -9,8 +9,8 @@ Bez backendu, bez kont, bez śledzenia. Wszystkie dane użytkownika zostają w j
 | | |
 |---|---|
 | Stack | Vite · React · TypeScript · Tailwind v4 · Leaflet · zustand · idb · exifr · Framer Motion |
-| Kod | 35 plików źródłowych, ~5 100 linii |
-| Bundle startowy | 101 KB gzip |
+| Kod | 36 plików źródłowych, ~5 600 linii |
+| Bundle startowy | 104 KB gzip |
 | Pełny payload offline | 2,1 MB (17 plików w precache) + zdjęcia szczytów zapisywane przy obejrzeniu |
 | Autor | Krzysztof Jelonek · sponsor: FaceLove® z Jaworza |
 
@@ -92,6 +92,21 @@ Nad mapą **pasek dni pełniący jednocześnie rolę legendy i filtru**:
 - wybrany dzień — tylko jego trasa, szczyty ponumerowane w kolejności przejścia, pozostałe przygaszone do małych kropek,
 - marker `P` w miejscu startu, trasa domknięta do niego przy trybie pętli,
 - pasek pod mapą: liczba szczytów, dystans, czas, suma podejść.
+
+Kontrolka warstw siedzi w prawym górnym rogu, pod paskiem dni — dół mapy zajmuje panel trasy.
+
+#### Trasa na dziś
+
+Przycisk **Na dziś** na pasku nad mapą przełącza mapę w tryb układania trasy na bieżący dzień, bez zakładania planu:
+
+- **dotknięcie szczytu** dodaje go do trasy albo z niej usuwa — bez dymka, jeden wybór to jedno dotknięcie,
+- po każdym wyborze aplikacja **sama układa kolejność** i liczy przebieg po szlakach. Użytkownik wybiera zbiór szczytów, nie kolejność. Kolejność układa ta sama funkcja co w generatorze planów (najbliższy sąsiad + 2-opt, [sekcja 6](#6-generator-planów)),
+- **parking** domyślnie dobierany jest automatycznie: z ośmiu punktów gminy wygrywa ten, z którego wybrane szczyty najszybciej się przejdzie. Liczone z pełnym ułożeniem kolejności, więc z uwzględnieniem powrotu. Można też dotknąć dowolnego `P` na mapie, wybrać parking z listy, **wskazać własne miejsce** dotknięciem mapy (marker da się potem przeciągnąć, wysokość pochodzi z siatki SRTM) albo zrezygnować z parkingu,
+- **Powrót / Bez powrotu** — z powrotem optymalizowana jest zamknięta pętla, bez powrotu droga od parkingu do ostatniego szczytu,
+- **⇄** odwraca kierunek przejścia. Działa dla pętli i dla trasy bez parkingu; dla trasy bez powrotu jest zablokowany, bo zmieniłby miejsce startu. Dystans się nie zmienia, ale czas i podejścia tak: Kotarz–Hyrca–Beskidek bez parkingu to 1:09 h i ↑ 202 m w jedną stronę, a 0:51 h i ↑ 70 m w drugą,
+- panel pod mapą: dystans, czas, podejścia i kolejność przejścia. Dotknięcie nazwy otwiera panel szczytu, × usuwa szczyt z trasy.
+
+Wybór zapisuje się w `localStorage` i nie zmienia statusów szczytów ani planu dni. Wyczyszczenie listy zostawia parking i ustawienie powrotu, bo to raczej stały zwyczaj niż wybór na jeden dzień.
 
 ### Plan
 
@@ -348,7 +363,9 @@ Geometria zapisywana jest **delta-kodowaniem na siatce 1e-5 stopnia (~1 m)**: pi
 
 **6. Sklejenie dnia** — [`dayRoute.ts`](src/lib/dayRoute.ts) łączy odcinki w jedną polilinię, sumuje długości, liczy profil i czas. Gdy któregoś odcinka nie da się poprowadzić po sieci, ten jeden odcinek spada na linię prostą z dawnym mnożnikiem, a wynik niesie licznik `straightLegs` — UI pokazuje, ile odcinków tak potraktowano, zamiast udawać, że wszystko się udało.
 
-**7. Cache i wątek** — [`useDayRoute.ts`](src/lib/useDayRoute.ts) trzyma wyniki w cache'u modułowym pod kluczem `(parking, pętla, kolejność szczytów)` i liczy poza ścieżką renderowania. Dla planu wielodniowego dni liczone są **po kolei, nie równolegle** — sześć Dijkstr naraz zablokowałoby wątek na dobrą sekundę. Do czasu policzenia mapa rysuje przebieg orientacyjny linią kropkowaną, a paski pokazują „liczę trasę…".
+**7. Cache i wątek** — [`useDayRoute.ts`](src/lib/useDayRoute.ts) trzyma wyniki w cache'u modułowym pod kluczem `(parking, pętla, kolejność szczytów)` i liczy poza ścieżką renderowania. Dla planu wielodniowego dni liczone są **po kolei, nie równolegle** — sześć Dijkstr naraz zablokowałoby wątek na dobrą sekundę. Do czasu policzenia mapa rysuje przebieg orientacyjny linią kropkowaną, a paski pokazują „liczę trasę…". Kiedy pasek i linia na mapie proszą o tę samą trasę naraz, dzielą jedno liczenie.
+
+Niżej, w [`dayRoute.ts`](src/lib/dayRoute.ts), jest drugi cache: **pojedynczych odcinków**, pod kluczem współrzędnych obu końców. Trasa na dziś przelicza się po każdym dotknięciu szczytu, a dołożenie szczytu zmienia zwykle jeden–dwa odcinki. Zmierzone: trzeci szczyt dolicza się w 5 ms (zimny odcinek to ok. 15 ms), a odwrócenie kierunku zajmuje 0 ms. Sieć jest nieskierowana, więc odcinek B→A to po prostu odwrócony A→B.
 
 ### Dlaczego kara ×4
 
@@ -476,6 +493,7 @@ korona-gor-brennej/
     │   ├── dayRoute.ts            # sklejenie dnia: dystans, podejścia, czas
     │   ├── useDayRoute.ts         # cache i liczenie poza renderem
     │   ├── planGenerator.ts       # k-means + 2-opt + wyrównanie dni
+    │   ├── todayRoute.ts          # trasa na dziś: parking, kolejność, kierunek
     │   ├── photo.ts               # kompresja canvas→WebP, EXIF
     │   ├── gpx.ts                 # zapis GPX 1.1
     │   └── download.ts
@@ -484,7 +502,7 @@ korona-gor-brennej/
     │   └── media.ts               # idb → IndexedDB (zdjęcia)
     ├── features/
     │   ├── checklist/             # Checklist, PeakCard, PeakSheet, PeakInfo
-    │   ├── map/                   # MapView + DayTrack + DaySummary
+    │   ├── map/                   # MapView + DayTrack + DaySummary + TodayPanel
     │   ├── planner/               # Planner, ElevationProfile
     │   ├── export/                # ExportView, collage, backup
     │   ├── field/                 # FieldView, useGeolocation
@@ -538,6 +556,14 @@ interface DayPlan {
   officialTime?: string
 }
 
+interface TodayPlan {         // localStorage — trasa na dziś
+  peakIds: string[]           // zbiór; kolejność liczona za każdym razem
+  parking: { kind: 'auto' } | { kind: 'none' } | { kind: 'point'; id: string }
+         | { kind: 'custom'; lat: number; lon: number; ele: number }
+  loop: boolean               // powrót na parking
+  reversed: boolean           // kierunek przejścia
+}
+
 interface StoredPhoto {       // IndexedDB
   id: string; peakId: string
   blob: Blob                  // WebP po kompresji
@@ -551,7 +577,7 @@ interface StoredPhoto {       // IndexedDB
 
 | Co | Gdzie | Dlaczego |
 |---|---|---|
-| postęp, plan, ustawienia | **localStorage** (`zustand/persist`) | kilkanaście kB, synchroniczny odczyt przy starcie |
+| postęp, plan, trasa na dziś, ustawienia | **localStorage** (`zustand/persist`) | kilkanaście kB, synchroniczny odczyt przy starcie |
 | zdjęcia | **IndexedDB** (`idb`) | localStorage ma limit ~5 MB i trzyma tylko stringi; 20 zdjęć × ~300 KB ≈ 6 MB |
 | trasy | **cache w pamięci** | wynik deterministyczny, przeliczalny w każdej chwili |
 
@@ -561,8 +587,8 @@ Wpychanie zdjęć do localStorage, choćby jako base64, to najczęstszy błąd w
 
 | Chunk | Rozmiar | gzip | Kiedy się ładuje |
 |---|---|---|---|
-| `index` | 302 KB | **101 KB** | start |
-| `index.css` | 51 KB | 14 KB | start |
+| `index` | 310 KB | **104 KB** | start |
+| `index.css` | 56 KB | 15 KB | start |
 | `map` (Leaflet) | 299 KB | 91 KB | zakładka Mapa |
 | `trails` | 648 KB | 229 KB | pierwsze liczenie trasy |
 | `elevation` | 112 KB | 39 KB | pierwsze liczenie trasy |
@@ -711,6 +737,12 @@ Sprawdzone tą drogą:
 | Podgląd: autor i licencja widoczne, strzałka przełącza zdjęcie, Escape zamyka podgląd, a nie panel | ✅ |
 | Otwarcie panelu szczytu: zero zapytań do obcych domen | ✅ |
 | Każdy plik wskazany w `peakInfo.json` istnieje w `dist/peaks` | ✅ |
+| Trasa na dziś: 20 szczytów + 8 parkingów na mapie, wybór dotknięciem markera, przeliczenie i nowa kolejność po każdym wyborze | ✅ |
+| Parking: automatyczny, dotknięcie `P`, lista, własne miejsce dotknięciem mapy (wysokość z SRTM, marker przeciągalny), bez parkingu | ✅ |
+| Powrót / bez powrotu; odwrócenie kierunku zablokowane dla trasy bez powrotu; × usuwa szczyt z trasy | ✅ |
+| Wybór na dziś zapisany w `localStorage`, wyjście z trybu przywraca pasek dni | ✅ |
+| Panel trasy na dziś przy 390 px: bez poziomego przewijania, kontrolka warstw nie wchodzi pod pasek | ✅ |
+| Logika (jednorazowy skrypt w Node przez esbuild): generator po wydzieleniu `orderPeaks` nadal daje 20 szczytów dla 1–8 dni; automatyczny parking, odwracanie, własny parking; cache odcinków | ✅ |
 | `tsc -b` bez błędów, `vite build` przechodzi | ✅ |
 
 ### Ograniczenia tej metody
@@ -742,6 +774,7 @@ Sam zapis GPX w [`gpx.ts`](src/lib/gpx.ts) jest poprawny: GPX 1.1, 20 szczytów 
 ### Pozostałe
 
 - **Profil wysokości w planerze rysuje wierzchołki, nie trasę.** [`ElevationProfile`](src/features/planner/ElevationProfile.tsx) rozkłada wysokości szczytów wzdłuż szacowanego dystansu. Od czasu wprowadzenia routingu prawdziwy profil SRTM jest już dostępny w `dayRoute` — komponent go po prostu jeszcze nie używa. Komentarz w pliku jest w tym miejscu nieaktualny.
+- **Trasa na dziś układa kolejność po linii prostej**, tak jak generator, a nie po czasie przejścia po szlakach. Gdy szczyty leżą po dwóch stronach doliny, wybrana kolejność po szlakach nie musi być najkrótsza. Kolejności nie da się też przestawić ręcznie, a trasy — zapisać jako dnia planu ani wyeksportować do GPX.
 - **Podział szczytów w wariantach 1-, 2- i 4-dniowym jest mój**, nie gminy. Oznaczone w UI, ale warto by odczytać go z map w PDF.
 - **Zebrzydka** — rozbieżność wysokości opisana w [3.4](#34-rozbieżności-wymagające-potwierdzenia), do potwierdzenia w terenie.
 - **Dzień VI wariantu gminy** różni się od trasy policzonej po szlakach o ~30%, bo gmina daje tam wybór drogi. To ograniczenie z założenia, nie usterka.

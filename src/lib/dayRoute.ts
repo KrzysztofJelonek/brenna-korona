@@ -26,6 +26,27 @@ export interface DayRoute {
   routed: boolean
 }
 
+/**
+ * Cache pojedynczych odcinków. Trasa „na dziś” przelicza się po każdym dotknięciu
+ * szczytu, a dołożenie jednego szczytu zmienia zwykle jeden–dwa odcinki — reszta
+ * nie musi drugi raz przechodzić przez Dijkstrę. Sieć jest nieskierowana, więc
+ * odcinek B→A to odwrócony A→B (odwrócenie kierunku pętli nic nie liczy).
+ */
+const legCache = new Map<string, Promise<RouteLeg | null>>()
+const pointKey = (p: LatLon) => `${p.lat.toFixed(5)},${p.lon.toFixed(5)}`
+
+function cachedLeg(from: LatLon, to: LatLon): Promise<RouteLeg | null> {
+  const forward = `${pointKey(from)}>${pointKey(to)}`
+  const hit = legCache.get(forward)
+  if (hit) return hit
+  const backward = legCache.get(`${pointKey(to)}>${pointKey(from)}`)
+  const leg = backward
+    ? backward.then((l) => l && { ...l, points: [...l.points].reverse() })
+    : route(from, to)
+  legCache.set(forward, leg)
+  return leg
+}
+
 export async function computeDayRoute(
   peaks: Peak[],
   start: StartPoint | undefined,
@@ -45,7 +66,7 @@ export async function computeDayRoute(
   let straightLegs = 0
 
   for (let i = 1; i < stops.length; i++) {
-    const leg = await route(stops[i - 1], stops[i])
+    const leg = await cachedLeg(stops[i - 1], stops[i])
     if (leg && leg.points.length > 1) {
       legs.push(leg)
       distance += leg.distance

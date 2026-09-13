@@ -230,6 +230,10 @@
     filter: brightness(0.72) saturate(0.8) hue-rotate(65deg) contrast(1.05) invert(0.03);
   }
 }
+/* Kontrolki u góry mapy schodzą pod pasek dni — dół zajmuje panel trasy. */
+.map-shell .leaflet-top {
+  top: 3.75rem;
+}
 .leaflet-control-attribution {
   background: color-mix(in srgb, var(--s-surface) 88%, transparent) !important;
   color: var(--s-muted) !important;

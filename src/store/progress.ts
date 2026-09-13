@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { AscentMode, DayPlan, PeakProgress } from '../types'
+import type { AscentMode, DayPlan, PeakProgress, TodayParking, TodayPlan } from '../types'
 import { PEAKS } from '../data/peaks'
 
 interface ProgressState {
@@ -8,6 +8,13 @@ interface ProgressState {
   plans: DayPlan[]
   activePresetId: string | null
   backupReminderAt: number
+  today: TodayPlan
+
+  toggleTodayPeak: (peakId: string) => void
+  setTodayParking: (parking: TodayParking) => void
+  toggleTodayLoop: () => void
+  toggleTodayReversed: () => void
+  clearToday: () => void
 
   toggleDone: (peakId: string) => void
   setStatus: (peakId: string, status: PeakProgress['status']) => void
@@ -48,6 +55,8 @@ const withPeak = (
   },
 })
 
+const emptyToday = (): TodayPlan => ({ peakIds: [], parking: { kind: 'auto' }, loop: true, reversed: false })
+
 let dayCounter = 0
 const nextDayId = () => `day-${Date.now()}-${dayCounter++}`
 
@@ -58,6 +67,23 @@ export const useProgress = create<ProgressState>()(
       plans: [],
       activePresetId: null,
       backupReminderAt: 0,
+      today: emptyToday(),
+
+      toggleTodayPeak: (peakId) =>
+        set((s) => {
+          const has = s.today.peakIds.includes(peakId)
+          const peakIds = has ? s.today.peakIds.filter((id) => id !== peakId) : [...s.today.peakIds, peakId]
+          return { today: { ...s.today, peakIds } }
+        }),
+
+      setTodayParking: (parking) => set((s) => ({ today: { ...s.today, parking } })),
+
+      toggleTodayLoop: () => set((s) => ({ today: { ...s.today, loop: !s.today.loop } })),
+
+      toggleTodayReversed: () => set((s) => ({ today: { ...s.today, reversed: !s.today.reversed } })),
+
+      // Parking i powrót zostają — to raczej stały zwyczaj niż wybór na jeden dzień.
+      clearToday: () => set((s) => ({ today: { ...s.today, peakIds: [], reversed: false } })),
 
       toggleDone: (peakId) =>
         set((s) =>
@@ -197,7 +223,8 @@ export const useProgress = create<ProgressState>()(
       replaceState: (data) =>
         set({ progress: data.progress, plans: data.plans, activePresetId: null }),
 
-      resetAll: () => set({ progress: {}, plans: [], activePresetId: null, backupReminderAt: 0 }),
+      resetAll: () =>
+        set({ progress: {}, plans: [], activePresetId: null, backupReminderAt: 0, today: emptyToday() }),
     }),
     { name: 'kgb-progress', version: 1 },
   ),

@@ -63,6 +63,26 @@ export interface DayPlan {
   officialTime?: string
 }
 
+/** Parking trasy „na dziś”: dobrany automatycznie, z listy gminy, wskazany na mapie albo żaden. */
+export type TodayParking =
+  | { kind: 'auto' }
+  | { kind: 'none' }
+  | { kind: 'point'; id: string }
+  | { kind: 'custom'; lat: number; lon: number; ele: number }
+
+/**
+ * Trasa ułożona na mapie na bieżący dzień. Trzyma tylko wybór użytkownika —
+ * kolejność przejścia i przebieg liczone są z niego za każdym razem.
+ */
+export interface TodayPlan {
+  peakIds: string[]
+  parking: TodayParking
+  /** Powrót na parking; bez parkingu nie ma znaczenia. */
+  loop: boolean
+  /** Przejście ułożonej kolejności w przeciwnym kierunku. */
+  reversed: boolean
+}
+
 export interface RoutePreset {
   id: string
   name: string

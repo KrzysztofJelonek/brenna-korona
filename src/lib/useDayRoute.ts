@@ -13,8 +13,24 @@ import { computeDayRoute, type DayRoute } from './dayRoute'
 
 const cache = new Map<string, DayRoute | null>()
 
+/** Trwające liczenia — pasek i linia na mapie proszą o tę samą trasę naraz. */
+const inflight = new Map<string, Promise<DayRoute | null>>()
+
 const keyOf = (peaks: Peak[], start: StartPoint | undefined, loop: boolean) =>
   `${start?.id ?? '-'}|${loop ? 'L' : 'P'}|${peaks.map((p) => p.id).join(',')}`
+
+function computeOnce(key: string, peaks: Peak[], start: StartPoint | undefined, loop: boolean) {
+  let job = inflight.get(key)
+  if (!job) {
+    job = computeDayRoute(peaks, start, loop).then((result) => {
+      cache.set(key, result)
+      inflight.delete(key)
+      return result
+    })
+    inflight.set(key, job)
+  }
+  return job
+}
 
 export function useDayRoute(
   peaks: Peak[],
@@ -30,8 +46,7 @@ export function useDayRoute(
     if (cache.has(key) || peaks.length === 0) return
     let alive = true
     const id = setTimeout(() => {
-      computeDayRoute(peaks, start, loop).then((result) => {
-        cache.set(key, result)
+      computeOnce(key, peaks, start, loop).then(() => {
         if (alive) force((n) => n + 1)
       })
     }, 0)
@@ -84,7 +99,7 @@ export function useDayRoutes(days: DayInput[]): {
         if (!alive) return
         const k = keyOf(d.peaks, d.start, d.loop)
         if (cache.has(k)) continue
-        cache.set(k, await computeDayRoute(d.peaks, d.start, d.loop))
+        await computeOnce(k, d.peaks, d.start, d.loop)
         if (alive) force((n) => n + 1)
       }
     }

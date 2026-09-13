@@ -109,7 +109,7 @@ export function Planner({ onShowDayOnMap }: Props) {
                     {day.peakIds.length} {plural(day.peakIds.length, ['szczyt', 'szczyty', 'szczytów'])}
                   </span>
                 </div>
-                <div className="mt-0.5 truncate text-muted">⭮ {sp?.name}</div>
+                <div className="mt-0.5 truncate text-muted">↻ {sp?.name}</div>
                 <div className="truncate">{day.peakIds.map((id) => peakById(id)?.name).join(' → ')}</div>
               </li>
             )
@@ -191,7 +191,7 @@ export function Planner({ onShowDayOnMap }: Props) {
                         className={`btn !py-2 !text-xs ${isLoop ? 'bg-brand-soft text-brand' : 'border border-line bg-surface text-ink'}`}
                         title={isLoop ? 'Wracasz na miejsce startu' : 'Kończysz w innym miejscu'}
                       >
-                        {isLoop ? '⭮ Pętla' : '→ Punkt-punkt'}
+                        {isLoop ? '↻ Pętla' : '→ Punkt-punkt'}
                       </button>
                     </div>
 
