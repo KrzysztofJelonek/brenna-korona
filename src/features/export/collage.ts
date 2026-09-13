@@ -1,5 +1,6 @@
 import { PEAKS } from '../../data/peaks'
 import type { PeakProgress, StoredPhoto } from '../../types'
+import { decodePhoto, describeError, drawCover, type ExportFailure } from './exportPhotos'
 
 const CELL = 520
 const COLS = 4
@@ -7,31 +8,9 @@ const HEADER = 150
 const GAP = 10
 const CAPTION = 74
 
-async function loadImage(blob: Blob): Promise<HTMLImageElement> {
-  const url = URL.createObjectURL(blob)
-  try {
-    const img = new Image()
-    await new Promise((res, rej) => {
-      img.onload = res
-      img.onerror = () => rej(new Error('Nie udało się wczytać zdjęcia'))
-      img.src = url
-    })
-    return img
-  } finally {
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
-  }
-}
-
-/** Rysuje obraz wypełniający komórkę, zachowując proporcje (object-fit: cover). */
-function drawCover(ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, w: number, h: number) {
-  const scale = Math.max(w / img.width, h / img.height)
-  const sw = w / scale
-  const sh = h / scale
-  ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, x, y, w, h)
-}
-
 export interface CollageOptions {
   progress: Record<string, PeakProgress>
+  /** Zdjęcie do eksportu per szczyt (photosForExport). */
   photos: Map<string, StoredPhoto>
   participant?: string
 }
@@ -40,7 +19,10 @@ export interface CollageOptions {
  * Składa komplet zdjęć w jeden obraz gotowy do wklejenia w dyskusję wydarzenia
  * na Facebooku — bo tak właśnie wygląda weryfikacja u organizatora.
  */
-export async function renderCollage({ progress, photos, participant }: CollageOptions): Promise<Blob> {
+export async function renderCollage({ progress, photos, participant }: CollageOptions): Promise<{
+  blob: Blob
+  failed: ExportFailure[]
+}> {
   const rows = Math.ceil(PEAKS.length / COLS)
   const cellH = CELL + CAPTION
   const width = COLS * CELL + (COLS + 1) * GAP
@@ -74,6 +56,7 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
       : ''
   ctx.fillText([participant, `${doneCount}/20 szczytów`, range].filter(Boolean).join('  ·  '), GAP + 24, 110)
 
+  const failed: ExportFailure[] = []
   for (let i = 0; i < PEAKS.length; i++) {
     const peak = PEAKS[i]
     const col = i % COLS
@@ -82,27 +65,33 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
     const y = HEADER + GAP + row * (cellH + GAP)
 
     const prog = progress[peak.id]
-    const photoId = prog?.primaryPhotoId ?? prog?.photoIds[0]
-    const photo = photoId ? photos.get(photoId) : undefined
+    const photo = photos.get(peak.id)
 
     ctx.save()
     ctx.beginPath()
     ctx.roundRect(x, y, CELL, CELL, 18)
     ctx.clip()
+    let placeholder: string | null = photo ? null : 'brak zdjęcia'
     if (photo) {
       try {
-        drawCover(ctx, await loadImage(photo.blob), x, y, CELL, CELL)
-      } catch {
-        ctx.fillStyle = '#dfeed8'
-        ctx.fillRect(x, y, CELL, CELL)
+        const img = await decodePhoto(photo.blob)
+        try {
+          drawCover(ctx, img, x, y, CELL, CELL)
+        } finally {
+          img.close()
+        }
+      } catch (e) {
+        failed.push({ peak: peak.name, reason: describeError(e) })
+        placeholder = 'nie udało się wczytać zdjęcia'
       }
-    } else {
-      ctx.fillStyle = '#e6f1e0'
+    }
+    if (placeholder) {
+      ctx.fillStyle = photo ? '#f6e6dc' : '#e6f1e0'
       ctx.fillRect(x, y, CELL, CELL)
-      ctx.fillStyle = '#9bb094'
+      ctx.fillStyle = photo ? '#b0643a' : '#9bb094'
       ctx.font = '26px ui-sans-serif, system-ui, sans-serif'
       ctx.textAlign = 'center'
-      ctx.fillText('brak zdjęcia', x + CELL / 2, y + CELL / 2)
+      ctx.fillText(placeholder, x + CELL / 2, y + CELL / 2)
       ctx.textAlign = 'left'
     }
     ctx.restore()
@@ -130,7 +119,7 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
 
   const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/jpeg', 0.9))
   if (!blob) throw new Error('Nie udało się wygenerować kolażu')
-  return blob
+  return { blob, failed }
 }
 
 /** Kwadratowa karta podsumowania do udostępnienia. */

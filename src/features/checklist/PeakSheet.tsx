@@ -5,6 +5,7 @@ import { deletePhoto, getPhotosForPeak, putPhoto } from '../../store/media'
 import { photoUrl, preparePhoto } from '../../lib/photo'
 import { isWithinChallenge, CHALLENGE_START, CHALLENGE_END } from '../../data/peaks'
 import { haversine } from '../../lib/geo'
+import { describeError } from '../../lib/errors'
 import { Sheet } from '../../ui/Sheet'
 import { IconBike, IconBoot, IconCamera, IconCheck, IconImage, IconStar, IconTrash, IconWarn } from '../../ui/Icons'
 import { PeakAbout, PeakGallery, usePeakInfo } from './PeakInfo'
@@ -56,7 +57,7 @@ export function PeakSheet({ peak, onClose }: Props) {
       setError(
         e instanceof Error && e.name === 'QuotaExceededError'
           ? 'Brak miejsca w przeglądarce. Usuń część zdjęć albo zrób backup i wyczyść dane.'
-          : 'Nie udało się dodać zdjęcia. Spróbuj innego pliku.',
+          : `Nie udało się dodać zdjęcia (${describeError(e)}). Spróbuj innego pliku.`,
       )
     } finally {
       setBusy(false)

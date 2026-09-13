@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { PEAKS } from '../../data/peaks'
 import { useProgress, countDone, totalAscent } from '../../store/progress'
-import { getAllPhotos } from '../../store/media'
 import { renderCollage, renderSummaryCard } from './collage'
+import { renderPdf } from './pdf'
+import { photosForExport, type ExportFailure } from './exportPhotos'
 import { exportBackup, importBackup } from './backup'
 import { downloadBlob } from '../../lib/download'
-import type { StoredPhoto } from '../../types'
 import { IconDownload, IconShare, IconUpload, IconWarn } from '../../ui/Icons'
 
 type Busy = null | 'collage' | 'pdf' | 'card' | 'backup' | 'import'
@@ -26,14 +26,35 @@ export function ExportView() {
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
-  const done = countDone(progress)
-  const withPhoto = PEAKS.filter((p) => (progress[p.id]?.photoIds.length ?? 0) > 0).length
-  const missing = PEAKS.filter((p) => (progress[p.id]?.photoIds.length ?? 0) === 0)
+  // Zdjęcia liczymy po bazie, tak jak pokazuje je karta szczytu i jak trafią do eksportu.
+  const [photoPeaks, setPhotoPeaks] = useState<Set<string> | null>(null)
+  useEffect(() => {
+    let alive = true
+    photosForExport(progress)
+      .then((map) => alive && setPhotoPeaks(new Set(map.keys())))
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [progress])
+  const hasPhoto = (peakId: string) =>
+    photoPeaks ? photoPeaks.has(peakId) : (progress[peakId]?.photoIds.length ?? 0) > 0
 
-  const photoMap = async () => {
-    const all = await getAllPhotos()
-    return new Map<string, StoredPhoto>(all.map((p) => [p.id, p]))
-  }
+  const done = countDone(progress)
+  const withPhoto = PEAKS.filter((p) => hasPhoto(p.id)).length
+  const missing = PEAKS.filter((p) => !hasPhoto(p.id))
+
+  const exportMessage = (ok: string, failed: ExportFailure[]) =>
+    setMsg(
+      failed.length
+        ? {
+            kind: 'err',
+            text: `${ok} Nie udało się wczytać ${failed.length === 1 ? 'zdjęcia' : 'zdjęć'}: ${failed
+              .map((f) => `${f.peak} (${f.reason})`)
+              .join(', ')} — w pliku są puste pola.`,
+          }
+        : { kind: 'ok', text: ok },
+    )
 
   const run = async (kind: Busy, fn: () => Promise<void>) => {
     setBusy(kind)
@@ -49,73 +70,18 @@ export function ExportView() {
 
   const makeCollage = () =>
     run('collage', async () => {
-      const blob = await renderCollage({ progress, photos: await photoMap(), participant })
+      const { blob, failed } = await renderCollage({ progress, photos: await photosForExport(progress), participant })
       if (preview) URL.revokeObjectURL(preview)
       setPreview(URL.createObjectURL(blob))
       downloadBlob(blob, 'korona-gor-brennej-2026-komplet.jpg')
-      setMsg({ kind: 'ok', text: 'Kolaż pobrany. Wrzuć go w dyskusję wydarzenia na Facebooku.' })
+      exportMessage('Kolaż pobrany. Wrzuć go w dyskusję wydarzenia na Facebooku.', failed)
     })
 
   const makePdf = () =>
     run('pdf', async () => {
-      // jsPDF ciągnie ~380 kB zależności — ładujemy dopiero przy realnym użyciu.
-      const { default: jsPDF } = await import('jspdf')
-      const photos = await photoMap()
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      const M = 12
-      const cols = 2
-      const cellW = (210 - 2 * M - 6) / cols
-      const cellH = cellW + 12
-      let page = 0
-      let idx = 0
-
-      for (const peak of PEAKS) {
-        const perPage = 6
-        if (idx > 0 && idx % perPage === 0) {
-          pdf.addPage()
-          page++
-        }
-        const slot = idx % perPage
-        if (slot === 0) {
-          pdf.setFontSize(14)
-          pdf.text(`Korona Gór Brennej 2026${participant ? ` — ${participant}` : ''}  (${page + 1})`, M, 12)
-        }
-        const col = slot % cols
-        const row = Math.floor(slot / cols)
-        const x = M + col * (cellW + 6)
-        const y = 18 + row * (cellH + 4)
-
-        const prog = progress[peak.id]
-        const pid = prog?.primaryPhotoId ?? prog?.photoIds[0]
-        const photo = pid ? photos.get(pid) : undefined
-        if (photo) {
-          const dataUrl = await new Promise<string>((res, rej) => {
-            const r = new FileReader()
-            r.onload = () => res(String(r.result))
-            r.onerror = () => rej(new Error('Błąd odczytu zdjęcia'))
-            r.readAsDataURL(photo.blob)
-          })
-          try {
-            pdf.addImage(dataUrl, 'WEBP', x, y, cellW, cellW, undefined, 'FAST')
-          } catch {
-            pdf.addImage(dataUrl, 'JPEG', x, y, cellW, cellW, undefined, 'FAST')
-          }
-        } else {
-          pdf.setDrawColor(180)
-          pdf.rect(x, y, cellW, cellW)
-        }
-        pdf.setFontSize(10)
-        pdf.text(`${peak.no}. ${peak.name} — ${peak.ele} m`, x, y + cellW + 5)
-        pdf.setFontSize(8)
-        pdf.text(
-          prog?.conqueredAt ? new Date(prog.conqueredAt).toLocaleDateString('pl-PL') : 'brak daty',
-          x,
-          y + cellW + 9,
-        )
-        idx++
-      }
-      pdf.save('korona-gor-brennej-2026.pdf')
-      setMsg({ kind: 'ok', text: 'PDF zapisany.' })
+      const { blob, failed } = await renderPdf({ progress, photos: await photosForExport(progress), participant })
+      downloadBlob(blob, 'korona-gor-brennej-2026.pdf')
+      exportMessage('PDF zapisany.', failed)
     })
 
   const makeCard = () =>

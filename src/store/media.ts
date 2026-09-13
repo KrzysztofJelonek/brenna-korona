@@ -12,6 +12,14 @@ interface TrackRecord {
   finishedAt?: string
 }
 
+/**
+ * Zdjęcie tak, jak leży w bazie. Bajty zapisujemy jako ArrayBuffer, nie Blob:
+ * WebKit w trybie prywatnym i w części przeglądarek wbudowanych (np. w aplikacji
+ * Facebooka) odrzuca Bloby w IndexedDB, a Blob odczytany z bazy w Safari potrafi
+ * się potem nie otworzyć. Rekordy sprzed tej zmiany mają jeszcze pole `blob`.
+ */
+type PhotoRecord = Omit<StoredPhoto, 'blob'> & { data?: ArrayBuffer; type?: string; blob?: Blob }
+
 let dbPromise: Promise<IDBPDatabase> | null = null
 
 function db() {
@@ -31,20 +39,28 @@ function db() {
   return dbPromise
 }
 
+const fromRecord = ({ data, type, blob, ...meta }: PhotoRecord): StoredPhoto => ({
+  ...meta,
+  blob: data ? new Blob([data], { type: type || 'image/webp' }) : (blob ?? new Blob()),
+})
+
 export async function putPhoto(photo: StoredPhoto): Promise<void> {
-  await (await db()).put('photos', photo)
+  const { blob, ...meta } = photo
+  const record: PhotoRecord = { ...meta, data: await blob.arrayBuffer(), type: blob.type }
+  await (await db()).put('photos', record)
 }
 
 export async function getPhoto(id: string): Promise<StoredPhoto | undefined> {
-  return (await db()).get('photos', id)
+  const record: PhotoRecord | undefined = await (await db()).get('photos', id)
+  return record && fromRecord(record)
 }
 
 export async function getPhotosForPeak(peakId: string): Promise<StoredPhoto[]> {
-  return (await db()).getAllFromIndex('photos', 'peakId', peakId)
+  return ((await (await db()).getAllFromIndex('photos', 'peakId', peakId)) as PhotoRecord[]).map(fromRecord)
 }
 
 export async function getAllPhotos(): Promise<StoredPhoto[]> {
-  return (await db()).getAll('photos')
+  return ((await (await db()).getAll('photos')) as PhotoRecord[]).map(fromRecord)
 }
 
 export async function deletePhoto(id: string): Promise<void> {
