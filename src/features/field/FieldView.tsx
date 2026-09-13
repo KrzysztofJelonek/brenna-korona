@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { PEAKS } from '../../data/peaks'
 import { useProgress } from '../../store/progress'
 import { bearing, compassLabel, formatDistance, haversine } from '../../lib/geo'
@@ -17,7 +17,7 @@ interface Props {
   onToggle: (v: boolean) => void
   recording: boolean
   onToggleRecording: (v: boolean) => void
-  currentTrack: () => TrackPoint[]
+  track: TrackPoint[]
   onOpenPeak: (peak: Peak) => void
 }
 
@@ -28,19 +28,12 @@ export function FieldView({
   onToggle,
   recording,
   onToggleRecording,
-  currentTrack,
+  track,
   onOpenPeak,
 }: Props) {
   const progress = useProgress((s) => s.progress)
   const toggleDone = useProgress((s) => s.toggleDone)
   const [dismissed, setDismissed] = useState<string[]>([])
-  const [trackLen, setTrackLen] = useState(0)
-
-  useEffect(() => {
-    if (!recording) return
-    const t = setInterval(() => setTrackLen(currentTrack().length), 3000)
-    return () => clearInterval(t)
-  }, [recording, currentTrack])
 
   const ranked = useMemo(() => {
     if (!position) return []
@@ -59,9 +52,8 @@ export function FieldView({
   )
 
   const exportTrack = () => {
-    const points = currentTrack()
     downloadText(
-      buildGpx(points, `Korona Gór Brennej ${new Date().toLocaleDateString('pl-PL')}`),
+      buildGpx(track, `Korona Gór Brennej ${new Date().toLocaleDateString('pl-PL')}`),
       `kgb-slad-${new Date().toISOString().slice(0, 10)}.gpx`,
       'application/gpx+xml',
     )
@@ -124,7 +116,7 @@ export function FieldView({
           <div>
             <h2 className="text-sm font-semibold">Zapis śladu</h2>
             <p className="mt-1 text-xs text-muted">
-              {recording ? `Nagrywam — ${trackLen} punktów.` : 'Zapisz trasę i wyeksportuj do GPX.'}
+              {recording ? `Nagrywam — ${track.length} punktów. Podgląd śladu na mapie.` : 'Zapisz trasę i wyeksportuj do GPX.'}
             </p>
           </div>
           <button

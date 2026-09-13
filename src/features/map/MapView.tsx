@@ -4,13 +4,13 @@ import {
 } from 'react-leaflet'
 import L from 'leaflet'
 import { PEAKS, peakById } from '../../data/peaks'
-import { estimateDay, formatTime, plural } from '../../lib/geo'
+import { estimateDay, formatDistance, formatTime, haversine, plural } from '../../lib/geo'
 import { START_POINTS, startPointById, type StartPoint } from '../../data/startPoints'
 import { useDayRoute } from '../../lib/useDayRoute'
 import { resolveToday, type ResolvedToday } from '../../lib/todayRoute'
 import { elevationAt, loadGrid } from '../../lib/elevation'
 import { useProgress } from '../../store/progress'
-import type { Peak } from '../../types'
+import type { Peak, TrackPoint } from '../../types'
 import { IconLocate, IconMountain, IconRoute, IconTrash } from '../../ui/Icons'
 
 const BRENNA_CENTER: [number, number] = [49.7175, 18.9265]
@@ -22,6 +22,12 @@ const DAY_COLORS = ['#226b31', '#e26c3b', '#1f6f8b', '#8a4fbd', '#c99a2e', '#b03
 /** Wartość selectedDayId oznaczająca tryb układania trasy na dziś. */
 export const TODAY_ID = 'today'
 const TODAY_COLOR = DAY_COLORS[0]
+
+/** Nagrany ślad — kolor spoza palety dni, żeby nie mylił się z planowaną trasą. */
+const TRACK_COLOR = '#c0368a'
+
+/** Dalej od Brennej pozycja nie wciąga widoku wybranej trasy — mapa oddaliłaby się do kraju. */
+const NEAR_BRENNA_M = 20_000
 
 interface MarkerOpts {
   /** Numer kolejności w wybranym dniu — zastępuje numer szczytu. */
@@ -124,15 +130,64 @@ function PlaceOnClick({ onPlace }: { onPlace: (lat: number, lon: number) => void
   return null
 }
 
+/**
+ * Pierwsza pozycja po wejściu na mapę (albo po włączeniu lokalizacji) ustawia widok.
+ * Bez wybranej trasy centrujemy na użytkowniku; z trasą dopasowujemy widok tak,
+ * żeby było widać i trasę, i pozycję. Dalsze odczyty już widoku nie ruszają.
+ */
+function CenterOnPosition({
+  position,
+  routePoints,
+}: {
+  position: { lat: number; lon: number } | null
+  routePoints: [number, number][] | null
+}) {
+  const map = useMap()
+  const centered = useRef(false)
+
+  useEffect(() => {
+    if (!position) {
+      centered.current = false
+      return
+    }
+    if (centered.current) return
+    centered.current = true
+
+    const here: [number, number] = [position.lat, position.lon]
+    if (!routePoints) {
+      map.setView(here, Math.max(map.getZoom(), 14))
+      return
+    }
+    if (haversine(BRENNA_CENTER[0], BRENNA_CENTER[1], here[0], here[1]) > NEAR_BRENNA_M) return
+    map.fitBounds(L.latLngBounds([...routePoints, here]), { padding: [56, 56], maxZoom: 15 })
+  }, [map, position, routePoints])
+
+  return null
+}
+
 interface Props {
   onOpenPeak: (peak: Peak) => void
   position: { lat: number; lon: number; accuracy: number } | null
   selectedDayId: string | null
   onSelectDay: (id: string | null) => void
   onGoToPlanner: () => void
+  geoOn: boolean
+  onEnableGeo: () => void
+  track: TrackPoint[]
+  recording: boolean
 }
 
-export function MapView({ onOpenPeak, position, selectedDayId, onSelectDay, onGoToPlanner }: Props) {
+export function MapView({
+  onOpenPeak,
+  position,
+  selectedDayId,
+  onSelectDay,
+  onGoToPlanner,
+  geoOn,
+  onEnableGeo,
+  track,
+  recording,
+}: Props) {
   const progress = useProgress((s) => s.progress)
   const plans = useProgress((s) => s.plans)
   const today = useProgress((s) => s.today)
@@ -198,6 +253,12 @@ export function MapView({ onOpenPeak, position, selectedDayId, onSelectDay, onGo
   // skakanie mapy po każdym dotknięciu szczytu uniemożliwiałoby wybieranie.
   const fitToken = todayMode ? TODAY_ID : `${selectedDayId ?? 'all'}:${plans.length}:${fitPoints.length}`
 
+  const trackPoints = useMemo(() => track.map((p) => [p.lat, p.lon] as [number, number]), [track])
+  const trackM = useMemo(
+    () => track.reduce((sum, p, i) => (i ? sum + haversine(track[i - 1].lat, track[i - 1].lon, p.lat, p.lon) : 0), 0),
+    [track],
+  )
+
   const placeParking = (lat: number, lon: number) => {
     setPlacing(false)
     loadGrid().then((grid) =>
@@ -236,6 +297,13 @@ export function MapView({ onOpenPeak, position, selectedDayId, onSelectDay, onGo
         {shown.map((day) => (
           <DayTrack key={day.id} day={day} />
         ))}
+
+        {trackPoints.length >= 2 && (
+          <>
+            <Polyline positions={trackPoints} pathOptions={{ color: '#ffffff', weight: 7, opacity: 0.8, lineCap: 'round', lineJoin: 'round' }} />
+            <Polyline positions={trackPoints} pathOptions={{ color: TRACK_COLOR, weight: 3.5, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }} />
+          </>
+        )}
 
         {todayMode ? (
           <>
@@ -341,11 +409,13 @@ export function MapView({ onOpenPeak, position, selectedDayId, onSelectDay, onGo
               radius={position.accuracy}
               pathOptions={{ color: '#1f6f8b', fillColor: '#1f6f8b', fillOpacity: 0.1, weight: 1 }}
             />
-            <Marker position={[position.lat, position.lon]} icon={userIcon} />
+            <Marker position={[position.lat, position.lon]} icon={userIcon} zIndexOffset={1000} interactive={false} />
           </>
         )}
 
         <FitToRoute points={fitPoints} token={fitToken} />
+        {/* Po FitToRoute — przy wejściu na mapę z gotową pozycją ma ostatnie słowo. */}
+        <CenterOnPosition position={position} routePoints={selected ? fitPoints : null} />
       </MapContainer>
 
       {/* Pasek nad mapą — w planie legenda i filtr dni, przy układaniu trasy podpowiedź. */}
@@ -417,15 +487,35 @@ export function MapView({ onOpenPeak, position, selectedDayId, onSelectDay, onGo
       {/* Dół mapy: przycisk pozycji nad panelem, żeby panel go nie zasłaniał.
           Od dołu odstęp na atrybucję OpenStreetMap. */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[500] flex flex-col items-end gap-2 px-2 pb-6">
-        {position && map && (
-          <button
-            onClick={() => map.flyTo([position.lat, position.lon], 14, { duration: 0.8 })}
-            className="pointer-events-auto rounded-xl border border-line bg-surface p-2.5 text-ink shadow-lg"
-            aria-label="Wyśrodkuj na mojej pozycji"
-          >
-            <IconLocate className="h-5 w-5" />
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {(recording || trackPoints.length >= 2) && (
+            <span className="pointer-events-auto flex items-center gap-1.5 rounded-xl border border-line bg-surface/95 px-2.5 py-2 text-xs shadow-lg backdrop-blur">
+              <span
+                className={`h-2 w-2 shrink-0 rounded-full ${recording ? 'animate-pulse' : ''}`}
+                style={{ background: TRACK_COLOR }}
+              />
+              {recording ? 'Nagrywam' : 'Ślad'}
+              <span className="tabular-nums text-muted">{formatDistance(trackM)}</span>
+            </span>
+          )}
+          {map && (
+            <button
+              onClick={() => {
+                if (position) map.flyTo([position.lat, position.lon], Math.max(map.getZoom(), 14), { duration: 0.8 })
+                else if (!geoOn) onEnableGeo()
+              }}
+              className={`pointer-events-auto rounded-xl border border-line bg-surface p-2.5 shadow-lg ${
+                geoOn ? 'text-brand' : 'text-ink'
+              } ${geoOn && !position ? 'animate-pulse' : ''}`}
+              aria-label={
+                position ? 'Wyśrodkuj na mojej pozycji' : geoOn ? 'Szukam pozycji…' : 'Włącz lokalizację'
+              }
+              title={position ? 'Wyśrodkuj na mojej pozycji' : geoOn ? 'Szukam pozycji…' : 'Włącz lokalizację'}
+            >
+              <IconLocate className="h-5 w-5" />
+            </button>
+          )}
+        </div>
         {todayMode ? (
           <TodayPanel
             today={resolved}

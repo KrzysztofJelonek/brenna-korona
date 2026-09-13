@@ -34,7 +34,7 @@ export default function App() {
 
   const progress = useProgress((s) => s.progress)
   const backupReminderAt = useProgress((s) => s.backupReminderAt)
-  const { position, error, currentTrack } = useGeolocation(geoOn, recording)
+  const { position, error, track } = useGeolocation(geoOn, recording)
 
   const done = countDone(progress)
   const left = daysLeft()
@@ -96,6 +96,10 @@ export default function App() {
               selectedDayId={selectedDayId}
               onSelectDay={setSelectedDayId}
               onGoToPlanner={() => setTab('plan')}
+              geoOn={geoOn}
+              onEnableGeo={() => setGeoOn(true)}
+              track={track}
+              recording={recording}
             />
           )}
           {tab === 'plan' && (
@@ -111,10 +115,14 @@ export default function App() {
               position={position}
               error={error}
               enabled={geoOn}
-              onToggle={setGeoOn}
+              onToggle={(on) => {
+                setGeoOn(on)
+                // Bez lokalizacji nie ma czego nagrywać, a przycisk nagrywania jest wtedy zablokowany.
+                if (!on) setRecording(false)
+              }}
               recording={recording}
               onToggleRecording={setRecording}
-              currentTrack={currentTrack}
+              track={track}
               onOpenPeak={setOpenPeak}
             />
           )}

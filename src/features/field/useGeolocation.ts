@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { TrackPoint } from '../../types'
 
 export interface GeoState {
@@ -10,16 +10,13 @@ export interface GeoState {
 /** Śledzenie pozycji + opcjonalny zapis śladu. */
 export function useGeolocation(enabled: boolean, recordTrack = false) {
   const [state, setState] = useState<GeoState>({ position: null, error: null, watching: false })
-  const trackRef = useRef<TrackPoint[]>([])
-  const idRef = useRef<number | null>(null)
+  // Ślad trzymamy w stanie, a nie w refie — mapa rysuje go na bieżąco.
+  const [track, setTrack] = useState<TrackPoint[]>([])
 
   useEffect(() => {
     if (!enabled) {
-      if (idRef.current !== null) {
-        navigator.geolocation.clearWatch(idRef.current)
-        idRef.current = null
-      }
-      setState((s) => ({ ...s, watching: false }))
+      // Po wyłączeniu nie pokazujemy starej pozycji jak aktualnej.
+      setState({ position: null, error: null, watching: false })
       return
     }
     if (!('geolocation' in navigator)) {
@@ -28,7 +25,7 @@ export function useGeolocation(enabled: boolean, recordTrack = false) {
     }
 
     setState((s) => ({ ...s, watching: true, error: null }))
-    idRef.current = navigator.geolocation.watchPosition(
+    const id = navigator.geolocation.watchPosition(
       (pos) => {
         const point = {
           lat: pos.coords.latitude,
@@ -37,40 +34,28 @@ export function useGeolocation(enabled: boolean, recordTrack = false) {
         }
         setState({ position: point, error: null, watching: true })
         if (recordTrack) {
-          trackRef.current.push({
-            lat: point.lat,
-            lon: point.lon,
-            ele: pos.coords.altitude ?? undefined,
-            t: pos.timestamp,
-          })
+          setTrack((t) => [
+            ...t,
+            { lat: point.lat, lon: point.lon, ele: pos.coords.altitude ?? undefined, t: pos.timestamp },
+          ])
         }
       },
       (err) => {
-        const msg =
-          err.code === err.PERMISSION_DENIED
-            ? 'Brak zgody na dostęp do lokalizacji.'
-            : err.code === err.POSITION_UNAVAILABLE
-              ? 'Pozycja niedostępna — słaby sygnał GPS.'
-              : 'Nie udało się ustalić pozycji.'
-        setState({ position: null, error: msg, watching: false })
+        const denied = err.code === err.PERMISSION_DENIED
+        const msg = denied
+          ? 'Brak zgody na dostęp do lokalizacji.'
+          : err.code === err.POSITION_UNAVAILABLE
+            ? 'Pozycja niedostępna — słaby sygnał GPS.'
+            : 'Nie udało się ustalić pozycji.'
+        // Chwilowa utrata sygnału (las, dolina) nie kasuje ostatniej znanej pozycji —
+        // przeglądarka dalej próbuje, a znacznik nie miga na mapie.
+        setState((s) => ({ position: denied ? null : s.position, error: msg, watching: !denied }))
       },
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 },
     )
 
-    const id = idRef.current
-    return () => {
-      if (id !== null) navigator.geolocation.clearWatch(id)
-      idRef.current = null
-    }
+    return () => navigator.geolocation.clearWatch(id)
   }, [enabled, recordTrack])
 
-  const takeTrack = useCallback(() => {
-    const points = trackRef.current
-    trackRef.current = []
-    return points
-  }, [])
-
-  const currentTrack = useCallback(() => trackRef.current, [])
-
-  return { ...state, takeTrack, currentTrack }
+  return { ...state, track }
 }
