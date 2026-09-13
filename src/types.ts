@@ -10,6 +10,32 @@ export interface Peak {
   lon: number
   note?: string
   verify?: string
+  /** Link do szczytu w Mapy.com (warstwa turystyczna, obiekt OSM). */
+  mapy?: string
+}
+
+export interface PeakPhoto {
+  /** Nazwa pliku na Wikimedia Commons (bez prefiksu File:). */
+  commons: string
+  caption: string
+  /** Pliki w public/peaks/: pełny do podglądu i miniatura do paska. */
+  src: string
+  thumb: string
+  w: number
+  h: number
+  author: string
+  license: string
+  licenseUrl?: string
+  /** Strona pliku na Commons. */
+  page: string
+}
+
+export interface PeakInfo {
+  range?: string
+  summary: string
+  highlights: string[]
+  wiki?: { title: string; url: string; note?: string }
+  photos: PeakPhoto[]
 }
 
 export interface PeakProgress {

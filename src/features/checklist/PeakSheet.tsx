@@ -7,6 +7,7 @@ import { isWithinChallenge, CHALLENGE_START, CHALLENGE_END } from '../../data/pe
 import { haversine } from '../../lib/geo'
 import { Sheet } from '../../ui/Sheet'
 import { IconBike, IconBoot, IconCamera, IconCheck, IconStar, IconTrash, IconWarn } from '../../ui/Icons'
+import { PeakAbout, PeakGallery, usePeakInfo } from './PeakInfo'
 
 interface Props {
   peak: Peak | null
@@ -23,6 +24,7 @@ export function PeakSheet({ peak, onClose }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const info = usePeakInfo(peak?.id)
 
   useEffect(() => {
     if (!peak) return setPhotos([])
@@ -80,6 +82,12 @@ export function PeakSheet({ peak, onClose }: Props) {
         </span>
       }
     >
+      {info && info.photos.length > 0 && (
+        <div className="mb-4">
+          <PeakGallery info={info} />
+        </div>
+      )}
+
       <button
         onClick={() => toggleDone(peak.id)}
         className={`w-full ${done ? 'btn-ghost' : 'btn-summit'} !py-3.5 text-base`}
@@ -137,6 +145,8 @@ export function PeakSheet({ peak, onClose }: Props) {
           </div>
         </div>
       )}
+
+      {info && <PeakAbout info={info} />}
 
       <div className="mt-5">
         <div className="mb-2 flex items-center justify-between">
@@ -248,6 +258,14 @@ export function PeakSheet({ peak, onClose }: Props) {
         >
           nawiguj
         </a>
+        {peak.mapy && (
+          <>
+            {' · '}
+            <a className="text-brand underline" href={peak.mapy} target="_blank" rel="noreferrer">
+              Mapy.com
+            </a>
+          </>
+        )}
       </p>
     </Sheet>
   )

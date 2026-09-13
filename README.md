@@ -9,9 +9,9 @@ Bez backendu, bez kont, bez śledzenia. Wszystkie dane użytkownika zostają w j
 | | |
 |---|---|
 | Stack | Vite · React · TypeScript · Tailwind v4 · Leaflet · zustand · idb · exifr · Framer Motion |
-| Kod | 33 pliki źródłowe, ~4 600 linii |
-| Bundle startowy | 99 KB gzip |
-| Pełny payload offline | 2,1 MB (16 plików w precache) |
+| Kod | 35 plików źródłowych, ~5 100 linii |
+| Bundle startowy | 101 KB gzip |
+| Pełny payload offline | 2,1 MB (17 plików w precache) + zdjęcia szczytów zapisywane przy obejrzeniu |
 | Autor | Krzysztof Jelonek · sponsor: FaceLove® z Jaworza |
 
 ---
@@ -80,6 +80,8 @@ Panel szczytu obsługuje zdjęcia:
 - ostrzeżenie, gdy data wypada poza terminem wydarzenia,
 - wiele zdjęć na szczyt, jedno oznaczone gwiazdką jako to, które trafi do kolażu.
 
+Panel pokazuje też **informacje o samej górze**: pasek zdjęć z Wikimedia Commons (dotknięcie otwiera pełny podgląd z podpisem, autorem i licencją), krótki opis zredagowany na podstawie Wikipedii (pasmo, co jest na szczycie, szlaki, historia, ciekawostki) oraz linki do Wikipedii i Mapy.com. Skąd są te treści, opisuje [3.5](#35-opisy-i-zdjęcia-szczytów).
+
 ### Mapa
 
 Leaflet + OpenStreetMap albo OpenTopoMap, z nakładką szlaków z Waymarked Trails (przyciemnioną do 0,55, żeby nie konkurowała z trasą).
@@ -128,7 +130,9 @@ Wszystko, co aplikacja wie o terenie, powstało z trzech źródeł: materiałów
 
 | Plik | Zawartość | Skąd | Rozmiar |
 |---|---|---|---|
-| [`peaks.json`](src/data/peaks.json) | 20 szczytów: nazwa, wysokość, współrzędne | wysokości z checklisty organizatora, współrzędne z OSM (Overpass, `natural=peak`) | 3 KB |
+| [`peaks.json`](src/data/peaks.json) | 20 szczytów: nazwa, wysokość, współrzędne, link do Mapy.com | wysokości z checklisty organizatora, współrzędne z OSM (Overpass, `natural=peak`), zweryfikowane z Mapy.com | 6 KB |
+| [`peakInfo.json`](src/data/peakInfo.json) | opisy szczytów, wybór zdjęć z podpisami, autorzy i licencje | opisy zredagowane na podstawie polskiej Wikipedii, zdjęcia z Wikimedia Commons | 38 KB |
+| [`public/peaks/`](public/peaks) | 39 zdjęć szczytów + miniatury, WebP | Wikimedia Commons przez [`tools/build-peak-photos.py`](tools/build-peak-photos.py) | 4,8 MB |
 | [`startPoints.ts`](src/data/startPoints.ts) | 8 punktów startowych ze współrzędnymi i wysokością | nazwy z PDF gminy, współrzędne z OSM, wysokości z SRTM | 2 KB |
 | [`routes.ts`](src/data/routes.ts) | 4 warianty tras, przypisanie szczytów do dni, punkty startowe, flagi pętli | wariant 6-dniowy z PDF, pozostałe to propozycja własna | 7 KB |
 | [`event.ts`](src/data/event.ts) | kontakt, FAQ, imprezy, konkursy, sponsor | strona i PDF-y organizatora | 5 KB |
@@ -137,30 +141,32 @@ Wszystko, co aplikacja wie o terenie, powstało z trzech źródeł: materiałów
 
 ### 3.1 Szczyty
 
-| # | Szczyt | m n.p.m. | lat | lon |
-|---|---|---:|---|---|
-| 1 | Zebrzydka | 557 | 49.77055 | 18.88253 |
-| 2 | Świniorka | 700 | 49.68498 | 18.90001 |
-| 3 | Czupel | 736 | 49.75607 | 18.90118 |
-| 4 | Stary Groń | 792 | 49.69353 | 18.92349 |
-| 5 | Horzelica | 797 | 49.70086 | 18.91576 |
-| 6 | Jaworzyna | 802 | 49.65770 | 18.94223 |
-| 7 | Trzy Kopce Wiślańskie | 810 | 49.66429 | 18.90730 |
-| 8 | Orłowa | 813 | 49.69698 | 18.87847 |
-| 9 | Gościejów | 818 | 49.65858 | 18.92162 |
-| 10 | Mały Cisowy | 829 | 49.74966 | 18.91480 |
-| 11 | Beskidek | 830 | 49.70870 | 18.99054 |
-| 12 | Wielka Cisowa | 878 | 49.74511 | 18.93170 |
-| 13 | Równica | 884 | 49.72470 | 18.85656 |
-| 14 | Grabowa | 907 | 49.67780 | 18.95456 |
-| 15 | Błatnia | 917 | 49.74835 | 18.94533 |
-| 16 | Hyrca | 929 | 49.70080 | 18.98066 |
-| 17 | Biały Krzyż | 940 | 49.67013 | 18.95904 |
-| 18 | Kotarz | 974 | 49.68908 | 18.96364 |
-| 19 | Stołów | 1035 | 49.74516 | 18.96529 |
-| 20 | Trzy Kopce | 1082 | 49.73662 | 18.98631 |
+| # | Szczyt | m n.p.m. | lat | lon | Mapy.com |
+|---|---|---:|---|---|---|
+| 1 | Zebrzydka | 557 | 49.77055 | 18.88253 | [mapa](https://mapy.com/pl/turisticka?source=osm&id=1048265841&ds=1&x=18.8825289&y=49.7705507&z=17) |
+| 2 | Świniorka | 700 | 49.68498 | 18.90001 | [mapa](https://mapy.com/pl/turisticka?q=%C5%9Bwiniorka&source=osm&id=1069138014&ds=2&x=18.9000142&y=49.6849811&z=17) |
+| 3 | Czupel | 736 | 49.75607 | 18.90118 | [mapa](https://mapy.com/pl/turisticka?q=Czupel&source=osm&id=1047951914&ds=1&x=18.9011836&y=49.7560719&z=17) |
+| 4 | Stary Groń | 792 | 49.69353 | 18.92349 | [mapa](https://mapy.com/pl/turisticka?q=Stary%20Gro%C5%84%20(792%C2%A0m)&source=osm&id=1047944035&ds=1&x=18.9234889&y=49.6935322&z=17) |
+| 5 | Horzelica | 797 | 49.70086 | 18.91576 | [mapa](https://mapy.com/pl/turisticka?q=Horzelica%20(797%C2%A0m)&source=osm&id=1047944036&ds=1&x=18.9157534&y=49.7008605&z=17) |
+| 6 | Jaworzyna | 802 | 49.65770 | 18.94223 | [mapa](https://mapy.com/pl/turisticka?q=Jaworzyna&source=osm&id=1047942529&ds=1&x=18.9422321&y=49.6577005&z=17) |
+| 7 | Trzy Kopce Wiślańskie | 810 | 49.66429 | 18.90730 | [mapa](https://mapy.com/pl/turisticka?q=Trzy%20Kopce%20Wi%C5%9Bla%C5%84skie%20(810%C2%A0m)&source=osm&id=149224400&ds=1&x=18.9072990&y=49.6642842&z=17) |
+| 8 | Orłowa | 813 | 49.69698 | 18.87847 | [mapa](https://mapy.com/pl/turisticka?q=Or%C5%82owa&source=osm&id=6392518&ds=2&x=18.8784707&y=49.6969813&z=17) |
+| 9 | Gościejów | 818 | 49.65858 | 18.92162 | [mapa](https://mapy.com/pl/turisticka?q=Go%C5%9Bciej%C3%B3w&source=osm&id=1084551714&ds=2&x=18.9216220&y=49.6585825&z=17) |
+| 10 | Mały Cisowy | 829 | 49.74966 | 18.91480 | [mapa](https://mapy.com/pl/turisticka?q=Ma%C5%82y%20Cisowy&source=osm&id=1047951915&ds=2&x=18.9147985&y=49.7496600&z=17) |
+| 11 | Beskidek | 830 | 49.70870 | 18.99054 | [mapa](https://mapy.com/pl/turisticka?q=Beskidek&source=osm&id=1051306155&ds=1&x=18.9905441&y=49.7087011&z=17) |
+| 12 | Wielka Cisowa | 878 | 49.74511 | 18.93170 | [mapa](https://mapy.com/pl/turisticka?q=Wielka%20Cisowa%20(878%C2%A0m)&source=osm&id=1047951920&ds=1&x=18.9316964&y=49.7451054&z=17) |
+| 13 | Równica | 884 | 49.72470 | 18.85656 | [mapa](https://mapy.com/pl/turisticka?q=R%C3%B3wnica&source=osm&id=1048167481&ds=1&x=18.8565516&y=49.7246977&z=17) |
+| 14 | Grabowa | 907 | 49.67780 | 18.95456 | [mapa](https://mapy.com/pl/turisticka?q=Grabowa%20(907%C2%A0m)&source=osm&id=6375953&ds=1&x=18.9545596&y=49.6777961&z=17) |
+| 15 | Błatnia | 917 | 49.74835 | 18.94533 | [mapa](https://mapy.com/pl/turisticka?q=B%C5%82atnia%20(917%C2%A0m)&source=osm&id=6315089&ds=1&x=18.9453328&y=49.7483498&z=17) |
+| 16 | Hyrca | 929 | 49.70080 | 18.98066 | [mapa](https://mapy.com/pl/turisticka?q=Hyrca&source=osm&id=1051306174&ds=2&x=18.9806628&y=49.7007980&z=17) |
+| 17 | Biały Krzyż | 940 | 49.67013 | 18.95904 | [mapa](https://mapy.com/pl/turisticka?q=Bia%C5%82y%20Krzy%C5%BC%20(940%C2%A0m)&source=osm&id=1048126439&ds=1&x=18.9590442&y=49.6701310&z=17) |
+| 18 | Kotarz | 974 | 49.68908 | 18.96364 | [mapa](https://mapy.com/pl/turisticka?q=Kotarz%20(974%C2%A0m)&source=osm&id=149224136&ds=1&x=18.9636362&y=49.6890763&z=17) |
+| 19 | Stołów | 1035 | 49.74516 | 18.96529 | [mapa](https://mapy.com/pl/turisticka?q=Sto%C5%82%C3%B3w%20(1035%C2%A0m)&source=osm&id=1056394345&ds=1&x=18.9652944&y=49.7451617&z=17) |
+| 20 | Trzy Kopce | 1082 | 49.73662 | 18.98631 | [mapa](https://mapy.com/pl/turisticka?q=Trzy%20Kopce%20(1082%C2%A0m)&source=osm&id=6419453&ds=1&x=18.9863062&y=49.7366188&z=17) |
 
 Wysokości pochodzą z checklisty organizatora i są wiążące — takie widnieją na tabliczkach, przy których robi się zdjęcie.
+
+**Weryfikacja położenia (2026-09-13).** Każdy punkt porównany z obiektem szczytu w Mapy.com (warstwa turystyczna, dane OSM) — linki w ostatniej kolumnie, zapisane też w `peaks.json` jako pole `mapy`. Największa różnica to 0,7 m (Równica), czyli samo zaokrąglenie do pięciu miejsc po przecinku. Niezależnie od tego każdy punkt sprawdzony na siatce SRTM z `elevation.json`: wszystkie leżą na lokalnym maksimum albo najwyżej 300 m od niego, z różnicą do 5 m — w granicach dokładności siatki 90 m. Współrzędne z artykułów Wikipedii różnią się od OSM o 1–150 m, z dwoma wyjątkami opisanymi w [3.4](#34-rozbieżności-wymagające-potwierdzenia).
 
 **Beskidek** leży na grzbiecie Karkoszczonka–Hyrca (granica Szczyrku i Brennej), tam gdzie węzeł OSM `natural=peak` o `ele=830` — zgodnie z checklistą. Przez szczyt biegnie czerwony szlak z Przełęczy Salmopolskiej; niżej, po szczyrkowskiej stronie, jest Beskid Sport Arena ze stokiem slalomowym „Beskidek”. Organizator ostrzega osobno: liczy się **Beskidek 830 m, a nie Beskid 860 m**, przez który nie przechodzi szlak.
 
@@ -204,8 +210,88 @@ Razem 79,4 km i ok. 26 h marszu.
 
 ### 3.4 Rozbieżności wymagające potwierdzenia
 
-1. **Zebrzydka.** OSM podaje 577 m, checklist 557 m. Aplikacja pokazuje 557 m.
+1. **Zebrzydka.** OSM podaje 577 m, Wikipedia 578 m, checklist 557 m. Aplikacja pokazuje 557 m.
 2. **Czupel.** W rejonie są dwa; wybrany ten o wysokości 736 m, zgodnej z checklistą.
+3. **Gościejów.** Ma dwa wierzchołki: południowy 818 m i północno-zachodni 811,5 m. Punkt z OSM i Mapy.com leży ok. 450 m na południowy wschód od współrzędnych z Wikipedii, czyli — zgodnie z opisem — na wyższym wierzchołku, tym z checklisty.
+4. **Beskidek.** Wikipedia ma tylko artykuł „Beskidek (860 m)”, którego współrzędne leżą ok. 775 m na północny wschód od punktu 830 m z checklisty. To właśnie ten wierzchołek, przed którym ostrzega organizator. Opis w aplikacji ogranicza się do faktów o grzbiecie, a link do artykułu ma dopisek, że dotyczy sąsiedniego szczytu.
+5. **Stary Groń i Horzelica.** Geoportal ma ich nazwy zamienione. Aplikacja trzyma się OSM, Mapy.com i Wikipedii: Stary Groń 792 m od południa, Horzelica 797 m od północy.
+6. **Wielka Cisowa.** Tabliczka na niedatowanym zdjęciu z Commons pokazuje 872 m, checklist podaje 878 m.
+7. **Jaworzyna.** Na mapach i w przewodnikach zwykle Jawierzny; Geoportal podaje 802 m, mapa Compassu 799 m. Nazwa urzędowa (PRNG) i checklist: Jaworzyna, 802 m.
+
+### 3.5 Opisy i zdjęcia szczytów
+
+**Opisy** w [`peakInfo.json`](src/data/peakInfo.json) są zredagowane ręcznie na podstawie artykułów polskiej Wikipedii (stan na 2026-09-13), a nie z nich skopiowane: krótkie podsumowanie plus 2–4 punkty przydatne na szlaku. Aplikacja podaje źródło i licencję (CC BY-SA 4.0) pod każdym opisem. Nie ma w nich informacji spoza artykułów. Tam, gdzie artykuł był niepewny albo dotyczył innego miejsca, fakt pominąłem.
+
+Dopasowanie artykułów wymagało uwagi, bo nazwy się powtarzają:
+
+| Szczyt | Artykuł | Uwagi |
+|---|---|---|
+| Orłowa | Orłowa (szczyt) | samo „Orłowa” to miasto w Czechach |
+| Świniorka | Świniarka (Beskid Śląski) | inna forma nazwy; „Świniorka” to przekierowanie |
+| Czupel | Czupel (736 m) | jest też Czupel 882 m |
+| Biały Krzyż | Biały Krzyż (szczyt) | nie mylić z przełęczą i dawnym schroniskiem |
+| Beskidek | Beskidek (860 m) | opisuje sąsiedni wierzchołek — patrz 3.4 |
+| Jaworzyna | Jawierzny | „Jaworzyna (Beskid Śląski)” przekierowuje na Skałkę w masywie Baraniej Góry |
+| pozostałe | nazwa szczytu, ew. z dopiskiem „(Beskid Śląski)” | każdy artykuł sprawdzony po współrzędnych |
+
+**Zdjęcia** wybierałem po obejrzeniu wszystkich kandydatów: zdjęcia z artykułów, obraz główny z Wikidata (P18), kategoria Commons szczytu (P373) i pliki z geotagiem w promieniu 400 m. Z ok. 100 kandydatów zostało 39. Odrzucone: panoramy z naniesionymi opisami, zdjęcia z innych miejsc wrzucone do kategorii (chrząszcze i restauracje z Ustronia w kategorii *Równica*, staw w Goczałkowicach w kategorii *Stołów*) i widoki, na których szczyt jest nie do rozpoznania. Dla sześciu szczytów Commons ma tylko jedno sensowne zdjęcie.
+
+Decyzje techniczne:
+
+- **Zdjęcia leżą w repo**, a nie są wczytywane z `upload.wikimedia.org` — z tego samego powodu co logo sponsora ([sekcja 9](#9-prywatność--jak-jest-zrobiona-technicznie)).
+- **Dwa rozmiary.** Pasek w panelu ładuje miniatury o wysokości 360 px (1,0 MB za wszystkie), a pełne zdjęcie dopiero w podglądzie. W terenie, na słabym zasięgu, różnica jest odczuwalna.
+- **Rozmiar pod smartfon.** Zdjęcia służą wyłącznie do podglądu na telefonie, więc dłuższy bok ma 960 px (panoramy do 1280 px szerokości), a jakość WebP to 60, dla miniatur 55. Ekran telefonu ma ~400 px szerokości przy gęstości 2–3×, więc to wystarcza z zapasem. Pełne zdjęcia zajmują 3,7 MB; przy 1200 px i jakości 70 zajmowały 6,6 MB.
+- **Poza precache.** Service Worker zapisuje zdjęcie przy pierwszym obejrzeniu (`CacheFirst`, 90 dni), zamiast dokładać kilka MB do instalacji.
+- **`peakInfo.json` jest osobnym chunkiem** ładowanym przy pierwszym otwarciu panelu, więc bundle startowy go nie niesie.
+- **Atrybucja** — autor na każdej miniaturze, a w podglądzie autor, licencja i link do strony pliku. Pełna lista poniżej.
+
+<details>
+<summary>Autorzy zdjęć i licencje</summary>
+
+| Szczyt | Zdjęcie | Autor | Licencja |
+|---|---|---|---|
+| Zebrzydka | [Zebrzydka z ulicy Spacerowej w Górkach Wielkich](https://commons.wikimedia.org/wiki/File:POL_G%C3%B3rki_Wielkie_Zebrzydka_ze_Spacerowej.JPG) | D T G | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0) |
+| Orłowa | [Orłowa z Trzech Kopców Wiślańskich, w tle Równica](https://commons.wikimedia.org/wiki/File:Orlowa.jpg) | Adrian Tync | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Orłowa | [Orłowa widziana z Czantorii Wielkiej](https://commons.wikimedia.org/wiki/File:Or%C5%82owa_B%C5%9A3_(2).jpg) | Jerzy Opioła | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Orłowa | [Widok na Równicę z hali pod Orłową](https://commons.wikimedia.org/wiki/File:Or%C5%82owa_Beskid_%C5%9Al%C4%85ski.JPG) | Pudelek | [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/) |
+| Błatnia | [Wierzchołek Błatniej](https://commons.wikimedia.org/wiki/File:B%C5%82atnia_2024.jpg) | Kamil Czaiński | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Błatnia | [Schronisko PTTK na Błatniej](https://commons.wikimedia.org/wiki/File:Schronisko_na_B%C5%82atniej_B%C5%9A4.jpg) | Jerzy Opioła | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Błatnia | [Symboliczny tron na szczycie](https://commons.wikimedia.org/wiki/File:B%C5%82atnia,_tron_na_szczycie_01.jpg) | Kamil Czaiński | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Świniorka | [Widok z Trzech Kopców Wiślańskich na północ — z lewej Świniorka, w głębi Pasmo Błatniej](https://commons.wikimedia.org/wiki/File:Widok_z_Trzech_Kopc%C3%B3w_B%C5%9A3.jpg) | Jerzy Opioła | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Gościejów | [Wierzchołek zimą, na żółtym szlaku](https://commons.wikimedia.org/wiki/File:Wierch_Go%C5%9Bciej%C3%B3w_summit_winter_2022.jpg) | Adrian Tync | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Gościejów | [Rzeźba Raspazjana pamięci Arkadiusza Kremzy](https://commons.wikimedia.org/wiki/File:Wierch_Go%C5%9Bciej%C3%B3w_Arkadiusz_Kremza_memorial_close-up.jpg) | Adrian Tync | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Hyrca | [Hyrca (Beskid Mały)](https://commons.wikimedia.org/wiki/File:Hyrca-Beskidy_2009_r._833.jpg) | Bastet78 | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| Czupel | [Czupel widziany z Trzech Kopców Wiślańskich](https://commons.wikimedia.org/wiki/File:Brenna_Czupel.jpg) | Adrian Tync | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Mały Cisowy | [Widok z Trzech Kopców Wiślańskich — Mała Cisowa w głębi, pośrodku](https://commons.wikimedia.org/wiki/File:Widok_z_Trzech_Kopc%C3%B3w_B%C5%9A3.jpg) | Jerzy Opioła | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Mały Cisowy | [Mały Cisowy i Czupel znad stawu Maciek w Goczałkowicach-Zdroju](https://commons.wikimedia.org/wiki/File:Ma%C5%82y_Cisowy_Maciek.jpg) | Adrian Tync | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Biały Krzyż | [Słup graniczny Brennej i Szczyrku na Białym Krzyżu](https://commons.wikimedia.org/wiki/File:POL_Brenna_Szczyrk_kamie%C5%84_graniczny_na_Bia%C5%82ym_Krzy%C5%BCu.jpg) | D T G | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| Biały Krzyż | [Przełęcz Salmopolska pod szczytem](https://commons.wikimedia.org/wiki/File:Prze%C5%82%C4%99cz_Salmopolska_BS2.jpg) | Jerzy Opioła | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Stary Groń | [Wieża widokowa na Starym Groniu](https://commons.wikimedia.org/wiki/File:Stary_Gro%C5%84_tower.jpg) | Adrian Tync | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Stary Groń | [Zimowy widok z wieży: dolina Hołcyny i pasmo Kotarza](https://commons.wikimedia.org/wiki/File:View_from_Stary_Gro%C5%84_(Beskid_%C5%9Al%C4%85ski).jpg) | Jendrusk | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Beskidek | [Masyw Beskidka od strony Szczyrku (osiedle Podmagura)](https://commons.wikimedia.org/wiki/File:Beskidek_widziany_z_Osiedla_Podmagura.jpg) | Viroitu | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
+| Kotarz | [Kotarz z masztem przekaźnika, widziany z Przełęczy Salmopolskiej](https://commons.wikimedia.org/wiki/File:Salmopolska_saddle_view_on_Kotarz_2.jpg) | Andrzej Kępys | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Kotarz | [Kamienny ołtarz na Kotarzu](https://commons.wikimedia.org/wiki/File:Kamienny_o%C5%82tarz_na_g%C3%B3rze_Kotarz_2009_r._914.jpg) | Bastet78 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Kotarz | [Kotarz od wschodu](https://commons.wikimedia.org/wiki/File:Kotarz_B%C5%9A3.jpg) | Jerzy Opioła | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Horzelica | [Punkt triangulacyjny na szczycie Horzelicy](https://commons.wikimedia.org/wiki/File:Horzelica_trig_point.jpg) | Adrian Tync | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Wielka Cisowa | [Bezleśny grzbiet Wielkiej Cisowej](https://commons.wikimedia.org/wiki/File:Wielka_Cisowa_B%C5%9A4_(2).jpg) | Jerzy Opioła | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Wielka Cisowa | [Łubin przy krzyżu na grzbiecie](https://commons.wikimedia.org/wiki/File:Wielka_Cisowa_B%C5%9A4.jpg) | Jerzy Opioła | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Wielka Cisowa | [Tabliczka na szczycie](https://commons.wikimedia.org/wiki/File:Wielka_Cisowa_872.JPG) | Jacek downey | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) |
+| Stołów | [Stołów (pośrodku) widziany z Hyrcy](https://commons.wikimedia.org/wiki/File:Sto%C5%82%C3%B3w.jpg) | Adrian Tync | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Stołów | [Szlak przez Stołów](https://commons.wikimedia.org/wiki/File:Sto%C5%82%C3%B3w_w_Beskidzie_%C5%9Alaskim.jpg) | Mariuszjbie | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| Jaworzyna | [Jawierzny (Jaworzyna) widziane z Czupla nad Wisłą](https://commons.wikimedia.org/wiki/File:Wisla_Jawierzny_799.jpg) | Adrian Tync | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Równica | [Polana pod szczytem Równicy](https://commons.wikimedia.org/wiki/File:R%C3%B3wnica_szczyt_p.jpg) | Przykuta | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Równica | [Równica](https://commons.wikimedia.org/wiki/File:R%C3%B3wnica_p.jpg) | Przykuta | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Równica | [Restauracja Dwór Skibówki na Równicy](https://commons.wikimedia.org/wiki/File:R%C3%B3wnica_B%C5%9A5.jpg) | Jerzy Opioła | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Trzy Kopce | [Wierzchołek Trzech Kopców](https://commons.wikimedia.org/wiki/File:Trzy_Kopce_Beskid_Slaski.jpg) | Adrian Tync | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Trzy Kopce | [Ruiny schroniska na Trzech Kopcach (2005)](https://commons.wikimedia.org/wiki/File:Ruiny_schroniska_na_Trzech_Kopcach_w_Beskidzie_Slaskim.jpg) | Ela Lesiak | [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/) |
+| Trzy Kopce Wiślańskie | [Trzy głazy w miejscu styku granic Ustronia, Wisły i Brennej](https://commons.wikimedia.org/wiki/File:G%C5%82azy_na_szczycie_Trzech_Kopc%C3%B3w_Wi%C5%9Bla%C5%84skich_w_Beskidzie_%C5%9Al%C4%85skim,_20260412_1033_0042.jpg) | Jakub Hałun | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
+| Trzy Kopce Wiślańskie | [Na grzbiecie Trzech Kopców Wiślańskich](https://commons.wikimedia.org/wiki/File:Trzy_Kopce_Wi%C5%9Bla%C5%84skie_B%C5%9A3_(3).jpg) | Jerzy Opioła | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Trzy Kopce Wiślańskie | [Owce na szczycie, kwiecień 2026](https://commons.wikimedia.org/wiki/File:Stado_owiec_na_Trzech_Kopcach_Wi%C5%9Bla%C5%84skich_w_Beskidzie_%C5%9Al%C4%85skim,_20260412_1055_0052.jpg) | Jakub Hałun | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
+| Trzy Kopce Wiślańskie | [Cumulonimbus o zachodzie słońca](https://commons.wikimedia.org/wiki/File:Trzy_Kopce_Wi%C5%9Bla%C5%84skie_-_Cumulonimbus.jpg) | Mstudnicki | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Grabowa | [Szczyt Grabowej](https://commons.wikimedia.org/wiki/File:POL_Grabowa_w_Beskidzie_%C5%9Al%C4%85skim.jpg) | D T G | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| Grabowa | [Oznaczenie szczytu zimą](https://commons.wikimedia.org/wiki/File:Grabowa_peak_guidepost.jpg) | Jendrusk | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+
+</details>
 
 ---
 
@@ -366,15 +452,18 @@ Po wczytaniu planu dni są przeliczane po realnych szlakach i liczby się zmieni
 korona-gor-brennej/
 ├── index.html
 ├── vite.config.ts                 # base: './' — działa z podkatalogu
+├── public/peaks/                  # zdjęcia szczytów z Commons (WebP + miniatury)
 ├── tools/
 │   ├── build-trails.py            # sieć ścieżek z OSM → trails.json
-│   └── build-elevation.py         # siatka SRTM → elevation.json
+│   ├── build-elevation.py         # siatka SRTM → elevation.json
+│   └── build-peak-photos.py       # zdjęcia i licencje z Commons → public/peaks/
 └── src/
     ├── App.tsx                    # 6 zakładek, wspólny stan wybranego dnia
     ├── types.ts
     ├── index.css                  # tokeny motywu, warstwa komponentów
     ├── data/
     │   ├── peaks.json  peaks.ts   # 20 szczytów
+    │   ├── peakInfo.json          # opisy i zdjęcia szczytów (osobny chunk)
     │   ├── startPoints.ts         # 8 parkingów ze współrzędnymi i wysokością
     │   ├── routes.ts              # 4 warianty gminy
     │   ├── event.ts               # kontakt, FAQ, imprezy, sponsor
@@ -394,7 +483,7 @@ korona-gor-brennej/
     │   ├── progress.ts            # zustand + persist → localStorage
     │   └── media.ts               # idb → IndexedDB (zdjęcia)
     ├── features/
-    │   ├── checklist/             # Checklist, PeakCard, PeakSheet
+    │   ├── checklist/             # Checklist, PeakCard, PeakSheet, PeakInfo
     │   ├── map/                   # MapView + DayTrack + DaySummary
     │   ├── planner/               # Planner, ElevationProfile
     │   ├── export/                # ExportView, collage, backup
@@ -413,6 +502,21 @@ interface Peak {              // statyczne, z peaks.json
   id: string; no: number; name: string
   ele: number; lat: number; lon: number
   note?: string; verify?: string    // verify = rozbieżność do potwierdzenia
+  mapy?: string               // link do obiektu w Mapy.com
+}
+
+interface PeakInfo {          // statyczne, z peakInfo.json (klucz = Peak.id)
+  range?: string              // pasmo
+  summary: string
+  highlights: string[]
+  wiki?: { title: string; url: string; note?: string }
+  photos: PeakPhoto[]
+}
+
+interface PeakPhoto {
+  commons: string; caption: string        // redagowane ręcznie
+  src: string; thumb: string; w: number; h: number
+  author: string; license: string; licenseUrl?: string; page: string  // z Commons, przez skrypt
 }
 
 interface PeakProgress {      // localStorage
@@ -457,16 +561,17 @@ Wpychanie zdjęć do localStorage, choćby jako base64, to najczęstszy błąd w
 
 | Chunk | Rozmiar | gzip | Kiedy się ładuje |
 |---|---|---|---|
-| `index` | 295 KB | **99 KB** | start |
+| `index` | 302 KB | **101 KB** | start |
 | `index.css` | 51 KB | 14 KB | start |
 | `map` (Leaflet) | 299 KB | 91 KB | zakładka Mapa |
 | `trails` | 648 KB | 229 KB | pierwsze liczenie trasy |
 | `elevation` | 112 KB | 39 KB | pierwsze liczenie trasy |
+| `peakInfo` | 30 KB | 8 KB | pierwsze otwarcie panelu szczytu |
 | `jspdf` + `html2canvas` + `purify` | 742 KB | 173 KB | dopiero przy eksporcie PDF |
 
 jsPDF ciągnął 380 KB zależności do bundla startowego, dopóki nie trafił na dynamiczny import. Dane routingu tak samo — statyczny import wpychał je do `index` i podnosił start do 341 KB gzip.
 
-Service Worker precache'uje 16 plików, łącznie **2,1 MB** — czyli po pierwszym uruchomieniu routing i cała aplikacja działają offline. Kafelki OSM mają osobną regułę `CacheFirst` z ważnością 30 dni.
+Service Worker precache'uje 17 plików, łącznie **2,1 MB** — czyli po pierwszym uruchomieniu routing i cała aplikacja działają offline. Kafelki OSM mają osobną regułę `CacheFirst` z ważnością 30 dni, zdjęcia szczytów — `CacheFirst` z ważnością 90 dni (w trybie offline widać te, które się już raz obejrzało).
 
 ---
 
@@ -504,6 +609,7 @@ Deklaracja „zero śledzenia" musi mieć pokrycie w kodzie, nie tylko w opisie:
 - postęp, zdjęcia i notatki żyją wyłącznie w `localStorage` i IndexedDB przeglądarki użytkownika,
 - **film z YouTube ładuje się dopiero po kliknięciu.** Zwykły embed odpytuje Google przy samym otwarciu strony; tutaj podgląd to własna grafika SVG, a po kliknięciu ładowany jest `youtube-nocookie.com`. Zweryfikowane w headless: na zakładce Info **nie ma żadnego zasobu z obcej domeny** przed kliknięciem,
 - **logo sponsora leży lokalnie** w `public/`, nie jest wczytywane z `facelove.pl` — inaczej każde otwarcie aplikacji byłoby zapytaniem do serwera firmy. Przy okazji zmniejszone z 1400 px / 56 KB do 600 px / 11 KB i działa offline,
+- **zdjęcia szczytów też leżą lokalnie** w `public/peaks/`. Otwarcie panelu szczytu nie wysyła nic do Wikimedia, a Wikipedia i Commons otwierają się dopiero po kliknięciu w link,
 - jedyne zapytania sieciowe w normalnej pracy to **kafelki map** (OpenStreetMap, OpenTopoMap, Waymarked Trails).
 
 Konsekwencja, o której UI mówi wprost: **wyczyszczenie danych przeglądarki kasuje postęp**. Stąd przypomnienia o backupie i eksport całego stanu do pliku.
@@ -512,12 +618,15 @@ Konsekwencja, o której UI mówi wprost: **wyczyszczenie danych przeglądarki ka
 
 ## 10. Narzędzia budujące dane
 
-Oba skrypty uruchamia się **ręcznie**, tylko gdy trzeba odświeżyć dane z OSM. Nie są częścią builda — wynik jest wersjonowany w repo.
+Skrypty uruchamia się **ręcznie**, tylko gdy trzeba odświeżyć dane z OSM, SRTM albo Commons. Nie są częścią builda — wynik jest wersjonowany w repo.
 
 ```bash
-python3 tools/build-trails.py      # ~15 s, → src/data/trails.json
-python3 tools/build-elevation.py   # ~5 min, → src/data/elevation.json
+python3 tools/build-trails.py        # ~15 s, → src/data/trails.json
+python3 tools/build-elevation.py     # ~5 min, → src/data/elevation.json
+python3 tools/build-peak-photos.py   # ~1 min, → public/peaks/*.webp + metadane w peakInfo.json (wymaga Pillow)
 ```
+
+`build-peak-photos.py` niczego nie wybiera sam. Czyta z `peakInfo.json` ręcznie wpisane pola `commons` (nazwa pliku) i `caption`, a uzupełnia tylko pola pochodne: wymiary, miniatury, autora, licencję, link do strony pliku i `wiki.url`. Żeby zmienić zdjęcie, podmienia się nazwę pliku w JSON i uruchamia skrypt. Pliki, które przestały być używane, skrypt usuwa.
 
 Pułapki, na które warto uważać przy modyfikacji:
 
@@ -525,6 +634,8 @@ Pułapki, na które warto uważać przy modyfikacji:
 - Przynależność do szlaku PTTK jest tagiem **relacji**, nie odcinka. Zapytanie o `marked_trail:*` na samych odcinkach znajduje ich 47; przez relacje `route=hiking` — 833.
 - `api.opentopodata.org` przyjmuje 100 punktów na zapytanie i jedno zapytanie na sekundę. Skrypt ma pauzę 1,1 s i pięć prób ponowienia.
 - Zmiana `STEP_M` w skrypcie wysokości zmienia rozdzielczość i czas pobierania kwadratowo: 180 m to 6 912 punktów i minuta, 90 m to 27 648 punktów i pięć minut.
+- **Commons zwraca miniatury tylko w stałych rozmiarach** — prośba o 800 px daje 960 px. Skrypt pobiera wariant 1920 px i zmniejsza lokalnie.
+- Pole `Artist` w metadanych Commons to **HTML** z linkami do stron użytkowników i dopiskami typu „(talk)” — skrypt zdejmuje znaczniki, zanim zapisze autora.
 
 ---
 
@@ -594,6 +705,12 @@ Sprawdzone tą drogą:
 | Zakładka Info: zero zasobów z obcych domen przed kliknięciem w film | ✅ |
 | Brak poziomego przewijania przy 360 i 390 px | ✅ |
 | Sześć zakładek mieści się na 360 px bez ucinania tekstu | ✅ |
+| Współrzędne 20 szczytów zgodne z punktami Mapy.com (maks. 0,7 m) i z lokalnymi maksimami SRTM | ✅ |
+| Panel każdego z 20 szczytów: opis, link Mapy.com, wszystkie miniatury załadowane | ✅ |
+| Pasek ładuje miniatury, pełne zdjęcie dopiero w podglądzie | ✅ |
+| Podgląd: autor i licencja widoczne, strzałka przełącza zdjęcie, Escape zamyka podgląd, a nie panel | ✅ |
+| Otwarcie panelu szczytu: zero zapytań do obcych domen | ✅ |
+| Każdy plik wskazany w `peakInfo.json` istnieje w `dist/peaks` | ✅ |
 | `tsc -b` bez błędów, `vite build` przechodzi | ✅ |
 
 ### Ograniczenia tej metody

@@ -31,6 +31,15 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,woff2}'],
         runtimeCaching: [
           {
+            // Zdjęcia szczytów nie idą do precache (kilka MB) — zapisują się przy pierwszym obejrzeniu.
+            urlPattern: /\/peaks\/[^/]+\.webp$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'peak-photos',
+              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 90 },
+            },
+          },
+          {
             urlPattern: /^https:\/\/[abc]\.tile\.openstreetmap\.org\/.*/i,
             handler: 'CacheFirst',
             options: {

@@ -1,0 +1,791 @@
+{
+  "$comment": "Opisy szczytów zredagowane na podstawie polskiej Wikipedii (CC BY-SA 4.0), stan na 2026-09-13. Wybór zdjęć i podpisy — ręcznie. Pola src/w/h/author/license/licenseUrl/page oraz wiki.url uzupełnia tools/build-peak-photos.py.",
+  "peaks": {
+    "zebrzydka": {
+      "range": "Pasmo Błatniej",
+      "summary": "Niewielki, kształtny kopiec o stromych stokach — ostatni szczyt Pasma Błatniej, górujący od wschodu nad Górkami Wielkimi. Góra jest cała zalesiona, a pod szczytem zachowały się płaty żyznej buczyny karpackiej. Na starszych mapach występuje też jako Rzebrzydka albo Rzybrzyczka.",
+      "highlights": [
+        "Przez wierzchołek biegnie zielony szlak ze Skoczowa",
+        "Między Zebrzydką a Łazkiem leży przełęcz Liszka (516 m)",
+        "Cała góra należy do Parku Krajobrazowego Beskidu Śląskiego"
+      ],
+      "wiki": {
+        "title": "Zebrzydka",
+        "url": "https://pl.wikipedia.org/wiki/Zebrzydka"
+      },
+      "photos": [
+        {
+          "commons": "POL Górki Wielkie Zebrzydka ze Spacerowej.JPG",
+          "caption": "Zebrzydka z ulicy Spacerowej w Górkach Wielkich",
+          "src": "zebrzydka-1.webp",
+          "w": 960,
+          "h": 720,
+          "author": "D T G",
+          "license": "CC BY 3.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:POL_G%C3%B3rki_Wielkie_Zebrzydka_ze_Spacerowej.JPG",
+          "thumb": "zebrzydka-1.thumb.webp"
+        }
+      ]
+    },
+    "orlowa": {
+      "range": "Pasmo Równicy",
+      "summary": "Góra o czterech wierzchołkach, w kształcie rogalika zwróconego rogami na południe; najwyższy (813 m) leży w głównym grzbiecie Pasma Równicy. Wzdłuż wewnętrznego łuku ciągną się widokowe polany z zabudowaniami osiedla Orłowa. Grzbietem biegnie granica Brennej i Ustronia.",
+      "highlights": [
+        "Z polany szczytowej widać Równicę, Ustroń i Wisłę — od Czantorii przez Stożek po Baranią Górę",
+        "Na północno-wschodnich stokach resztki partyzanckiej ziemianki „bunkra w Grapach” z zimy 1944/45",
+        "Szlakiem z Równicy ok. 1:15 h, z Trzech Kopców Wiślańskich ok. 1:30 h"
+      ],
+      "wiki": {
+        "title": "Orłowa (szczyt)",
+        "url": "https://pl.wikipedia.org/wiki/Or%C5%82owa_(szczyt)"
+      },
+      "photos": [
+        {
+          "commons": "Orlowa.jpg",
+          "caption": "Orłowa z Trzech Kopców Wiślańskich, w tle Równica",
+          "src": "orlowa-1.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Adrian Tync",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Orlowa.jpg",
+          "thumb": "orlowa-1.thumb.webp"
+        },
+        {
+          "commons": "Orłowa BŚ3 (2).jpg",
+          "caption": "Orłowa widziana z Czantorii Wielkiej",
+          "src": "orlowa-2.webp",
+          "w": 960,
+          "h": 640,
+          "author": "Jerzy Opioła",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Or%C5%82owa_B%C5%9A3_(2).jpg",
+          "thumb": "orlowa-2.thumb.webp"
+        },
+        {
+          "commons": "Orłowa Beskid Śląski.JPG",
+          "caption": "Widok na Równicę z hali pod Orłową",
+          "src": "orlowa-3.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Pudelek",
+          "license": "CC BY-SA 3.0",
+          "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+          "page": "https://commons.wikimedia.org/wiki/File:Or%C5%82owa_Beskid_%C5%9Al%C4%85ski.JPG",
+          "thumb": "orlowa-3.thumb.webp"
+        }
+      ]
+    },
+    "blatnia": {
+      "range": "Pasmo Klimczoka i Szyndzielni",
+      "summary": "Szczyt na zachodnim krańcu Pasma Klimczoka i Szyndzielni, od którego odchodzi Pasmo Błatniej. Kopiec na wierzchołku daje jedną z nielicznych w Beskidzie Śląskim pełnych, dookolnych panoram — od Klimczoka i Skrzycznego po Czantorię i Łysą Górę, a na północy po Bielsko-Białą i Zbiornik Goczałkowicki. W przewodnikach bywa nazywana Błotnym.",
+      "highlights": [
+        "Schronisko PTTK z lat 1925–1926 tuż pod szczytem",
+        "Na wierzchołku symboliczny drewniany tron",
+        "Węzeł szlaków: Klimczok, Szyndzielnia, Przełęcz Salmopolska, Brenna, Jaworze",
+        "Tu stykają się granice Bielska-Białej, Jaworza i Brennej"
+      ],
+      "wiki": {
+        "title": "Błatnia",
+        "url": "https://pl.wikipedia.org/wiki/B%C5%82atnia"
+      },
+      "photos": [
+        {
+          "commons": "Błatnia 2024.jpg",
+          "caption": "Wierzchołek Błatniej",
+          "src": "blatnia-1.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Kamil Czaiński",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:B%C5%82atnia_2024.jpg",
+          "thumb": "blatnia-1.thumb.webp"
+        },
+        {
+          "commons": "Schronisko na Błatniej BŚ4.jpg",
+          "caption": "Schronisko PTTK na Błatniej",
+          "src": "blatnia-2.webp",
+          "w": 960,
+          "h": 670,
+          "author": "Jerzy Opioła",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Schronisko_na_B%C5%82atniej_B%C5%9A4.jpg",
+          "thumb": "blatnia-2.thumb.webp"
+        },
+        {
+          "commons": "Błatnia, tron na szczycie 01.jpg",
+          "caption": "Symboliczny tron na szczycie",
+          "src": "blatnia-3.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Kamil Czaiński",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:B%C5%82atnia,_tron_na_szczycie_01.jpg",
+          "thumb": "blatnia-3.thumb.webp"
+        }
+      ]
+    },
+    "swiniorka": {
+      "range": "Pasmo Równicy",
+      "summary": "Szczyt w Paśmie Równicy między Orłową a Zakrzoskiem, na Wikipedii i części map jako Świniarka. Stoki północno-wschodnie to w większości pola Brennej, dlatego z grzbietu otwierają się widoki na zachód, północ i wschód. Grzbietem biegnie granica Brennej i Ustronia.",
+      "highlights": [
+        "Przy szlaku w stronę osiedla Jastrzębie tablica upamiętniająca desant 10 radzieckich spadochroniarzy z nocy 23/24 sierpnia 1944 r.",
+        "Na stoku ku dolinie Leśnianki dwa niewielkie wyciągi narciarskie",
+        "Szlak Równica – Orłowa – Świniarka – Trzy Kopce Wiślańskie"
+      ],
+      "wiki": {
+        "title": "Świniarka (Beskid Śląski)",
+        "url": "https://pl.wikipedia.org/wiki/%C5%9Awiniarka_(Beskid_%C5%9Al%C4%85ski)"
+      },
+      "photos": [
+        {
+          "commons": "Widok z Trzech Kopców BŚ3.jpg",
+          "caption": "Widok z Trzech Kopców Wiślańskich na północ — z lewej Świniorka, w głębi Pasmo Błatniej",
+          "src": "swiniorka-1.webp",
+          "w": 960,
+          "h": 613,
+          "author": "Jerzy Opioła",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Widok_z_Trzech_Kopc%C3%B3w_B%C5%9A3.jpg",
+          "thumb": "swiniorka-1.thumb.webp"
+        }
+      ]
+    },
+    "gosciejow": {
+      "range": "Pasmo Równicy",
+      "summary": "Niepozorne, dwuwierzchołkowe wzniesienie w głównym grzbiecie Pasma Równicy, między Smrekowcem a Trzema Kopcami Wiślańskimi. Wyższy jest wierzchołek południowy. Masyw jest zalesiony, z dwiema polanami — osiedlem Suchowianka i wiślańskim Wierchem Gościejów.",
+      "highlights": [
+        "Przez oba wierzchołki biegnie żółty szlak z Wisły na Przełęcz Salmopolską",
+        "Na wierzchołku drewniana rzeźba Raspazjana poświęcona pamięci Arkadiusza Kremzy",
+        "Grzbietem biegnie granica Wisły i Brennej"
+      ],
+      "wiki": {
+        "title": "Gościejów (szczyt)",
+        "url": "https://pl.wikipedia.org/wiki/Go%C5%9Bciej%C3%B3w_(szczyt)"
+      },
+      "photos": [
+        {
+          "commons": "Wierch Gościejów summit winter 2022.jpg",
+          "caption": "Wierzchołek zimą, na żółtym szlaku",
+          "src": "gosciejow-1.webp",
+          "w": 960,
+          "h": 640,
+          "author": "Adrian Tync",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Wierch_Go%C5%9Bciej%C3%B3w_summit_winter_2022.jpg",
+          "thumb": "gosciejow-1.thumb.webp"
+        },
+        {
+          "commons": "Wierch Gościejów Arkadiusz Kremza memorial close-up.jpg",
+          "caption": "Rzeźba Raspazjana pamięci Arkadiusza Kremzy",
+          "src": "gosciejow-2.webp",
+          "w": 640,
+          "h": 960,
+          "author": "Adrian Tync",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Wierch_Go%C5%9Bciej%C3%B3w_Arkadiusz_Kremza_memorial_close-up.jpg",
+          "thumb": "gosciejow-2.thumb.webp"
+        }
+      ]
+    },
+    "hyrca": {
+      "range": "Beskid Węgierski",
+      "summary": "Nazywana też Beskidem Małym — wzniesienie w grzbiecie Beskidu Węgierskiego, który łączy Pasmo Klimczoka i Szyndzielni z resztą Beskidu Śląskiego. Stoki są w większości zalesione, z polanami. Grzbietem biegnie granica Szczyrku i Brennej.",
+      "highlights": [
+        "Czerwony szlak z Przełęczy Salmopolskiej na Klimczok",
+        "Z doliny potoku Węgierski w Brennej na szczyt prowadzą orczyki tzw. wyciągów na Kotarzu — ok. 1100 m długości i 360 m różnicy wysokości",
+        "Ok. 1,8 km w linii prostej na północny wschód od Kotarza"
+      ],
+      "wiki": {
+        "title": "Hyrca",
+        "url": "https://pl.wikipedia.org/wiki/Hyrca"
+      },
+      "photos": [
+        {
+          "commons": "Hyrca-Beskidy 2009 r. 833.jpg",
+          "caption": "Hyrca (Beskid Mały)",
+          "src": "hyrca-1.webp",
+          "w": 720,
+          "h": 960,
+          "author": "Bastet78",
+          "license": "CC BY-SA 3.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Hyrca-Beskidy_2009_r._833.jpg",
+          "thumb": "hyrca-1.thumb.webp"
+        }
+      ]
+    },
+    "czupel": {
+      "range": "Pasmo Błatniej",
+      "summary": "Wyraźne wzniesienie w głównym grzbiecie Pasma Błatniej, między Łazkiem a Małym Cisowym. Szczyt jest zalesiony, a na stokach południowych i południowo-zachodnich widać wyrobiska kamieniołomów, częściowo już nieczynnych. Nazwa „czupel” oznacza w Beskidach górę o ostrym wierzchołku.",
+      "highlights": [
+        "Czerwony szlak Jaworze-Nałęże – Łazek – Czupel – Błatnia (4,7 km, ok. 1:50 h)",
+        "Stok południowo-zachodni opada do Brennicy, północno-wschodni do Jasienicy"
+      ],
+      "wiki": {
+        "title": "Czupel (736 m)",
+        "url": "https://pl.wikipedia.org/wiki/Czupel_(736_m)"
+      },
+      "photos": [
+        {
+          "commons": "Brenna Czupel.jpg",
+          "caption": "Czupel widziany z Trzech Kopców Wiślańskich",
+          "src": "czupel-1.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Adrian Tync",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Brenna_Czupel.jpg",
+          "thumb": "czupel-1.thumb.webp"
+        }
+      ]
+    },
+    "maly-cisowy": {
+      "range": "Pasmo Błatniej",
+      "summary": "Ledwo zauważalne spiętrzenie grzbietu Pasma Błatniej między Wielką Cisową a Czuplem, opadające wyraźnym progiem ku Czuplowi. Szczytowe polany dają dookolną panoramę — na dolinę Brennicy, Pogórze Cieszyńskie i wiele szczytów. Bywa nazywany Małą Cisową.",
+      "highlights": [
+        "Polany od Czupla po Błatnią to dawny ośrodek szałaśnictwa — szałasy wzmiankowano tu od XVII w.",
+        "Słabo już czytelne ślady okopów z 1939 i z lat 1944/45",
+        "Czerwony szlak Jaworze-Nałęże – Błatnia",
+        "Stoki północne należą do Jaworza, południowe do Brennej"
+      ],
+      "wiki": {
+        "title": "Mały Cisowy",
+        "url": "https://pl.wikipedia.org/wiki/Ma%C5%82y_Cisowy"
+      },
+      "photos": [
+        {
+          "commons": "Widok z Trzech Kopców BŚ3.jpg",
+          "caption": "Widok z Trzech Kopców Wiślańskich — Mała Cisowa w głębi, pośrodku",
+          "src": "swiniorka-1.webp",
+          "w": 960,
+          "h": 613,
+          "author": "Jerzy Opioła",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Widok_z_Trzech_Kopc%C3%B3w_B%C5%9A3.jpg",
+          "thumb": "swiniorka-1.thumb.webp"
+        },
+        {
+          "commons": "Mały Cisowy Maciek.jpg",
+          "caption": "Mały Cisowy i Czupel znad stawu Maciek w Goczałkowicach-Zdroju",
+          "src": "maly-cisowy-2.webp",
+          "w": 960,
+          "h": 640,
+          "author": "Adrian Tync",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Ma%C5%82y_Cisowy_Maciek.jpg",
+          "thumb": "maly-cisowy-2.thumb.webp"
+        }
+      ]
+    },
+    "bialy-krzyz": {
+      "range": "Beskid Węgierski",
+      "summary": "Mało wybitny szczyt na płaskim, zalesionym grzbiecie tuż nad Przełęczą Salmopolską. Do II wojny światowej wzniesienie nie miało nazwy — „Biały Krzyż” oznaczał samą przełęcz, na której do dziś stoi biały krzyż. Nie wiadomo, kto i dlaczego przeniósł nazwę na szczyt.",
+      "highlights": [
+        "Ok. 250 m od Przełęczy Salmopolskiej (934 m), przez którą biegnie droga Wisła – Szczyrk",
+        "Kamienny słup graniczny Brennej i Szczyrku",
+        "Czerwony szlak z przełęczy na Klimczok"
+      ],
+      "wiki": {
+        "title": "Biały Krzyż (szczyt)",
+        "url": "https://pl.wikipedia.org/wiki/Bia%C5%82y_Krzy%C5%BC_(szczyt)"
+      },
+      "photos": [
+        {
+          "commons": "POL Brenna Szczyrk kamień graniczny na Białym Krzyżu.jpg",
+          "caption": "Słup graniczny Brennej i Szczyrku na Białym Krzyżu",
+          "src": "bialy-krzyz-1.webp",
+          "w": 960,
+          "h": 720,
+          "author": "D T G",
+          "license": "CC BY-SA 3.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:POL_Brenna_Szczyrk_kamie%C5%84_graniczny_na_Bia%C5%82ym_Krzy%C5%BCu.jpg",
+          "thumb": "bialy-krzyz-1.thumb.webp"
+        },
+        {
+          "commons": "Przełęcz Salmopolska BS2.jpg",
+          "caption": "Przełęcz Salmopolska pod szczytem",
+          "src": "bialy-krzyz-2.webp",
+          "w": 1280,
+          "h": 505,
+          "author": "Jerzy Opioła",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Prze%C5%82%C4%99cz_Salmopolska_BS2.jpg",
+          "thumb": "bialy-krzyz-2.thumb.webp"
+        }
+      ]
+    },
+    "stary-gron": {
+      "range": "grzbiet Starego Gronia",
+      "summary": "Szczyt i zarazem nazwa całego, prawie płaskiego grzbietu odchodzącego od Grabowej na północny zachód, między dolinami Leśnicy i Hołcyny. To najstarszy w Brennej ośrodek szałaśnictwa — pierwszy szałas powstał tu w XVII w., a owce wypasano jeszcze w latach 60. XX w. Na mapach Geoportalu nazwy Starego Gronia i Horzelicy są zamienione.",
+      "highlights": [
+        "Tuż pod szczytem drewniana wieża widokowa o wysokości 12 m",
+        "Na polanach jedne z najbogatszych w Polsce stanowisk naparstnicy purpurowej (kwitnie latem)",
+        "Czarny szlak z Brennej na Grabową biegnie przez cały grzbiet"
+      ],
+      "wiki": {
+        "title": "Stary Groń (Beskid Śląski)",
+        "url": "https://pl.wikipedia.org/wiki/Stary_Gro%C5%84_(Beskid_%C5%9Al%C4%85ski)"
+      },
+      "photos": [
+        {
+          "commons": "Stary Groń tower.jpg",
+          "caption": "Wieża widokowa na Starym Groniu",
+          "src": "stary-gron-1.webp",
+          "w": 960,
+          "h": 640,
+          "author": "Adrian Tync",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Stary_Gro%C5%84_tower.jpg",
+          "thumb": "stary-gron-1.thumb.webp"
+        },
+        {
+          "commons": "View from Stary Groń (Beskid Śląski).jpg",
+          "caption": "Zimowy widok z wieży: dolina Hołcyny i pasmo Kotarza",
+          "src": "stary-gron-2.webp",
+          "w": 1280,
+          "h": 280,
+          "author": "Jendrusk",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:View_from_Stary_Gro%C5%84_(Beskid_%C5%9Al%C4%85ski).jpg",
+          "thumb": "stary-gron-2.thumb.webp"
+        }
+      ]
+    },
+    "beskidek": {
+      "range": "Beskid Węgierski",
+      "summary": "Wierzchołek na grzbiecie Beskidu Węgierskiego między Hyrcą a przełęczą Karkoszczonką, na granicy Szczyrku i Brennej. Stoki od strony Brennej są zalesione, szczyrkowskie opadają ku dolinie Żylicy. Wikipedia i część map nazywają Beskidkiem także wyższy Beskid (860 m) — organizator liczy wierzchołek 830 m, przez który biegnie szlak.",
+      "highlights": [
+        "Czerwony szlak Przełęcz Salmopolska – Hyrca – Beskidek – Karkoszczonka – Klimczok",
+        "Na północ grzbiet opada do przełęczy Karkoszczonka (723 m), za którą wznoszą się Trzy Kopce"
+      ],
+      "wiki": {
+        "title": "Beskidek (860 m)",
+        "note": "artykuł opisuje sąsiedni, wyższy wierzchołek",
+        "url": "https://pl.wikipedia.org/wiki/Beskidek_(860_m)"
+      },
+      "photos": [
+        {
+          "commons": "Beskidek widziany z Osiedla Podmagura.jpg",
+          "caption": "Masyw Beskidka od strony Szczyrku (osiedle Podmagura)",
+          "src": "beskidek-1.webp",
+          "w": 960,
+          "h": 638,
+          "author": "Viroitu",
+          "license": "CC BY 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Beskidek_widziany_z_Osiedla_Podmagura.jpg",
+          "thumb": "beskidek-1.thumb.webp"
+        }
+      ]
+    },
+    "kotarz": {
+      "range": "Beskid Węgierski",
+      "summary": "Najwyższe wypiętrzenie grzbietu między Przełęczą Salmopolską a Karkoszczonką, nad Szczyrkiem-Soliskiem. Polany na stokach ku Żylicy mają doskonały widok na Skrzyczne, a zbocza zachodnie są kamieniste, z rumowiskami i rozpadlinami. Boczny grzbiet z Halą Jaworową przez wieki był ośrodkiem pasterskim — „Szałas Kotarz” wzmiankowano już w 1689 r.",
+      "highlights": [
+        "Na górze kamienny ołtarz; na polanach od strony Szczyrku maszt przekaźnika",
+        "Żyją tu gatunki chronione: storczyki, widłaki, puszczyk uralski, wilki i — w sam raz na tegoroczną edycję — nietoperze",
+        "W 2022 r. mieszkańcy i turyści zablokowali plan zabudowy Hali Jaworowej hotelem i apartamentami",
+        "Z Przełęczy Salmopolskiej ok. 50 min, z Brennej ok. 2 h"
+      ],
+      "wiki": {
+        "title": "Kotarz (Beskid Śląski)",
+        "url": "https://pl.wikipedia.org/wiki/Kotarz_(Beskid_%C5%9Al%C4%85ski)"
+      },
+      "photos": [
+        {
+          "commons": "Salmopolska saddle view on Kotarz 2.jpg",
+          "caption": "Kotarz z masztem przekaźnika, widziany z Przełęczy Salmopolskiej",
+          "src": "kotarz-1.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Andrzej Kępys",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Salmopolska_saddle_view_on_Kotarz_2.jpg",
+          "thumb": "kotarz-1.thumb.webp"
+        },
+        {
+          "commons": "Kamienny ołtarz na górze Kotarz 2009 r. 914.jpg",
+          "caption": "Kamienny ołtarz na Kotarzu",
+          "src": "kotarz-2.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Bastet78",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Kamienny_o%C5%82tarz_na_g%C3%B3rze_Kotarz_2009_r._914.jpg",
+          "thumb": "kotarz-2.thumb.webp"
+        },
+        {
+          "commons": "Kotarz BŚ3.jpg",
+          "caption": "Kotarz od wschodu",
+          "src": "kotarz-3.webp",
+          "w": 960,
+          "h": 590,
+          "author": "Jerzy Opioła",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Kotarz_B%C5%9A3.jpg",
+          "thumb": "kotarz-3.thumb.webp"
+        }
+      ]
+    },
+    "horzelica": {
+      "range": "grzbiet Starego Gronia",
+      "summary": "Najwyższe wzniesienie grzbietu Starego Gronia i jego ostatnie wyraźne spiętrzenie na północy — od Starego Gronia oddziela je przełączka z zabudowaniami i kapliczką. Stoki pokrywają polany w miejscu lasów wypalonych przed wiekami, stąd nazwa (dawniej zapewne Gorzelica). Na mapach Geoportalu opisana jako Stary Groń.",
+      "highlights": [
+        "Jedno z najbogatszych w Polsce stanowisk naparstnicy purpurowej — szacunkowo ponad 100 tys. roślin",
+        "Na szczycie punkt triangulacyjny z przewróconym betonowym słupem",
+        "W 1913 r. na szałasie „Na Horzelicach” wypasano 140 owiec i 11 krów",
+        "Czarny szlak Brenna – Malina – Horzelica – Grabowa"
+      ],
+      "wiki": {
+        "title": "Horzelica",
+        "url": "https://pl.wikipedia.org/wiki/Horzelica"
+      },
+      "photos": [
+        {
+          "commons": "Horzelica trig point.jpg",
+          "caption": "Punkt triangulacyjny na szczycie Horzelicy",
+          "src": "horzelica-1.webp",
+          "w": 960,
+          "h": 640,
+          "author": "Adrian Tync",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Horzelica_trig_point.jpg",
+          "thumb": "horzelica-1.thumb.webp"
+        }
+      ]
+    },
+    "wielka-cisowa": {
+      "range": "Pasmo Błatniej",
+      "summary": "Rozległe, płaskie i w większości bezleśne wypiętrzenie Pasma Błatniej, pierwsze na zachód od Błatniej. Nazwa pochodzi najpewniej od rosnących tu niegdyś cisów. Już w XVI w. mieszkańcy Brennej mieli tu pierwsze górskie pastwisko, a szałas Cisowa wzmiankowano w 1689 r.",
+      "highlights": [
+        "W siodle w stronę Błatniej obelisk po walkach z 12–13 maja 1946 r. i krzyż postawiony przez gminę i mieszkańców",
+        "Ślady fundamentów studenckiego schroniska, które spłonęło w 1994 r.",
+        "Czerwony szlak Jaworze-Nałęże – Błatnia; zielony z Brennej (4,4 km, ok. 1:55 h)"
+      ],
+      "wiki": {
+        "title": "Wielka Cisowa",
+        "url": "https://pl.wikipedia.org/wiki/Wielka_Cisowa"
+      },
+      "photos": [
+        {
+          "commons": "Wielka Cisowa BŚ4 (2).jpg",
+          "caption": "Bezleśny grzbiet Wielkiej Cisowej",
+          "src": "wielka-cisowa-1.webp",
+          "w": 960,
+          "h": 640,
+          "author": "Jerzy Opioła",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Wielka_Cisowa_B%C5%9A4_(2).jpg",
+          "thumb": "wielka-cisowa-1.thumb.webp"
+        },
+        {
+          "commons": "Wielka Cisowa BŚ4.jpg",
+          "caption": "Łubin przy krzyżu na grzbiecie",
+          "src": "wielka-cisowa-2.webp",
+          "w": 960,
+          "h": 640,
+          "author": "Jerzy Opioła",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Wielka_Cisowa_B%C5%9A4.jpg",
+          "thumb": "wielka-cisowa-2.thumb.webp"
+        },
+        {
+          "commons": "Wielka Cisowa 872.JPG",
+          "caption": "Tabliczka na szczycie",
+          "src": "wielka-cisowa-3.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Jacek downey",
+          "license": "CC0",
+          "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "page": "https://commons.wikimedia.org/wiki/File:Wielka_Cisowa_872.JPG",
+          "thumb": "wielka-cisowa-3.thumb.webp"
+        }
+      ]
+    },
+    "stolow": {
+      "range": "Pasmo Klimczoka i Szyndzielni",
+      "summary": "Rozległe, spłaszczone wypiętrzenie między Trzema Kopcami a Błatnią — nazwa zapewne od wierzchołka „płaskiego jak stół”. Dawniej całkowicie porośnięty bukami, dziś w wielu miejscach pokryty zrębami. Na południowy zachód schodzi ramię Bukowego Gronia z polanami i osiedlem Brennej.",
+      "highlights": [
+        "Jaskinia Głęboka w Stołowie — 554 m korytarzy, odkryta w 2003 r., jedna z większych w polskich Karpatach fliszowych",
+        "Do Jaskini w Stołowie nie należy wchodzić — strop grozi zawaleniem",
+        "Żółty szlak Błatnia – Stołów – Trzy Kopce – Klimczok",
+        "Przez szczyt biegnie granica Bielska-Białej i Brennej"
+      ],
+      "wiki": {
+        "title": "Stołów",
+        "url": "https://pl.wikipedia.org/wiki/Sto%C5%82%C3%B3w"
+      },
+      "photos": [
+        {
+          "commons": "Stołów.jpg",
+          "caption": "Stołów (pośrodku) widziany z Hyrcy",
+          "src": "stolow-1.webp",
+          "w": 960,
+          "h": 548,
+          "author": "Adrian Tync",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Sto%C5%82%C3%B3w.jpg",
+          "thumb": "stolow-1.thumb.webp"
+        },
+        {
+          "commons": "Stołów w Beskidzie Ślaskim.jpg",
+          "caption": "Szlak przez Stołów",
+          "src": "stolow-2.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Mariuszjbie",
+          "license": "CC BY-SA 3.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Sto%C5%82%C3%B3w_w_Beskidzie_%C5%9Alaskim.jpg",
+          "thumb": "stolow-2.thumb.webp"
+        }
+      ]
+    },
+    "jaworzyna": {
+      "range": "Pasmo Równicy",
+      "summary": "Niewybitne, płaskie wzniesienie w głównym grzbiecie Pasma Równicy, między Smrekowcem a przełęczą Baracht, niemal całe zalesione. Najczęściej spotykana nazwa to Jawierzny (mapa Compassu, przewodniki), dawniej Jaworzny — urzędowa, według Państwowego Rejestru Nazw Geograficznych, to Jaworzyna.",
+      "highlights": [
+        "Żółty szlak Wisła – Trzy Kopce Wiślańskie – Jawierzny – Przełęcz Salmopolska",
+        "Na południowo-wschodnim stoku polana z wiślańskim przysiółkiem Wierch Malinka",
+        "Przez szczyt biegnie granica Wisły i Brennej"
+      ],
+      "wiki": {
+        "title": "Jawierzny",
+        "url": "https://pl.wikipedia.org/wiki/Jawierzny"
+      },
+      "photos": [
+        {
+          "commons": "Wisla Jawierzny 799.jpg",
+          "caption": "Jawierzny (Jaworzyna) widziane z Czupla nad Wisłą",
+          "src": "jaworzyna-1.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Adrian Tync",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Wisla_Jawierzny_799.jpg",
+          "thumb": "jaworzyna-1.thumb.webp"
+        }
+      ]
+    },
+    "rownica": {
+      "range": "Pasmo Równicy",
+      "summary": "Najwyższy szczyt Pasma Równicy, między dolinami Wisły i Brennicy. Nazwa pochodzi od prawie poziomego, długiego na ok. 1 km odcinka grzbietu, widocznego i z Ustronia, i z Brennej; w dokumentach pojawia się już w 1566 r. Spod szczytu rozciąga się szeroka panorama Beskidu Śląskiego — Czantoria, Skrzyczne, Barania Góra, Malinowska Skała.",
+      "highlights": [
+        "Dawne schronisko PTTK z 1928 r. (758 m), dziś z placówką GOPR",
+        "Z Ustronia prowadzi asfaltowa droga — na górze są parkingi i bufety",
+        "Przy „Kamieniu” na zachodnim stoku leśny kościół — miejsce potajemnych nabożeństw protestanckich z XVII i XVIII w.",
+        "Główny Szlak Beskidzki; z Brennej ok. 1:45 h"
+      ],
+      "wiki": {
+        "title": "Równica (szczyt)",
+        "url": "https://pl.wikipedia.org/wiki/R%C3%B3wnica_(szczyt)"
+      },
+      "photos": [
+        {
+          "commons": "Równica szczyt p.jpg",
+          "caption": "Polana pod szczytem Równicy",
+          "src": "rownica-1.webp",
+          "w": 960,
+          "h": 587,
+          "author": "Przykuta",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:R%C3%B3wnica_szczyt_p.jpg",
+          "thumb": "rownica-1.thumb.webp"
+        },
+        {
+          "commons": "Równica p.jpg",
+          "caption": "Równica",
+          "src": "rownica-2.webp",
+          "w": 960,
+          "h": 577,
+          "author": "Przykuta",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:R%C3%B3wnica_p.jpg",
+          "thumb": "rownica-2.thumb.webp"
+        },
+        {
+          "commons": "Równica BŚ5.jpg",
+          "caption": "Restauracja Dwór Skibówki na Równicy",
+          "src": "rownica-3.webp",
+          "w": 960,
+          "h": 538,
+          "author": "Jerzy Opioła",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:R%C3%B3wnica_B%C5%9A5.jpg",
+          "thumb": "rownica-3.thumb.webp"
+        }
+      ]
+    },
+    "trzy-kopce": {
+      "range": "Pasmo Klimczoka i Szyndzielni",
+      "summary": "Najwyższy szczyt Korony, ok. 750 m na południowy zachód od Klimczoka. Nazwa pochodzi od trzech kamiennych kopców granicznych Brennej, Wapienicy i Szczyrku — od XVII w. zbiegały się tu też granice Księstwa Cieszyńskiego, hrabstwa bielskiego i Rzeczypospolitej. Na początku XVIII w. szczyt nazywano Goryczną Skałą.",
+      "highlights": [
+        "Przy żółtym szlaku fundamenty przedwojennego schroniska, zniszczonego pod koniec II wojny światowej",
+        "Jaskinia w Trzech Kopcach — według przekazów kryjówka zbójników Klimczoków",
+        "Żółty szlak Klimczok – Trzy Kopce – Błatnia",
+        "Na szczycie zbiegają się granice Bielska-Białej, Szczyrku i Brennej"
+      ],
+      "wiki": {
+        "title": "Trzy Kopce (Beskid Śląski)",
+        "url": "https://pl.wikipedia.org/wiki/Trzy_Kopce_(Beskid_%C5%9Al%C4%85ski)"
+      },
+      "photos": [
+        {
+          "commons": "Trzy Kopce Beskid Slaski.jpg",
+          "caption": "Wierzchołek Trzech Kopców",
+          "src": "trzy-kopce-1.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Adrian Tync",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Trzy_Kopce_Beskid_Slaski.jpg",
+          "thumb": "trzy-kopce-1.thumb.webp"
+        },
+        {
+          "commons": "Ruiny schroniska na Trzech Kopcach w Beskidzie Slaskim.jpg",
+          "caption": "Ruiny schroniska na Trzech Kopcach (2005)",
+          "src": "trzy-kopce-2.webp",
+          "w": 960,
+          "h": 720,
+          "author": "Ela Lesiak",
+          "license": "CC BY-SA 3.0",
+          "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+          "page": "https://commons.wikimedia.org/wiki/File:Ruiny_schroniska_na_Trzech_Kopcach_w_Beskidzie_Slaskim.jpg",
+          "thumb": "trzy-kopce-2.thumb.webp"
+        }
+      ]
+    },
+    "trzy-kopce-wislanskie": {
+      "range": "Pasmo Równicy",
+      "summary": "Dwuwierzchołkowy szczyt, na którym stykają się granice Ustronia, Wisły i Brennej — miejsce oznaczają dziś trzy duże głazy. Dawniej granice znaczono kamiennymi kopcami albo nacięciami na drzewach, stąd nazwa; przymiotnik odróżnia górę od Trzech Kopców nad Brenną. Na przedwojennych mapach jako Malinka.",
+      "highlights": [
+        "Widok na Skrzyczne, Kotarz, Grabową, Stary Groń, Orłową, Równicę i Czantorię",
+        "Na grzbiecie Telesforówka — punkt gastronomiczny i noclegi",
+        "Węzeł szlaków: do Wisły ok. 1 h, na Równicę przez Orłową ok. 2:30 h, do Brennej ok. 3 h"
+      ],
+      "wiki": {
+        "title": "Trzy Kopce Wiślańskie",
+        "url": "https://pl.wikipedia.org/wiki/Trzy_Kopce_Wi%C5%9Bla%C5%84skie"
+      },
+      "photos": [
+        {
+          "commons": "Głazy na szczycie Trzech Kopców Wiślańskich w Beskidzie Śląskim, 20260412 1033 0042.jpg",
+          "caption": "Trzy głazy w miejscu styku granic Ustronia, Wisły i Brennej",
+          "src": "trzy-kopce-wislanskie-1.webp",
+          "w": 960,
+          "h": 640,
+          "author": "Jakub Hałun",
+          "license": "CC BY 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:G%C5%82azy_na_szczycie_Trzech_Kopc%C3%B3w_Wi%C5%9Bla%C5%84skich_w_Beskidzie_%C5%9Al%C4%85skim,_20260412_1033_0042.jpg",
+          "thumb": "trzy-kopce-wislanskie-1.thumb.webp"
+        },
+        {
+          "commons": "Trzy Kopce Wiślańskie BŚ3 (3).jpg",
+          "caption": "Na grzbiecie Trzech Kopców Wiślańskich",
+          "src": "trzy-kopce-wislanskie-2.webp",
+          "w": 960,
+          "h": 615,
+          "author": "Jerzy Opioła",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Trzy_Kopce_Wi%C5%9Bla%C5%84skie_B%C5%9A3_(3).jpg",
+          "thumb": "trzy-kopce-wislanskie-2.thumb.webp"
+        },
+        {
+          "commons": "Stado owiec na Trzech Kopcach Wiślańskich w Beskidzie Śląskim, 20260412 1055 0052.jpg",
+          "caption": "Owce na szczycie, kwiecień 2026",
+          "src": "trzy-kopce-wislanskie-3.webp",
+          "w": 960,
+          "h": 640,
+          "author": "Jakub Hałun",
+          "license": "CC BY 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Stado_owiec_na_Trzech_Kopcach_Wi%C5%9Bla%C5%84skich_w_Beskidzie_%C5%9Al%C4%85skim,_20260412_1055_0052.jpg",
+          "thumb": "trzy-kopce-wislanskie-3.thumb.webp"
+        },
+        {
+          "commons": "Trzy Kopce Wiślańskie - Cumulonimbus.jpg",
+          "caption": "Cumulonimbus o zachodzie słońca",
+          "src": "trzy-kopce-wislanskie-4.webp",
+          "w": 960,
+          "h": 541,
+          "author": "Mstudnicki",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Trzy_Kopce_Wi%C5%9Bla%C5%84skie_-_Cumulonimbus.jpg",
+          "thumb": "trzy-kopce-wislanskie-4.thumb.webp"
+        }
+      ]
+    },
+    "grabowa": {
+      "range": "Beskid Węgierski",
+      "summary": "Mało wybitny szczyt na płaskim, zalesionym grzbiecie między Białym Krzyżem a Kotarzem; odchodzi od niego na północny zachód ramię Starego Gronia. Nazwa pochodzi od grabów — nosi ją też przysiółek Brennej Leśnicy na zachodnim stoku, a łąka Grabowa pojawia się w dokumentach już w 1689 r.",
+      "highlights": [
+        "Znaleziono tu ślady praczłowieka ze środkowego paleolitu, prawdopodobnie kultury mustierskiej",
+        "Czerwony szlak Klimczok – Przełęcz Salmopolska; tu kończy się czarny szlak z Brennej przez Horzelicę",
+        "Grzbietem biegnie granica Brennej i Szczyrku"
+      ],
+      "wiki": {
+        "title": "Grabowa (Beskid Śląski)",
+        "url": "https://pl.wikipedia.org/wiki/Grabowa_(Beskid_%C5%9Al%C4%85ski)"
+      },
+      "photos": [
+        {
+          "commons": "POL Grabowa w Beskidzie Śląskim.jpg",
+          "caption": "Szczyt Grabowej",
+          "src": "grabowa-1.webp",
+          "w": 960,
+          "h": 720,
+          "author": "D T G",
+          "license": "CC BY-SA 3.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:POL_Grabowa_w_Beskidzie_%C5%9Al%C4%85skim.jpg",
+          "thumb": "grabowa-1.thumb.webp"
+        },
+        {
+          "commons": "Grabowa peak guidepost.jpg",
+          "caption": "Oznaczenie szczytu zimą",
+          "src": "grabowa-2.webp",
+          "w": 720,
+          "h": 960,
+          "author": "Jendrusk",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Grabowa_peak_guidepost.jpg",
+          "thumb": "grabowa-2.thumb.webp"
+        }
+      ]
+    }
+  }
+}
