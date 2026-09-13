@@ -684,28 +684,6 @@ W repo jest [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): przy
 
 Dla repozytorium prywatnego Pages wymaga płatnego planu.
 
-### Ograniczenie miejsca na dysku
-
-Repozytorium leży na zaszyfrowanym wolumenie `/mnt/l` (2 GB, wolne ~40 MB); ścieżka `~/CODE/priv-brenna-korona` to dowiązanie do tego samego katalogu, nie druga kopia. `node_modules` tego stacku waży ~400 MB i **tam się nie zmieści**. Symlink nie wystarcza — npm go usuwa i tworzy katalog w miejscu docelowym.
-
-Obejście użyte przy budowaniu tego projektu — workspace poza wolumenem, z dowiązaniami do źródeł w repo, dzięki czemu edycja plików w repo działa na żywo:
-
-```bash
-WS=~/.kgb-workspace
-mkdir -p "$WS" && cd "$WS"
-for f in src public index.html package.json vite.config.ts \
-         tsconfig.json tsconfig.app.json tsconfig.node.json; do
-  ln -sf /mnt/l/CODE/priv-brenna-korona/$f .
-done
-# Vite rozwiązuje symlinki do ścieżek w repo, gdzie nie ma node_modules:
-sed 's|^export default defineConfig({|&\n  resolve: { preserveSymlinks: true },|' \
-  /mnt/l/CODE/priv-brenna-korona/vite.config.ts > vite.config.ts
-npm install && npm run build
-cp -r dist /mnt/l/CODE/priv-brenna-korona/dist
-```
-
-W CI ten problem nie występuje — GitHub Actions buduje z czystego checkoutu zwykłym `npm ci`.
-
 ---
 
 ## 12. Metodyka testów
