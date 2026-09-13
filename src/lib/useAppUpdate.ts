@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
 /** PWA na telefonie potrafi wisieć otwarta całymi dniami — wtedy sprawdzamy wersję co jakiś czas. */
@@ -16,20 +16,21 @@ const MIN_CHECK_GAP_MS = 60_000
  * przeładowanie wyłączyłoby GPS i skasowało nagrany ślad.
  */
 export function useAppUpdate(busy: boolean) {
+  const registrationRef = useRef<ServiceWorkerRegistration | null>(null)
   const {
     needRefresh: [available],
-    updateServiceWorker,
   } = useRegisterSW({
     immediate: true,
     onRegisteredSW(swUrl, registration) {
       if (!registration) return
+      registrationRef.current = registration
       let lastCheck = 0
       const check = async () => {
         if (!navigator.onLine || registration.installing || Date.now() - lastCheck < MIN_CHECK_GAP_MS) return
         lastCheck = Date.now()
         try {
-          // GitHub Pages każe trzymać sw.js w cache przez 10 minut. `reload` pobiera świeży plik
-          // i nadpisuje nim cache HTTP, więc update() porównuje już aktualną wersję.
+          // `reload` omija cache przeglądarki, więc update() porównuje najświeższy sw.js, jaki da serwer.
+          // CDN GitHub Pages i tak trzyma sw.js do 10 minut — nowa wersja może pojawić się z takim opóźnieniem.
           const res = await fetch(swUrl, { cache: 'reload' })
           if (res.ok) await registration.update()
         } catch {
@@ -58,9 +59,32 @@ export function useAppUpdate(busy: boolean) {
     }
   }, [])
 
+  const reloading = useRef(false)
+  /**
+   * Przełącza na nową wersję. Nie polegamy na zdarzeniu „controlling” z workbox-window: karta,
+   * której nie kontroluje service worker (pierwsza wizyta, twarde odświeżenie — częste na PC),
+   * nigdy go nie dostaje, a nowa wersja jest w niej zwykle od razu aktywna, bez czekania.
+   */
+  const apply = useCallback(() => {
+    if (reloading.current) return
+    reloading.current = true
+    const reload = () => window.location.reload()
+    const waiting = registrationRef.current?.waiting
+    if (!waiting) {
+      reload()
+      return
+    }
+    navigator.serviceWorker.addEventListener('controllerchange', reload, { once: true })
+    waiting.addEventListener('statechange', () => {
+      if (waiting.state === 'activated') reload()
+    })
+    waiting.postMessage({ type: 'SKIP_WAITING' })
+    // Awaryjnie, gdyby nowy service worker nie przejął strony.
+    setTimeout(reload, 3000)
+  }, [])
+
   useEffect(() => {
     if (!available || busy) return
-    const apply = () => void updateServiceWorker(true)
     if (!touched.current || document.visibilityState === 'hidden') {
       apply()
       return
@@ -68,7 +92,7 @@ export function useAppUpdate(busy: boolean) {
     // W trakcie korzystania nie przeładowujemy pod palcem — dopiero przy zmianie widoczności.
     document.addEventListener('visibilitychange', apply)
     return () => document.removeEventListener('visibilitychange', apply)
-  }, [available, busy, updateServiceWorker])
+  }, [available, busy, apply])
 
-  return { available, apply: () => void updateServiceWorker(true) }
+  return { available, apply }
 }

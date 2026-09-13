@@ -725,6 +725,7 @@ Sprawdzone tą drogą:
 | Każdy plik wskazany w `peakInfo.json` istnieje w `dist/peaks` | ✅ |
 | Trasa na dziś: 20 szczytów + 8 parkingów na mapie, wybór dotknięciem markera, przeliczenie i nowa kolejność po każdym wyborze | ✅ |
 | Parking: automatyczny, dotknięcie `P`, lista, własne miejsce dotknięciem mapy (wysokość z SRTM, marker przeciągalny), bez parkingu | ✅ |
+| Aktualizacja (Chrome sterowany przez DevTools Protocol w czasie rzeczywistym, dwie wersje `sw.js` na lokalnym serwerze): przycisk **Odśwież** przeładowuje do nowej wersji w karcie kontrolowanej przez service workera, także gdy nowa wersja czeka, i w karcie niekontrolowanej (pierwsza wizyta, twarde odświeżenie) — tam wcześniej nic nie robił | ✅ |
 | Własne miejsca: migracja zapisu v1 (jedno miejsce w parkingu) do listy; dotknięcie markera otwiera dymek; zapis nazwy trafia na listę i do podpowiedzi markera; nowe miejsce otwiera dymek samo i zostaje wybrane; Usuń wraca do parkingu automatycznego; wybór z listy „Moje miejsca”; bez poziomego przewijania przy 390 px | ✅ |
 | Powrót / bez powrotu; odwrócenie kierunku zablokowane dla trasy bez powrotu; × usuwa szczyt z trasy | ✅ |
 | Wybór na dziś zapisany w `localStorage`, wyjście z trybu przywraca pasek dni | ✅ |
@@ -736,6 +737,7 @@ Sprawdzone tą drogą:
 
 - **`requestAnimationFrame` w tym headless w ogóle nie tyka** (0 klatek na 2 s). Animacji Framer Motion nie da się w nim zweryfikować, a zrzuty ekranu wymagają wymuszenia stanu końcowego przez wstrzyknięcie `opacity: 1 !important`. Raz doprowadziło mnie to do fałszywego wniosku, że `AnimatePresence` blokuje nawigację — to był artefakt środowiska, nie błąd aplikacji.
 - **Headless zawsze raportuje `prefers-color-scheme: dark`** i ignoruje flagę wymuszającą schemat. Motyw jasny testowany był na wariancie builda z wyciętym blokiem `@media (prefers-color-scheme: dark)` — przechodzi przez prawdziwą kaskadę CSS, ale nie przez samo przełączenie schematu.
+- **Service Worker nie startuje przy `--virtual-time-budget`.** Chrome pobiera `sw.js`, ale nie wykonuje już `importScripts` i rejestracja zostaje bez aktywnego workera. Aktualizację aplikacji trzeba testować w czasie rzeczywistym, sterując Chrome przez DevTools Protocol, a lokalny serwer z dwiema wersjami nie może odpowiadać `304` — obie powstają w tej samej sekundzie, więc data pliku ich nie rozróżnia.
 - **Geolokalizacja nie ma pokrycia w testach** — headless nie nadaje uprawnień. Cała zakładka Teren jest zweryfikowana wyłącznie przez lekturę kodu.
 
 ### Do sprawdzenia ręcznie na urządzeniu
