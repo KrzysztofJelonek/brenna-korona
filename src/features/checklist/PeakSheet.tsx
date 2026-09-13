@@ -6,7 +6,7 @@ import { photoUrl, preparePhoto } from '../../lib/photo'
 import { isWithinChallenge, CHALLENGE_START, CHALLENGE_END } from '../../data/peaks'
 import { haversine } from '../../lib/geo'
 import { Sheet } from '../../ui/Sheet'
-import { IconBike, IconBoot, IconCamera, IconCheck, IconStar, IconTrash, IconWarn } from '../../ui/Icons'
+import { IconBike, IconBoot, IconCamera, IconCheck, IconImage, IconStar, IconTrash, IconWarn } from '../../ui/Icons'
 import { PeakAbout, PeakGallery, usePeakInfo } from './PeakInfo'
 
 interface Props {
@@ -23,7 +23,8 @@ export function PeakSheet({ peak, onClose }: Props) {
   const [photos, setPhotos] = useState<StoredPhoto[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
+  const galleryRef = useRef<HTMLInputElement>(null)
   const info = usePeakInfo(peak?.id)
 
   useEffect(() => {
@@ -59,7 +60,7 @@ export function PeakSheet({ peak, onClose }: Props) {
       )
     } finally {
       setBusy(false)
-      if (fileRef.current) fileRef.current.value = ''
+      for (const input of [cameraRef.current, galleryRef.current]) if (input) input.value = ''
     }
   }
 
@@ -199,20 +200,36 @@ export function PeakSheet({ peak, onClose }: Props) {
           })}
 
           <button
-            onClick={() => fileRef.current?.click()}
+            onClick={() => cameraRef.current?.click()}
             disabled={busy}
             className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-line-strong bg-tint text-muted hover:bg-tint-strong"
           >
             <IconCamera className="h-6 w-6" />
-            <span className="text-[11px]">{busy ? 'przetwarzam…' : 'dodaj'}</span>
+            <span className="text-[11px]">{busy ? 'przetwarzam…' : 'aparat'}</span>
+          </button>
+          <button
+            onClick={() => galleryRef.current?.click()}
+            disabled={busy}
+            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-line-strong bg-tint text-muted hover:bg-tint-strong"
+          >
+            <IconImage className="h-6 w-6" />
+            <span className="text-[11px]">{busy ? 'przetwarzam…' : 'z galerii'}</span>
           </button>
         </div>
 
+        {/* Dwa pola: `capture` na telefonie od razu otwiera aparat i odcina wybór z galerii. */}
         <input
-          ref={fileRef}
+          ref={cameraRef}
           type="file"
           accept="image/*"
           capture="environment"
+          hidden
+          onChange={(e) => onFiles(e.target.files)}
+        />
+        <input
+          ref={galleryRef}
+          type="file"
+          accept="image/*"
           multiple
           hidden
           onChange={(e) => onFiles(e.target.files)}
