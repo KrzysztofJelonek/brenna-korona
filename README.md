@@ -149,7 +149,7 @@ Wszystko, co aplikacja wie o terenie, powstało z trzech źródeł: materiałów
 | 8 | Orłowa | 813 | 49.69698 | 18.87847 |
 | 9 | Gościejów | 818 | 49.65858 | 18.92162 |
 | 10 | Mały Cisowy | 829 | 49.74966 | 18.91480 |
-| 11 | Beskidek | 830 | 49.70635 | 18.94328 |
+| 11 | Beskidek | 830 | 49.70870 | 18.99054 |
 | 12 | Wielka Cisowa | 878 | 49.74511 | 18.93170 |
 | 13 | Równica | 884 | 49.72470 | 18.85656 |
 | 14 | Grabowa | 907 | 49.67780 | 18.95456 |
@@ -161,6 +161,8 @@ Wszystko, co aplikacja wie o terenie, powstało z trzech źródeł: materiałów
 | 20 | Trzy Kopce | 1082 | 49.73662 | 18.98631 |
 
 Wysokości pochodzą z checklisty organizatora i są wiążące — takie widnieją na tabliczkach, przy których robi się zdjęcie.
+
+**Beskidek** leży na grzbiecie Karkoszczonka–Hyrca (granica Szczyrku i Brennej), tam gdzie węzeł OSM `natural=peak` o `ele=830` — zgodnie z checklistą. Przez szczyt biegnie czerwony szlak z Przełęczy Salmopolskiej; niżej, po szczyrkowskiej stronie, jest Beskid Sport Arena ze stokiem slalomowym „Beskidek”. Organizator ostrzega osobno: liczy się **Beskidek 830 m, a nie Beskid 860 m**, przez który nie przechodzi szlak.
 
 ### 3.2 Punkty startowe
 
@@ -202,9 +204,8 @@ Razem 79,4 km i ok. 26 h marszu.
 
 ### 3.4 Rozbieżności wymagające potwierdzenia
 
-1. **Beskidek (830 m).** Węzeł OSM o nazwie „Beskidek" ma `ele=700` i leży w innej części gminy. Przyjąłem nienazwany węzeł 831 m na grani Karkoszczonka–Hyrca, bo zgadza się z opisem trasy z PDF (Kotarz → Hyrca → Beskidek → przełęcz Karkoszczonka). Organizator ostrzega osobno: liczy się **Beskidek 830 m, a nie Beskid 860 m**, przez który nie przechodzi szlak. Do potwierdzenia w terenie.
-2. **Zebrzydka.** OSM podaje 577 m, checklist 557 m. Aplikacja pokazuje 557 m.
-3. **Czupel.** W rejonie są dwa; wybrany ten o wysokości 736 m, zgodnej z checklistą.
+1. **Zebrzydka.** OSM podaje 577 m, checklist 557 m. Aplikacja pokazuje 557 m.
+2. **Czupel.** W rejonie są dwa; wybrany ten o wysokości 736 m, zgodnej z checklistą.
 
 ---
 
@@ -625,7 +626,7 @@ Sam zapis GPX w [`gpx.ts`](src/lib/gpx.ts) jest poprawny: GPX 1.1, 20 szczytów 
 
 - **Profil wysokości w planerze rysuje wierzchołki, nie trasę.** [`ElevationProfile`](src/features/planner/ElevationProfile.tsx) rozkłada wysokości szczytów wzdłuż szacowanego dystansu. Od czasu wprowadzenia routingu prawdziwy profil SRTM jest już dostępny w `dayRoute` — komponent go po prostu jeszcze nie używa. Komentarz w pliku jest w tym miejscu nieaktualny.
 - **Podział szczytów w wariantach 1-, 2- i 4-dniowym jest mój**, nie gminy. Oznaczone w UI, ale warto by odczytać go z map w PDF.
-- **Beskidek i Zebrzydka** — rozbieżności opisane w [3.4](#34-rozbieżności-wymagające-potwierdzenia), do potwierdzenia w terenie.
+- **Zebrzydka** — rozbieżność wysokości opisana w [3.4](#34-rozbieżności-wymagające-potwierdzenia), do potwierdzenia w terenie.
 - **Dzień VI wariantu gminy** różni się od trasy policzonej po szlakach o ~30%, bo gmina daje tam wybór drogi. To ograniczenie z założenia, nie usterka.
 - **Aplikacja nie była uruchomiona na realnym telefonie.** Wszystko powyżej pochodzi z headless Chrome i lektury kodu.
 - **Brak testów jednostkowych.** Logika obliczeniowa (`geo`, `trailRouter`, `elevation`, `planGenerator`) jest czysta i dobrze się do nich nadaje.

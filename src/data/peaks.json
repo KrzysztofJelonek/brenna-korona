@@ -18,7 +18,7 @@
     { "id": "orlowa", "no": 8, "name": "Orłowa", "ele": 813, "lat": 49.69698, "lon": 18.87847 },
     { "id": "gosciejow", "no": 9, "name": "Gościejów", "ele": 818, "lat": 49.65858, "lon": 18.92162 },
     { "id": "maly-cisowy", "no": 10, "name": "Mały Cisowy", "ele": 829, "lat": 49.74966, "lon": 18.91480 },
-    { "id": "beskidek", "no": 11, "name": "Beskidek", "ele": 830, "lat": 49.70635, "lon": 18.94328, "verify": "Węzeł OSM o nazwie 'Beskidek' (700 m) leży gdzie indziej. Przyjęto nienazwany węzeł OSM 831 m na grani Karkoszczonka–Hyrca, zgodny z opisem trasy. Do potwierdzenia w terenie.", "note": "Liczy się Beskidek 830 m, a NIE Beskid 860 m — przez Beskid nie przechodzi szlak." },
+    { "id": "beskidek", "no": 11, "name": "Beskidek", "ele": 830, "lat": 49.70870, "lon": 18.99054, "note": "Liczy się Beskidek 830 m, a NIE Beskid 860 m — przez Beskid nie przechodzi szlak. Szczyt na grzbiecie Karkoszczonka–Hyrca, granica Szczyrku i Brennej; czerwony szlak z Przełęczy Salmopolskiej. Poniżej Beskid Sport Arena ze stokiem slalomowym „Beskidek”." },
     { "id": "wielka-cisowa", "no": 12, "name": "Wielka Cisowa", "ele": 878, "lat": 49.74511, "lon": 18.93170 },
     { "id": "rownica", "no": 13, "name": "Równica", "ele": 884, "lat": 49.72470, "lon": 18.85656, "note": "Po drodze warto odbić na Lipowski Groń (ławeczka, miejsce odpoczynku)." },
     { "id": "grabowa", "no": 14, "name": "Grabowa", "ele": 907, "lat": 49.67780, "lon": 18.95456 },
