@@ -223,6 +223,11 @@ export function InfoView({ onGoToPlanner }: Props) {
           </a>
         </p>
       </Section>
+
+      <p className="text-center text-[11px] text-muted">
+        Wersja {__APP_BUILD__.version} · {buildDate}
+        {__APP_BUILD__.commit && <span className="opacity-70"> · {__APP_BUILD__.commit}</span>}
+      </p>
     </div>
   )
 }
@@ -338,3 +343,11 @@ function Bullet({ children }: { children: ReactNode }) {
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })
 
 const sponsorDomain = SPONSOR.url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+
+const buildDate = new Date(__APP_BUILD__.date).toLocaleString('pl-PL', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+})

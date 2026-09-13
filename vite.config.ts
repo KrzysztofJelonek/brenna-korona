@@ -2,9 +2,34 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { execSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+
+/** Wersja pokazywana w aplikacji: numer z package.json oraz skrót i data ostatniego commita. */
+function buildInfo() {
+  const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as {
+    version: string
+  }
+  const git = (args: string) => {
+    try {
+      return execSync(`git ${args}`, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+    } catch {
+      return ''
+    }
+  }
+  return {
+    version,
+    commit: git('rev-parse --short HEAD'),
+    // Data commita, nie budowania — ten sam kod ma zawsze tę samą datę, niezależnie od chwili deployu.
+    date: git('log -1 --format=%cI') || new Date().toISOString(),
+  }
+}
 
 export default defineConfig({
   base: './',
+  define: {
+    __APP_BUILD__: JSON.stringify(buildInfo()),
+  },
   plugins: [
     react(),
     tailwindcss(),
