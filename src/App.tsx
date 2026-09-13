@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { PEAKS, daysLeft, CHALLENGE_END } from './data/peaks'
 import { useProgress, countDone, totalAscent } from './store/progress'
 import { useGeolocation } from './features/field/useGeolocation'
+import { useAppUpdate } from './lib/useAppUpdate'
 import { Checklist } from './features/checklist/Checklist'
 import { PeakSheet } from './features/checklist/PeakSheet'
 import { MapView } from './features/map/MapView'
@@ -35,6 +36,7 @@ export default function App() {
   const progress = useProgress((s) => s.progress)
   const backupReminderAt = useProgress((s) => s.backupReminderAt)
   const { position, error, track } = useGeolocation(geoOn, recording)
+  const update = useAppUpdate(geoOn || recording)
 
   const done = countDone(progress)
   const left = daysLeft()
@@ -67,6 +69,18 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      {update.available && (
+        <div className="mx-4 mt-3 flex items-center gap-3 rounded-xl border border-brand bg-brand-soft px-3 py-2.5 text-xs text-brand">
+          <span className="min-w-0 flex-1">
+            Jest nowa wersja aplikacji.
+            {recording && ' Odświeżenie przerwie nagrywanie — najpierw wyeksportuj GPX.'}
+          </span>
+          <button onClick={update.apply} className="btn-primary shrink-0 !min-h-0 !py-1.5 !text-xs">
+            Odśwież
+          </button>
+        </div>
+      )}
 
       {needsBackup && (
         <div className="mx-4 mt-3 rounded-xl border border-warn bg-warn-soft px-3 py-2.5 text-xs text-warn">

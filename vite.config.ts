@@ -9,7 +9,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // Nowy service worker czeka na zgodę aplikacji (src/lib/useAppUpdate.ts) — samo przejęcie
+      // w trakcie pracy potrafi przeładować stronę w środku nagrywania albo zgubić leniwe moduły.
+      registerType: 'prompt',
+      injectRegister: false,
       includeAssets: ['icon.svg'],
       manifest: {
         name: 'Korona Gór Brennej',
