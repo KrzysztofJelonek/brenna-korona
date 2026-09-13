@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Pełna historia — liczba commitów to trzecia liczba wersji (vite.config.ts).
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:

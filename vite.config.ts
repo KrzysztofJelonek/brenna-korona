@@ -5,7 +5,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 
-/** Wersja pokazywana w aplikacji: numer z package.json oraz skrót i data ostatniego commita. */
+/**
+ * Wersja pokazywana w aplikacji: `major.minor` z package.json i liczba commitów jako trzecia liczba,
+ * więc każdy push podbija numer sam. Do tego skrót i data ostatniego commita.
+ */
 function buildInfo() {
   const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as {
     version: string
@@ -17,8 +20,10 @@ function buildInfo() {
       return ''
     }
   }
+  // W płytkim klonie (checkout bez fetch-depth: 0) licznik commitów byłby bez sensu — zostaje numer z package.json.
+  const count = git('rev-parse --is-shallow-repository') === 'false' ? git('rev-list --count HEAD') : ''
   return {
-    version,
+    version: count ? `${version.split('.').slice(0, 2).join('.')}.${count}` : version,
     commit: git('rev-parse --short HEAD'),
     // Data commita, nie budowania — ten sam kod ma zawsze tę samą datę, niezależnie od chwili deployu.
     date: git('log -1 --format=%cI') || new Date().toISOString(),
