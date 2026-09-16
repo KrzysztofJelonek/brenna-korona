@@ -267,7 +267,7 @@ export function PeakSheet({ peak, onClose }: Props) {
       )}
 
       <p className="mt-4 text-[11px] text-muted">
-        Współrzędne: {peak.lat.toFixed(5)}, {peak.lon.toFixed(5)} ·{' '}
+        Tabliczka: {peak.lat.toFixed(5)}, {peak.lon.toFixed(5)} ·{' '}
         <a
           className="text-brand underline"
           href={`https://www.google.com/maps/dir/?api=1&destination=${peak.lat},${peak.lon}`}

@@ -146,7 +146,7 @@ Wszystko, co aplikacja wie o terenie, powstało z trzech źródeł: materiałów
 
 | Plik | Zawartość | Skąd | Rozmiar |
 |---|---|---|---|
-| [`peaks.json`](src/data/peaks.json) | 20 szczytów: nazwa, wysokość, współrzędne, link do Mapy.com | wysokości z checklisty organizatora, współrzędne z OSM (Overpass, `natural=peak`), zweryfikowane z Mapy.com | 6 KB |
+| [`peaks.json`](src/data/peaks.json) | 20 szczytów: nazwa, wysokość, współrzędne tabliczki, link do Mapy.com | wysokości z checklisty organizatora, współrzędne tabliczek z mapy My Maps zweryfikowanej w terenie | 6 KB |
 | [`peakInfo.json`](src/data/peakInfo.json) | opisy szczytów, wybór zdjęć z podpisami, autorzy i licencje | opisy zredagowane na podstawie polskiej Wikipedii, zdjęcia z Wikimedia Commons | 38 KB |
 | [`public/peaks/`](public/peaks) | 39 zdjęć szczytów + miniatury, WebP | Wikimedia Commons przez [`tools/build-peak-photos.py`](tools/build-peak-photos.py) | 4,8 MB |
 | [`startPoints.ts`](src/data/startPoints.ts) | 8 punktów startowych ze współrzędnymi i wysokością | nazwy z PDF gminy, współrzędne z OSM, wysokości z SRTM | 2 KB |
@@ -159,30 +159,43 @@ Wszystko, co aplikacja wie o terenie, powstało z trzech źródeł: materiałów
 
 | # | Szczyt | m n.p.m. | lat | lon | Mapy.com |
 |---|---|---:|---|---|---|
-| 1 | Zebrzydka | 557 | 49.77055 | 18.88253 | [mapa](https://mapy.com/pl/turisticka?source=osm&id=1048265841&ds=1&x=18.8825289&y=49.7705507&z=17) |
-| 2 | Świniorka | 700 | 49.68498 | 18.90001 | [mapa](https://mapy.com/pl/turisticka?q=%C5%9Bwiniorka&source=osm&id=1069138014&ds=2&x=18.9000142&y=49.6849811&z=17) |
-| 3 | Czupel | 736 | 49.75607 | 18.90118 | [mapa](https://mapy.com/pl/turisticka?q=Czupel&source=osm&id=1047951914&ds=1&x=18.9011836&y=49.7560719&z=17) |
-| 4 | Stary Groń | 792 | 49.69353 | 18.92349 | [mapa](https://mapy.com/pl/turisticka?q=Stary%20Gro%C5%84%20(792%C2%A0m)&source=osm&id=1047944035&ds=1&x=18.9234889&y=49.6935322&z=17) |
-| 5 | Horzelica | 797 | 49.70086 | 18.91576 | [mapa](https://mapy.com/pl/turisticka?q=Horzelica%20(797%C2%A0m)&source=osm&id=1047944036&ds=1&x=18.9157534&y=49.7008605&z=17) |
-| 6 | Jaworzyna | 802 | 49.65770 | 18.94223 | [mapa](https://mapy.com/pl/turisticka?q=Jaworzyna&source=osm&id=1047942529&ds=1&x=18.9422321&y=49.6577005&z=17) |
-| 7 | Trzy Kopce Wiślańskie | 810 | 49.66429 | 18.90730 | [mapa](https://mapy.com/pl/turisticka?q=Trzy%20Kopce%20Wi%C5%9Bla%C5%84skie%20(810%C2%A0m)&source=osm&id=149224400&ds=1&x=18.9072990&y=49.6642842&z=17) |
-| 8 | Orłowa | 813 | 49.69698 | 18.87847 | [mapa](https://mapy.com/pl/turisticka?q=Or%C5%82owa&source=osm&id=6392518&ds=2&x=18.8784707&y=49.6969813&z=17) |
-| 9 | Gościejów | 818 | 49.65858 | 18.92162 | [mapa](https://mapy.com/pl/turisticka?q=Go%C5%9Bciej%C3%B3w&source=osm&id=1084551714&ds=2&x=18.9216220&y=49.6585825&z=17) |
-| 10 | Mały Cisowy | 829 | 49.74966 | 18.91480 | [mapa](https://mapy.com/pl/turisticka?q=Ma%C5%82y%20Cisowy&source=osm&id=1047951915&ds=2&x=18.9147985&y=49.7496600&z=17) |
-| 11 | Beskidek | 830 | 49.70870 | 18.99054 | [mapa](https://mapy.com/pl/turisticka?q=Beskidek&source=osm&id=1051306155&ds=1&x=18.9905441&y=49.7087011&z=17) |
-| 12 | Wielka Cisowa | 878 | 49.74511 | 18.93170 | [mapa](https://mapy.com/pl/turisticka?q=Wielka%20Cisowa%20(878%C2%A0m)&source=osm&id=1047951920&ds=1&x=18.9316964&y=49.7451054&z=17) |
-| 13 | Równica | 884 | 49.72470 | 18.85656 | [mapa](https://mapy.com/pl/turisticka?q=R%C3%B3wnica&source=osm&id=1048167481&ds=1&x=18.8565516&y=49.7246977&z=17) |
-| 14 | Grabowa | 907 | 49.67780 | 18.95456 | [mapa](https://mapy.com/pl/turisticka?q=Grabowa%20(907%C2%A0m)&source=osm&id=6375953&ds=1&x=18.9545596&y=49.6777961&z=17) |
-| 15 | Błatnia | 917 | 49.74835 | 18.94533 | [mapa](https://mapy.com/pl/turisticka?q=B%C5%82atnia%20(917%C2%A0m)&source=osm&id=6315089&ds=1&x=18.9453328&y=49.7483498&z=17) |
-| 16 | Hyrca | 929 | 49.70080 | 18.98066 | [mapa](https://mapy.com/pl/turisticka?q=Hyrca&source=osm&id=1051306174&ds=2&x=18.9806628&y=49.7007980&z=17) |
-| 17 | Biały Krzyż | 940 | 49.67013 | 18.95904 | [mapa](https://mapy.com/pl/turisticka?q=Bia%C5%82y%20Krzy%C5%BC%20(940%C2%A0m)&source=osm&id=1048126439&ds=1&x=18.9590442&y=49.6701310&z=17) |
-| 18 | Kotarz | 974 | 49.68908 | 18.96364 | [mapa](https://mapy.com/pl/turisticka?q=Kotarz%20(974%C2%A0m)&source=osm&id=149224136&ds=1&x=18.9636362&y=49.6890763&z=17) |
-| 19 | Stołów | 1035 | 49.74516 | 18.96529 | [mapa](https://mapy.com/pl/turisticka?q=Sto%C5%82%C3%B3w%20(1035%C2%A0m)&source=osm&id=1056394345&ds=1&x=18.9652944&y=49.7451617&z=17) |
-| 20 | Trzy Kopce | 1082 | 49.73662 | 18.98631 | [mapa](https://mapy.com/pl/turisticka?q=Trzy%20Kopce%20(1082%C2%A0m)&source=osm&id=6419453&ds=1&x=18.9863062&y=49.7366188&z=17) |
+| 1 | Zebrzydka | 557 | 49.770834 | 18.882738 | [mapa](https://mapy.com/pl/turisticka?source=osm&id=1048265841&ds=1&x=18.8825289&y=49.7705507&z=17) |
+| 2 | Świniorka | 700 | 49.685208 | 18.90032 | [mapa](https://mapy.com/pl/turisticka?q=%C5%9Bwiniorka&source=osm&id=1069138014&ds=2&x=18.9000142&y=49.6849811&z=17) |
+| 3 | Czupel | 736 | 49.756196 | 18.90128 | [mapa](https://mapy.com/pl/turisticka?q=Czupel&source=osm&id=1047951914&ds=1&x=18.9011836&y=49.7560719&z=17) |
+| 4 | Stary Groń | 792 | 49.691497 | 18.925997 | [mapa](https://mapy.com/pl/turisticka?q=Stary%20Gro%C5%84%20(792%C2%A0m)&source=osm&id=1047944035&ds=1&x=18.9234889&y=49.6935322&z=17) |
+| 5 | Horzelica | 797 | 49.700877 | 18.915753 | [mapa](https://mapy.com/pl/turisticka?q=Horzelica%20(797%C2%A0m)&source=osm&id=1047944036&ds=1&x=18.9157534&y=49.7008605&z=17) |
+| 6 | Jaworzyna | 802 | 49.657812 | 18.94235 | [mapa](https://mapy.com/pl/turisticka?q=Jaworzyna&source=osm&id=1047942529&ds=1&x=18.9422321&y=49.6577005&z=17) |
+| 7 | Trzy Kopce Wiślańskie | 810 | 49.664172 | 18.902412 | [mapa](https://mapy.com/pl/turisticka?q=Trzy%20Kopce%20Wi%C5%9Bla%C5%84skie%20(810%C2%A0m)&source=osm&id=149224400&ds=1&x=18.9072990&y=49.6642842&z=17) |
+| 8 | Orłowa | 813 | 49.697342 | 18.884516 | [mapa](https://mapy.com/pl/turisticka?q=Or%C5%82owa&source=osm&id=6392518&ds=2&x=18.8784707&y=49.6969813&z=17) |
+| 9 | Gościejów | 818 | 49.656702 | 18.922942 | [mapa](https://mapy.com/pl/turisticka?q=Go%C5%9Bciej%C3%B3w&source=osm&id=1084551714&ds=2&x=18.9216220&y=49.6585825&z=17) |
+| 10 | Mały Cisowy | 829 | 49.749807 | 18.914981 | [mapa](https://mapy.com/pl/turisticka?q=Ma%C5%82y%20Cisowy&source=osm&id=1047951915&ds=2&x=18.9147985&y=49.7496600&z=17) |
+| 11 | Beskidek | 830 | 49.708715 | 18.990525 | [mapa](https://mapy.com/pl/turisticka?q=Beskidek&source=osm&id=1051306155&ds=1&x=18.9905441&y=49.7087011&z=17) |
+| 12 | Wielka Cisowa | 878 | 49.745897 | 18.934499 | [mapa](https://mapy.com/pl/turisticka?q=Wielka%20Cisowa%20(878%C2%A0m)&source=osm&id=1047951920&ds=1&x=18.9316964&y=49.7451054&z=17) |
+| 13 | Równica | 884 | 49.724695 | 18.856556 | [mapa](https://mapy.com/pl/turisticka?q=R%C3%B3wnica&source=osm&id=1048167481&ds=1&x=18.8565516&y=49.7246977&z=17) |
+| 14 | Grabowa | 907 | 49.674866 | 18.95549 | [mapa](https://mapy.com/pl/turisticka?q=Grabowa%20(907%C2%A0m)&source=osm&id=6375953&ds=1&x=18.9545596&y=49.6777961&z=17) |
+| 15 | Błatnia | 917 | 49.748099 | 18.945424 | [mapa](https://mapy.com/pl/turisticka?q=B%C5%82atnia%20(917%C2%A0m)&source=osm&id=6315089&ds=1&x=18.9453328&y=49.7483498&z=17) |
+| 16 | Hyrca | 929 | 49.700887 | 18.980427 | [mapa](https://mapy.com/pl/turisticka?q=Hyrca&source=osm&id=1051306174&ds=2&x=18.9806628&y=49.7007980&z=17) |
+| 17 | Biały Krzyż | 940 | 49.670054 | 18.959031 | [mapa](https://mapy.com/pl/turisticka?q=Bia%C5%82y%20Krzy%C5%BC%20(940%C2%A0m)&source=osm&id=1048126439&ds=1&x=18.9590442&y=49.6701310&z=17) |
+| 18 | Kotarz | 974 | 49.689112 | 18.963754 | [mapa](https://mapy.com/pl/turisticka?q=Kotarz%20(974%C2%A0m)&source=osm&id=149224136&ds=1&x=18.9636362&y=49.6890763&z=17) |
+| 19 | Stołów | 1035 | 49.745148 | 18.965323 | [mapa](https://mapy.com/pl/turisticka?q=Sto%C5%82%C3%B3w%20(1035%C2%A0m)&source=osm&id=1056394345&ds=1&x=18.9652944&y=49.7451617&z=17) |
+| 20 | Trzy Kopce | 1082 | 49.736655 | 18.986354 | [mapa](https://mapy.com/pl/turisticka?q=Trzy%20Kopce%20(1082%C2%A0m)&source=osm&id=6419453&ds=1&x=18.9863062&y=49.7366188&z=17) |
 
 Wysokości pochodzą z checklisty organizatora i są wiążące — takie widnieją na tabliczkach, przy których robi się zdjęcie.
 
-**Weryfikacja położenia (2026-09-13).** Każdy punkt porównany z obiektem szczytu w Mapy.com (warstwa turystyczna, dane OSM) — linki w ostatniej kolumnie, zapisane też w `peaks.json` jako pole `mapy`. Największa różnica to 0,7 m (Równica), czyli samo zaokrąglenie do pięciu miejsc po przecinku. Niezależnie od tego każdy punkt sprawdzony na siatce SRTM z `elevation.json`: wszystkie leżą na lokalnym maksimum albo najwyżej 300 m od niego, z różnicą do 5 m — w granicach dokładności siatki 90 m. Współrzędne z artykułów Wikipedii różnią się od OSM o 1–150 m, z dwoma wyjątkami opisanymi w [3.4](#34-rozbieżności-wymagające-potwierdzenia).
+**Współrzędne to pozycje tabliczek, nie wierzchołków (2026-09-16).** Pierwotnie punkty brały się z węzłów `natural=peak` w OSM. Trasa zapoznawcza pokazała, że część tabliczek nie stoi na wierzchołku — organizator wiesza je tam, gdzie prowadzi szlak i gdzie jest miejsce na zdjęcie. Ponieważ zaliczenie szczytu to zdjęcie przy tabliczce, `lat`/`lon` w `peaks.json` wskazują teraz tabliczkę: to ona jest celem nawigacji, punktem odniesienia dla odległości w widoku terenowym i dla sprawdzania GPS-u ze zdjęcia. Źródłem jest [mapa My Maps](https://www.google.com/maps/d/viewer?mid=1Krpwi-8ZNoF30CKzST1pqKqF2ZBIoDg) z punktami spisanymi w terenie (KML pobrany 2026-09-16, wszystkie 20 tabliczek).
+
+Czternaście punktów przesunęło się o mniej niż 35 m — to zwykłe doprecyzowanie. Sześć rozjeżdżało się na tyle, że dawna wersja aplikacji potrafiła prowadzić obok tabliczki:
+
+| Szczyt | Przesunięcie |
+|---|---:|
+| Orłowa | 437 m |
+| Trzy Kopce Wiślańskie | 352 m |
+| Grabowa | 333 m |
+| Stary Groń | 289 m |
+| Gościejów | 230 m |
+| Wielka Cisowa | 219 m |
+
+Linki w ostatniej kolumnie tabeli (pole `mapy` w `peaks.json`) celowo nadal prowadzą do obiektu szczytu w OSM — służą jako odnośnik do samego szczytu, nie do tabliczki. Wysokości pozostają z checklisty organizatora, bo takie widnieją na tabliczkach. Współrzędne z artykułów Wikipedii różnią się od tabliczek o kilkadziesiąt do kilkuset metrów, z wyjątkami opisanymi w [3.4](#34-rozbieżności-wymagające-potwierdzenia).
 
 **Beskidek** leży na grzbiecie Karkoszczonka–Hyrca (granica Szczyrku i Brennej), tam gdzie węzeł OSM `natural=peak` o `ele=830` — zgodnie z checklistą. Przez szczyt biegnie czerwony szlak z Przełęczy Salmopolskiej; niżej, po szczyrkowskiej stronie, jest Beskid Sport Arena ze stokiem slalomowym „Beskidek”. Organizator ostrzega osobno: liczy się **Beskidek 830 m, a nie Beskid 860 m**, przez który nie przechodzi szlak.
 
@@ -717,7 +730,7 @@ Sprawdzone tą drogą:
 | Zakładka Info: zero zasobów z obcych domen przed kliknięciem w film | ✅ |
 | Brak poziomego przewijania przy 360 i 390 px | ✅ |
 | Sześć zakładek mieści się na 360 px bez ucinania tekstu | ✅ |
-| Współrzędne 20 szczytów zgodne z punktami Mapy.com (maks. 0,7 m) i z lokalnymi maksimami SRTM | ✅ |
+| Współrzędne 20 szczytów zgodne z pozycjami tabliczek z mapy My Maps (weryfikacja terenowa 2026-09-16) | ✅ |
 | Panel każdego z 20 szczytów: opis, link Mapy.com, wszystkie miniatury załadowane | ✅ |
 | Pasek ładuje miniatury, pełne zdjęcie dopiero w podglądzie | ✅ |
 | Podgląd: autor i licencja widoczne, strzałka przełącza zdjęcie, Escape zamyka podgląd, a nie panel | ✅ |
