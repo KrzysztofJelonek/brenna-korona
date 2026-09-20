@@ -1,0 +1,18 @@
+{
+  "name": "korona-promo",
+  "private": true,
+  "type": "module",
+  "description": "Materiały promocyjne aplikacji Korona Gór Brennej — zrzuty, grafika do posta, rolka.",
+  "scripts": {
+    "serve": "python3 -m http.server 4179 --bind 127.0.0.1",
+    "shots": "node src/shots.mjs",
+    "card": "node src/card.mjs",
+    "frames": "node src/frames.mjs",
+    "preview": "node src/frames.mjs preview",
+    "video": "node src/video.mjs"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "playwright-core": "^1.49.0"
+  }
+}

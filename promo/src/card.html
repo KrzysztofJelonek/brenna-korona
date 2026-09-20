@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1080px; height: 1350px; overflow: hidden; background: #08150e;
+    font-family: Inter, system-ui, sans-serif; color: #eaf5ec; }
+  #card { position: relative; width: 1080px; height: 1350px; overflow: hidden; }
+  .bg { position: absolute; inset: 0; background: radial-gradient(120% 65% at 50% 6%, #1d4b31 0%, #113021 45%, #08150e 100%); }
+  .glow { position: absolute; left: 50%; top: 58%; width: 1200px; height: 1200px; margin: -600px 0 0 -600px;
+    background: radial-gradient(circle, rgba(143,240,164,.15) 0%, rgba(143,240,164,0) 62%); }
+  svg.contours { position: absolute; inset: 0; opacity: .15; }
+  .top { position: absolute; left: 0; right: 0; top: 58px; text-align: center; padding: 0 70px; }
+  .tag { display: inline-flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 800; letter-spacing: .16em;
+    text-transform: uppercase; color: #06210f; background: #8ff0a4; padding: 10px 22px; border-radius: 999px; }
+  h1 { font-size: 72px; font-weight: 900; letter-spacing: -.03em; line-height: 1.04; margin: 26px 0 0; }
+  h1 .hl { color: #8ff0a4; }
+  .sub { font-size: 30px; max-width: 800px; margin-left: auto; margin-right: auto; color: #a9c9b4; margin: 18px 0 0; line-height: 1.35; }
+  .phones { position: absolute; left: 0; right: 0; top: 402px; height: 660px; }
+  .ph { position: absolute; border-radius: 34px; overflow: hidden; background: #0d2418;
+    border: 7px solid rgba(233,255,238,.18); box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+  .ph img { display: block; width: 100%; }
+  .ph.center { width: 336px; left: 372px; top: 0; z-index: 3; }
+  .ph.left { width: 282px; left: 78px; top: 78px; transform: rotate(-6deg); z-index: 2; }
+  .ph.right { width: 282px; right: 78px; top: 78px; transform: rotate(6deg); z-index: 2; }
+  .ph.center img { height: 616px; object-fit: cover; object-position: top center; }
+  .ph.left img, .ph.right img { height: 520px; object-fit: cover; object-position: top center; }
+  .badge { position: absolute; z-index: 5; font-size: 21px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    color: #06210f; background: #ffd166; padding: 9px 18px; border-radius: 999px; box-shadow: 0 12px 30px rgba(0,0,0,.4); }
+  .badge.b1 { left: 96px; top: 42px; transform: rotate(-6deg); }
+  .badge.b2 { right: 96px; top: 42px; transform: rotate(6deg); }
+  .stats { position: absolute; left: 70px; right: 70px; bottom: 168px; display: flex; justify-content: center; gap: 26px; }
+  .stat { flex: 1; max-width: 290px; text-align: center; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 22px; padding: 18px 10px 16px; }
+  .stat b { display: block; font-size: 42px; font-weight: 900; letter-spacing: -.02em; }
+  .stat span { display: block; font-size: 22px; color: #a9c9b4; margin-top: 4px; }
+  .foot { position: absolute; left: 0; right: 0; bottom: 62px; text-align: center; }
+  .foot .url { font-size: 33px; font-weight: 800; color: #8ff0a4; }
+  .foot .note { font-size: 24px; color: #a9c9b4; margin-top: 9px; }
+</style>
+</head>
+<body>
+<div id="card">
+  <div class="bg"></div><div class="glow"></div>
+  <svg class="contours" viewBox="0 0 1080 1350" preserveAspectRatio="none">
+    <g fill="none" stroke="#8ff0a4" stroke-width="2">
+      <path d="M-80 1040 C 180 940, 300 1150, 560 1010 S 940 860, 1180 970"/>
+      <path d="M-80 1140 C 200 1040, 320 1250, 580 1110 S 960 960, 1180 1070"/>
+      <path d="M-80 1240 C 220 1140, 340 1350, 600 1210 S 980 1060, 1180 1170"/>
+      <path d="M-80 330 C 180 230, 320 450, 560 310 S 940 170, 1180 290"/>
+      <path d="M-80 232 C 200 132, 340 352, 580 212 S 960 72, 1180 192"/>
+    </g>
+  </svg>
+
+  <div class="top">
+    <span class="tag">Korona Gór Brennej · aplikacja</span>
+    <h1>Start i meta osobno.<br><span class="hl">I własne punkty trasy.</span></h1>
+    <p class="sub">Dwie zmiany, które wyszły dopiero na szlaku</p>
+  </div>
+
+  <div class="phones">
+    <div class="ph left"><img src="../screens/01-lista.png"></div>
+    <div class="ph right"><img src="../screens/04-mapa-waypoint.png"></div>
+    <div class="ph center"><img src="../screens/03-mapa-start-meta.png"></div>
+    <span class="badge b1">20 szczytów</span>
+    <span class="badge b2">+ punkt</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>17,18 km</b><span>wczorajsza trasa</span></div>
+    <div class="stat"><b>1 002 m</b><span>podejść</span></div>
+    <div class="stat"><b>7</b><span>szczytów w jeden dzień</span></div>
+  </div>
+
+  <div class="foot">
+    <div class="url">krzysztofjelonek.github.io/brenna-korona</div>
+    <div class="note">bez kont · bez reklam · po pierwszym otwarciu działa bez zasięgu</div>
+  </div>
+</div>
+</body>
+</html>

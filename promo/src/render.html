@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>KGB clip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #eaf5ec;
+    --muted: #a9c9b4;
+    --accent: #8ff0a4;
+    --accent-2: #ffd166;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; width: 1080px; height: 1920px; overflow: hidden; background: #08150e; }
+  body { font-family: Inter, system-ui, sans-serif; color: var(--ink); }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  .bg { position: absolute; inset: 0; background:
+      radial-gradient(120% 70% at 50% 8%, #1d4b31 0%, #113021 45%, #08150e 100%); }
+  .bg-glow { position: absolute; left: 50%; top: 52%; width: 1300px; height: 1300px; margin: -650px 0 0 -650px;
+      background: radial-gradient(circle, rgba(143,240,164,.16) 0%, rgba(143,240,164,0) 62%); }
+  .contours { position: absolute; inset: -5%; opacity: .16; }
+  .caption { position: absolute; left: 0; right: 0; top: 112px; text-align: center; padding: 0 70px; }
+  .tag { display: inline-block; font-size: 26px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+      color: #06210f; background: var(--accent); padding: 10px 22px; border-radius: 999px; margin-bottom: 20px; }
+  .title { font-size: 68px; line-height: 1.06; font-weight: 900; letter-spacing: -.02em; margin: 0; }
+  .sub { font-size: 36px; line-height: 1.25; font-weight: 500; color: var(--muted); margin: 18px 0 0; }
+  .phone-wrap { position: absolute; left: 50%; top: 455px; width: 600px; margin-left: -300px; }
+  .phone { position: relative; width: 600px; height: 1298px; border-radius: 52px; overflow: hidden;
+      border: 9px solid rgba(233,255,238,.16); background: #0d2418;
+      box-shadow: 0 50px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.4); }
+  .phone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+  .footer { position: absolute; left: 0; right: 0; bottom: 92px; text-align: center; }
+  .url { font-size: 31px; font-weight: 700; color: var(--accent); letter-spacing: .01em; }
+  .note { font-size: 25px; color: var(--muted); margin-top: 10px; }
+  .bar { position: absolute; left: 90px; right: 90px; bottom: 56px; height: 6px; border-radius: 4px; background: rgba(255,255,255,.14); }
+  .bar > i { display: block; height: 100%; border-radius: 4px; background: var(--accent); }
+  .intro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; }
+  .intro img { width: 250px; height: 250px; filter: drop-shadow(0 26px 50px rgba(0,0,0,.5)); }
+  .intro h1 { font-size: 92px; font-weight: 900; margin: 16px 0 0; letter-spacing: -.03em; text-align: center; line-height: 1.02; }
+  .intro p { font-size: 38px; color: var(--muted); margin: 0; text-align: center; }
+  .outro { position: absolute; left: 0; right: 0; bottom: 210px; text-align: center; padding: 0 80px; }
+  .outro h2 { font-size: 60px; font-weight: 900; margin: 0 0 18px; letter-spacing: -.02em; }
+  .outro p { font-size: 35px; color: var(--muted); margin: 0 0 14px; line-height: 1.3; }
+  .outro .link { font-size: 36px; font-weight: 800; color: var(--accent); }
+  .stat { display: inline-flex; gap: 14px; align-items: baseline; font-size: 32px; color: var(--accent-2); font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bg"></div>
+  <div class="bg-glow" id="glow"></div>
+  <svg class="contours" viewBox="0 0 1080 1920" preserveAspectRatio="none" id="contours">
+    <g fill="none" stroke="#8ff0a4" stroke-width="2">
+      <path d="M-80 1500 C 180 1380, 300 1600, 560 1460 S 940 1300, 1180 1420"/>
+      <path d="M-80 1600 C 200 1480, 320 1700, 580 1560 S 960 1400, 1180 1520"/>
+      <path d="M-80 1700 C 220 1580, 340 1800, 600 1660 S 980 1500, 1180 1620"/>
+      <path d="M-80 400 C 180 300, 320 520, 560 380 S 940 240, 1180 360"/>
+      <path d="M-80 300 C 200 200, 340 420, 580 280 S 960 140, 1180 260"/>
+    </g>
+  </svg>
+
+  <div class="intro" id="intro">
+    <img src="../screens/icon.svg" alt="">
+    <h1>Korona<br>Gór Brennej</h1>
+    <p>nieoficjalna aplikacja · 20 szczytów</p>
+  </div>
+
+  <div class="caption" id="caps"></div>
+  <div class="phone-wrap" id="pw"><div class="phone" id="phone"></div></div>
+
+  <div class="footer" id="footer">
+    <div class="url">krzysztofjelonek.github.io/brenna-korona</div>
+    <div class="note">bez kont · bez reklam · działa offline</div>
+  </div>
+
+  <div class="outro" id="outro">
+    <h2>Zostało 11 dni</h2>
+    <p>Korona Gór Brennej trwa do 30 września.<br>20 szczytów, dowolna kolejność, pieszo lub rowerem.</p>
+    <div class="link">krzysztofjelonek.github.io/brenna-korona</div>
+  </div>
+
+  <div class="bar"><i id="barfill"></i></div>
+</div>
+
+<script>
+const BEAT = 0.45279, BAR = BEAT * 4, D = 21.24;
+const SCENES = [
+  { img: '01-lista.png',           tag: null,    title: 'Checklista 20 szczytów', sub: 'status, data, sposób wejścia, postęp' },
+  { img: '02-szczyt.png',          tag: null,    title: 'Każda góra z opisem',    sub: 'zdjęcia, szlaki, ciekawostki, mapy' },
+  { img: '03-mapa-start-meta.png', tag: 'nowe',  title: 'Start i meta osobno',    sub: 'auto zostaje w Górkach, odbiór w Bukowej' },
+  { img: '04-mapa-waypoint.png',   tag: 'nowe',  title: 'Własne punkty trasy',    sub: 'wracam przez Halę Jaworową — i tyle' },
+  { img: '05-plan.png',            tag: 'nowe',  title: 'Plan z tego, co zostało',sub: 'generator pomija zaliczone szczyty' },
+  { img: '06-teren.png',           tag: null,    title: 'W terenie bez zasięgu',  sub: 'odległość i kierunek do szczytu' },
+];
+const INTRO_END = BAR;               // 1.811
+const SCENE_LEN = BAR * 1.5;         // 2.717
+const OUTRO_START = INTRO_END + SCENES.length * SCENE_LEN;  // 18.113
+const OUTRO_IMG = '08-qr.png';
+
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const ease = (x) => 1 - Math.pow(1 - clamp(x), 3);
+
+const phone = document.getElementById('phone');
+const caps = document.getElementById('caps');
+const layers = [];
+[...SCENES.map(s => s.img), OUTRO_IMG].forEach((src, i) => {
+  const img = document.createElement('img');
+  img.src = '../screens/' + src;
+  if (src === '08-qr.png') img.style.objectPosition = 'center bottom';
+  img.style.opacity = '0';
+  phone.appendChild(img);
+  const box = document.createElement('div');
+  const s = SCENES[i];
+  box.innerHTML = s
+    ? (s.tag ? `<span class="tag">${s.tag}</span><br>` : '') +
+      `<h2 class="title">${s.title}</h2><p class="sub">${s.sub}</p>`
+    : '';
+  box.style.position = 'absolute';
+  box.style.left = '0'; box.style.right = '0'; box.style.top = '0';
+  box.style.opacity = '0';
+  caps.appendChild(box);
+  layers.push({ img, box });
+});
+
+window.renderAt = function (t) {
+  // beat pulse
+  const bp = Math.exp(-((t % BEAT) / 0.11)) * 0.011;
+  document.getElementById('glow').style.opacity = String(0.75 + bp * 16);
+
+  // intro
+  const introOut = clamp((t - (INTRO_END - 0.45)) / 0.45);
+  const intro = document.getElementById('intro');
+  intro.style.opacity = String((1 - introOut) * ease((t + 0.15) / 0.5));
+  intro.style.transform = `scale(${1 + 0.05 * clamp(t / INTRO_END)}) translateY(${-30 * introOut}px)`;
+
+  // scenes
+  let phoneVisible = 0;
+  layers.forEach((L, i) => {
+    const isOutro = i === SCENES.length;
+    const start = isOutro ? OUTRO_START : INTRO_END + i * SCENE_LEN;
+    const end = isOutro ? D + 1 : start + SCENE_LEN;
+    const inP = ease((t - start) / 0.4);
+    const outP = 1 - clamp((t - (end - 0.25)) / 0.25);
+    const op = clamp(Math.min(inP, outP));
+    const local = clamp((t - start) / (end - start));
+    L.img.style.opacity = String(op);
+    L.img.style.transform = `scale(${1.02 + 0.045 * local}) translateY(${(1 - inP) * 26}px)`;
+    L.box.style.opacity = String(op);
+    L.box.style.transform = `translateY(${(1 - inP) * 34}px)`;
+    phoneVisible = Math.max(phoneVisible, op);
+  });
+
+  // phone frame
+  const pw = document.getElementById('pw');
+  const outroP = ease((t - OUTRO_START) / 0.6);
+  const scale = (0.965 + 0.035 * phoneVisible) * (1 - 0.30 * outroP) + bp;
+  pw.style.opacity = String(phoneVisible);
+  pw.style.transformOrigin = '50% 12%';
+  pw.style.transform = `translateY(${-24 * outroP}px) scale(${scale})`;
+
+  // footer + outro text
+  document.getElementById('footer').style.opacity = String(clamp(Math.min(ease((t - INTRO_END) / 0.6), 1 - outroP)));
+  const o = document.getElementById('outro');
+  o.style.opacity = String(outroP);
+  o.style.transform = `translateY(${(1 - outroP) * 40}px)`;
+
+  document.getElementById('barfill').style.width = (clamp(t / D) * 100) + '%';
+};
+window.renderAt(0);
+</script>
+</body>
+</html>

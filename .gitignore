@@ -41,3 +41,9 @@ pnpm-debug.log*
 # materiały robocze (dane źródłowe wyekstrahowane do src/data/ i README)
 tmp/
 *.pdf
+
+# materiały promocyjne: podkład muzyczny, klatki pośrednie i regenerowalne zrzuty
+promo/audio/
+promo/build/
+promo/screens/*.png
+promo/*.mp4
