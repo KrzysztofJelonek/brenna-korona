@@ -7,6 +7,7 @@
     "serve": "python3 -m http.server 4179 --bind 127.0.0.1",
     "shots": "node src/shots.mjs",
     "card": "node src/card.mjs",
+    "cover": "node src/cover.mjs",
     "frames": "node src/frames.mjs",
     "preview": "node src/frames.mjs preview",
     "video": "node src/video.mjs"

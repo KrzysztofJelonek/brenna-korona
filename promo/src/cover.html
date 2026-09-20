@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  /* Okładka TikToka 1080×1920. Siatka profilu przycina kadr do ok. 3:4 (y 240–1680),
+     a w feedzie dolne ~420 px zasłania opis i dolny pasek, prawe ~190 px — przyciski.
+     Dlatego wszystko, co musi być czytelne, siedzi w pasie y 430–1420 i z dala od prawej krawędzi. */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #08150e;
+    font-family: Inter, system-ui, sans-serif; color: #eaf5ec; }
+  #c { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  .bg { position: absolute; inset: 0; background: radial-gradient(120% 62% at 50% 16%, #1d4b31 0%, #113021 45%, #08150e 100%); }
+  .glow { position: absolute; left: 50%; top: 52%; width: 1300px; height: 1300px; margin: -650px 0 0 -650px;
+    background: radial-gradient(circle, rgba(143,240,164,.16) 0%, rgba(143,240,164,0) 62%); }
+  svg.contours { position: absolute; inset: 0; opacity: .15; }
+  .head { position: absolute; left: 0; right: 0; top: 388px; text-align: center; padding: 0 74px; }
+  .tag { display: inline-block; font-size: 26px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+    color: #06210f; background: #8ff0a4; padding: 11px 24px; border-radius: 999px; }
+  h1 { margin: 26px 0 0; font-size: 116px; font-weight: 900; line-height: .96; letter-spacing: -.035em; text-transform: uppercase; }
+  h1 em { display: block; font-style: normal; color: #8ff0a4; }
+  .sub { margin: 24px 0 0; font-size: 38px; font-weight: 600; color: #c8e6d1; }
+  .phone { position: absolute; left: 50%; margin-left: -260px; top: 812px; width: 520px; height: 596px;
+    border-radius: 40px; overflow: hidden; border: 8px solid rgba(233,255,238,.2); background: #0d2418;
+    box-shadow: 0 46px 110px rgba(0,0,0,.62); }
+  /* Zdjęcie 1170×2532 skalujemy do 520 px szerokości (1125 px wysokości) i przesuwamy tak,
+     żeby w kadrze wylądował sam przebieg trasy ze znacznikami S i M. */
+  .phone img { display: block; width: 100%; margin-top: -192px; }
+  .strip { position: absolute; left: 0; right: 0; top: 1436px; text-align: center; }
+  .strip b { font-size: 44px; font-weight: 900; letter-spacing: -.01em; }
+  .strip b + b { margin-left: 30px; }
+  .strip .dot { color: #8ff0a4; font-size: 40px; margin: 0 6px; }
+  .strip p { margin: 14px 0 0; font-size: 30px; color: #a9c9b4; }
+</style>
+</head>
+<body>
+<div id="c">
+  <div class="bg"></div><div class="glow"></div>
+  <svg class="contours" viewBox="0 0 1080 1920" preserveAspectRatio="none">
+    <g fill="none" stroke="#8ff0a4" stroke-width="2">
+      <path d="M-80 1560 C 180 1440, 300 1660, 560 1520 S 940 1360, 1180 1480"/>
+      <path d="M-80 1660 C 200 1540, 320 1760, 580 1620 S 960 1460, 1180 1580"/>
+      <path d="M-80 1760 C 220 1640, 340 1860, 600 1720 S 980 1560, 1180 1680"/>
+      <path d="M-80 360 C 180 260, 320 480, 560 340 S 940 200, 1180 320"/>
+      <path d="M-80 250 C 200 150, 340 370, 580 230 S 960 90, 1180 210"/>
+    </g>
+  </svg>
+
+  <div class="head">
+    <span class="tag">Korona Gór Brennej</span>
+    <h1>Trasa<em>bez zasięgu</em></h1>
+    <p class="sub">apka liczy szlaki w telefonie</p>
+  </div>
+
+  <div class="phone"><img src="../screens/03-mapa-start-meta.png"></div>
+
+  <div class="strip">
+    <b>7 szczytów</b><span class="dot">·</span><b>17 km</b><span class="dot">·</span><b>1002 m</b>
+    <p>jeden dzień w Beskidzie Śląskim</p>
+  </div>
+</div>
+</body>
+</html>
