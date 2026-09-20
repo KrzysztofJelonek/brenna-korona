@@ -135,7 +135,7 @@ Nad mapą **pasek dni pełniący jednocześnie rolę legendy i filtru**:
 
 - *Wszystkie* — każdy dzień innym kolorem, widok dopasowany do całego planu,
 - wybrany dzień — tylko jego trasa, szczyty ponumerowane w kolejności przejścia, pozostałe przygaszone do małych kropek,
-- marker `P` w miejscu startu, trasa domknięta do niego przy trybie pętli,
+- marker parkingu w miejscu startu, trasa domknięta do niego przy trybie pętli,
 - pasek pod mapą: liczba szczytów, dystans, czas, suma podejść.
 
 Kontrolka warstw siedzi w prawym górnym rogu, pod paskiem dni — dół mapy zajmuje panel trasy.
@@ -146,13 +146,15 @@ Przycisk **Na dziś** na pasku nad mapą przełącza mapę w tryb układania tra
 
 - **dotknięcie szczytu** dodaje go do trasy albo z niej usuwa — bez dymka, jeden wybór to jedno dotknięcie,
 - po każdym wyborze aplikacja **sama układa kolejność** i liczy przebieg po szlakach. Użytkownik wybiera zbiór szczytów, nie kolejność. Kolejność układa ta sama funkcja co w generatorze planów (najbliższy sąsiad + 2-opt, [sekcja 6](#6-generator-planów)),
-- **parking** domyślnie dobierany jest automatycznie: z ośmiu punktów gminy wygrywa ten, z którego wybrane szczyty najszybciej się przejdzie. Liczone z pełnym ułożeniem kolejności, więc z uwzględnieniem powrotu. Można też dotknąć dowolnego `P` na mapie, wybrać parking z listy, **wskazać własne miejsce** dotknięciem mapy albo zrezygnować z parkingu,
-- **własne miejsca** zapisują się na liście „Moje miejsca” i zostają na mapie na kolejne dni. Wysokość pochodzi z siatki SRTM, marker da się przeciągnąć. Dotknięcie markera wybiera miejsce i otwiera dymek z polem nazwy (np. „pod kościołem”) oraz przyciskami **Zapisz** i **Usuń**. Świeżo wskazane miejsce otwiera dymek samo. Usunięcie miejsca wybranego na dziś wraca do automatycznego doboru parkingu,
-- **Powrót / Bez powrotu** — z powrotem optymalizowana jest zamknięta pętla, bez powrotu droga od parkingu do ostatniego szczytu,
-- **⇄** odwraca kierunek przejścia. Działa dla pętli i dla trasy bez parkingu; dla trasy bez powrotu jest zablokowany, bo zmieniłby miejsce startu. Dystans się nie zmienia, ale czas i podejścia tak: Kotarz–Hyrca–Beskidek bez parkingu to 1:09 h i ↑ 202 m w jedną stronę, a 0:51 h i ↑ 70 m w drugą,
-- panel pod mapą: dystans, czas, podejścia i kolejność przejścia. Dotknięcie nazwy otwiera panel szczytu, × usuwa szczyt z trasy.
+- **start (`S`) i meta (`M`) wybierane są osobno** — to dwa górne wiersze panelu. Trasa nie musi być pętlą: przy dwóch autach zostawia się jedno na starcie, drugie na mecie i idzie w jedną stronę. Dotknięcie parkingu na mapie otwiera dymek z jego nazwą, opisem z materiałów gminy i przyciskami **Start stąd** / **Meta tutaj**. Litera w markerze pokazuje rolę: `S`, `M`, `↻` (start i meta w jednym miejscu) albo szare `P` dla parkingu jeszcze nieużytego,
+- **start** domyślnie dobierany jest automatycznie: z ośmiu punktów gminy wygrywa ten, z którego wybrane szczyty najszybciej się przejdzie. Liczone z pełnym ułożeniem kolejności, więc z uwzględnieniem drogi do mety — jeśli meta jest już wskazana, automat dobiera start właśnie pod nią,
+- **meta** domyślnie to **↻ Powrót na start**. Poza tym do wyboru dowolny parking gminy, własne miejsce albo **Koniec na ostatnim szczycie**,
+- **własne miejsca** zapisują się na liście „Moje miejsca” i zostają na mapie na kolejne dni. Wysokość pochodzi z siatki SRTM, marker da się przeciągnąć. Dotknięcie markera otwiera dymek z wyborem roli, polem nazwy (np. „pod kościołem”) oraz przyciskami **Zapisz** i **Usuń**. Świeżo wskazane miejsce otwiera dymek samo. Usunięcie miejsca użytego na dziś wraca do automatycznego startu albo do powrotu na start,
+- **+ punkt** w pasku nad mapą dokłada **punkt pośredni**: miejsce, przez które trasa ma przejść, choćby leżało poza szlakiem (przełęcz, bacówka, przejście przez potok). Kolejność układa się razem ze szczytami — punkt wpada tam, gdzie leży. Marker to biały okrąg z numerem kolejności, da się go przeciągnąć, nazwać i usunąć. Punkty pośrednie należą do konkretnej trasy, więc znikają razem z nią,
+- **⇄** odwraca kierunek przejścia. Dla pętli i dla trasy bez parkingów odwraca kolejność szczytów; dla trasy między dwoma parkingami **zamienia start z metą** (czyli auta miejscami) i układa kolejność od nowa. Zablokowany tylko wtedy, gdy trasa jest zaczepiona jednym końcem, bo kierunek jest wtedy narzucony. Dystans się nie zmienia, ale czas i podejścia tak: Kotarz–Hyrca–Beskidek bez parkingu to 1:09 h i ↑ 202 m w jedną stronę, a 0:51 h i ↑ 70 m w drugą,
+- panel pod mapą: dystans, czas, podejścia i kolejność przejścia — szczyty i punkty pośrednie w jednej liście. Dotknięcie nazwy szczytu otwiera jego panel, × usuwa przystanek z trasy.
 
-Wybór zapisuje się w `localStorage` i nie zmienia statusów szczytów ani planu dni. Wyczyszczenie listy zostawia parking i ustawienie powrotu, bo to raczej stały zwyczaj niż wybór na jeden dzień.
+Wybór zapisuje się w `localStorage` i nie zmienia statusów szczytów ani planu dni. Wyczyszczenie trasy zostawia start i metę, bo to raczej stały zwyczaj niż wybór na jeden dzień; punkty pośrednie znikają.
 
 ### Plan
 
@@ -377,7 +379,7 @@ Decyzje techniczne:
 
 ## 4. Jak powstają ślady tras
 
-**Kluczowa rzecz: ślady nie są nigdzie zapisane.** W repozytorium nie ma ani jednej gotowej trasy. Aplikacja dostaje wyłącznie *listę przystanków* (parking + szczyty w kolejności) i **wylicza przebieg w przeglądarce** przy każdym pokazaniu dnia.
+**Kluczowa rzecz: ślady nie są nigdzie zapisane.** W repozytorium nie ma ani jednej gotowej trasy. Aplikacja dostaje wyłącznie *listę przystanków* (start, szczyty i punkty pośrednie w kolejności, meta) i **wylicza przebieg w przeglądarce** przy każdym pokazaniu dnia.
 
 Dotyczy to tak samo wariantów gminy, jak i planów wygenerowanych czy ułożonych ręcznie — ta sama ścieżka kodu.
 
@@ -428,7 +430,7 @@ Geometria zapisywana jest **delta-kodowaniem na siatce 1e-5 stopnia (~1 m)**: pi
 
 **6. Sklejenie dnia** — [`dayRoute.ts`](src/lib/dayRoute.ts) łączy odcinki w jedną polilinię, sumuje długości, liczy profil i czas. Gdy któregoś odcinka nie da się poprowadzić po sieci, ten jeden odcinek spada na linię prostą z dawnym mnożnikiem, a wynik niesie licznik `straightLegs` — UI pokazuje, ile odcinków tak potraktowano, zamiast udawać, że wszystko się udało.
 
-**7. Cache i wątek** — [`useDayRoute.ts`](src/lib/useDayRoute.ts) trzyma wyniki w cache'u modułowym pod kluczem `(parking, pętla, kolejność szczytów)` i liczy poza ścieżką renderowania. Dla planu wielodniowego dni liczone są **po kolei, nie równolegle** — sześć Dijkstr naraz zablokowałoby wątek na dobrą sekundę. Do czasu policzenia mapa rysuje przebieg orientacyjny linią kropkowaną, a paski pokazują „liczę trasę…". Kiedy pasek i linia na mapie proszą o tę samą trasę naraz, dzielą jedno liczenie.
+**7. Cache i wątek** — [`useDayRoute.ts`](src/lib/useDayRoute.ts) trzyma wyniki w cache'u modułowym pod kluczem `(start, meta, kolejność przystanków)` i liczy poza ścieżką renderowania. Dla planu wielodniowego dni liczone są **po kolei, nie równolegle** — sześć Dijkstr naraz zablokowałoby wątek na dobrą sekundę. Do czasu policzenia mapa rysuje przebieg orientacyjny linią kropkowaną, a paski pokazują „liczę trasę…". Kiedy pasek i linia na mapie proszą o tę samą trasę naraz, dzielą jedno liczenie.
 
 Niżej, w [`dayRoute.ts`](src/lib/dayRoute.ts), jest drugi cache: **pojedynczych odcinków**, pod kluczem współrzędnych obu końców. Trasa na dziś przelicza się po każdym dotknięciu szczytu, a dołożenie szczytu zmienia zwykle jeden–dwa odcinki. Zmierzone: trzeci szczyt dolicza się w 5 ms (zimny odcinek to ok. 15 ms), a odwrócenie kierunku zajmuje 0 ms. Sieć jest nieskierowana, więc odcinek B→A to po prostu odwrócony A→B.
 
@@ -503,11 +505,11 @@ Dlatego **dla wariantów gminy UI pokazuje ich dystanse i czasy**, a wartości p
 
 Propozycje gminy dzielą szczyty tak, jak wygodnie było je opisać. Generator wychodzi od innego założenia: prawie każdy zostawia samochód na parkingu i musi po niego wrócić, więc **dzień jest pętlą**.
 
-Suwak 1–8 dni, [`planGenerator.ts`](src/lib/planGenerator.ts):
+Suwak 1–8 dni, [`planGenerator.ts`](src/lib/planGenerator.ts). Zbiór szczytów do rozplanowania podaje wywołujący: przełącznik **Pomiń zaliczone** (domyślnie włączony, widoczny dopiero gdy jest co pomijać) zostawia generatorowi same niezaliczone, więc po kilku wyjazdach planuje się resztę korony, a nie całość od nowa.
 
 1. **Grupowanie** — k-means po współrzędnych, deterministyczny: centroidy startowe rozłożone po długości geograficznej, więc ten sam wybór zawsze daje ten sam plan.
 2. **Dobór parkingu** — dla każdej grupy ten z ośmiu punktów startowych, z którego cała grupa jest średnio najbliżej.
-3. **Kolejność** — najbliższy sąsiad od parkingu, potem **2-opt** na zamkniętej pętli (odwracanie fragmentów trasy, dopóki skraca całość).
+3. **Kolejność** — najbliższy sąsiad od parkingu, potem **2-opt** na zamkniętej pętli (odwracanie fragmentów trasy, dopóki skraca całość). Ta sama funkcja obsługuje drogę start→meta i trasę bez parkingów, dlatego korzysta z niej też trasa na dziś.
 4. **Wyrównanie** — przenoszenie pojedynczych szczytów z najcięższego dnia do najlżejszego, dopóki skraca to najdłuższy dzień. Do 12 rund.
 5. **Sortowanie dni** z północy na południe, żeby numeracja była przewidywalna.
 
@@ -623,10 +625,20 @@ interface DayPlan {
 
 interface TodayPlan {         // localStorage — trasa na dziś
   peakIds: string[]           // zbiór; kolejność liczona za każdym razem
-  parking: { kind: 'auto' } | { kind: 'none' } | { kind: 'point'; id: string }
-         | { kind: 'custom'; id: string }  // id z CustomParking
-  loop: boolean               // powrót na parking
-  reversed: boolean           // kierunek przejścia
+  parking: { kind: 'auto' } | { kind: 'none' } | ParkingRef   // start
+  finish: { kind: 'start' } | { kind: 'none' } | ParkingRef   // meta
+  waypoints: Waypoint[]       // punkty pośrednie tej trasy
+  reversed: boolean           // kierunek; przy dwóch parkingach zamienia je miejscami
+}
+
+type ParkingRef = { kind: 'point'; id: string }   // id ze startPoints.ts
+              | { kind: 'custom'; id: string }    // id z CustomParking
+
+interface Waypoint {          // localStorage — miejsce, przez które ma iść trasa
+  id: string
+  name: string                // pusty → „Punkt pośredni”
+  lat: number; lon: number
+  ele: number                 // z siatki SRTM
 }
 
 interface CustomParking {     // localStorage — własne miejsca wskazane na mapie
@@ -649,7 +661,7 @@ interface StoredPhoto {       // IndexedDB
 
 | Co | Gdzie | Dlaczego |
 |---|---|---|
-| postęp, plan, trasa na dziś, własne miejsca, ustawienia | **localStorage** (`zustand/persist`, wersja 2 z migracją) | kilkanaście kB, synchroniczny odczyt przy starcie |
+| postęp, plan, trasa na dziś, własne miejsca, ustawienia | **localStorage** (`zustand/persist`, wersja 3 z migracjami) | kilkanaście kB, synchroniczny odczyt przy starcie |
 | zdjęcia | **IndexedDB** (`idb`) | localStorage ma limit ~5 MB i trzyma tylko stringi; 20 zdjęć × ~300 KB ≈ 6 MB |
 | trasy | **cache w pamięci** | wynik deterministyczny, przeliczalny w każdej chwili |
 
@@ -794,6 +806,9 @@ Sprawdzone tą drogą:
 | Trasa na dziś: 20 szczytów + 8 parkingów na mapie, wybór dotknięciem markera, przeliczenie i nowa kolejność po każdym wyborze | ✅ |
 | Parking: automatyczny, dotknięcie `P`, lista, własne miejsce dotknięciem mapy (wysokość z SRTM, marker przeciągalny), bez parkingu | ✅ |
 | Aktualizacja (Chrome sterowany przez DevTools Protocol w czasie rzeczywistym, dwie wersje `sw.js` na lokalnym serwerze): przycisk **Odśwież** przeładowuje do nowej wersji w karcie kontrolowanej przez service workera, także gdy nowa wersja czeka, i w karcie niekontrolowanej (pierwsza wizyta, twarde odświeżenie) — tam wcześniej nic nie robił | ✅ |
+| Start i meta osobno: trasa z parkingu A na parking B liczona i rysowana od A do B; ⇄ zamienia auta miejscami i układa kolejność od nowa; automatyczny start dobierany pod wskazaną metę; migracja zapisu v2 (`loop: false` → meta „koniec na szczycie”) | ✅ |
+| Punkty pośrednie: dołożony punkt trafia w kolejność zgodnie z położeniem, marker pokazuje numer, trasa przechodzi przez niego, przeciąganie przelicza przebieg, wyczyszczenie trasy je usuwa | ✅ |
+| Generator: „Pomiń zaliczone” planuje tylko niezaliczone szczyty (5 zaliczonych → 15 w planie, ~70 zamiast ~81 km); przy komplecie zaliczonych pokazuje komunikat i blokuje wczytanie | ✅ |
 | Własne miejsca: migracja zapisu v1 (jedno miejsce w parkingu) do listy; dotknięcie markera otwiera dymek; zapis nazwy trafia na listę i do podpowiedzi markera; nowe miejsce otwiera dymek samo i zostaje wybrane; Usuń wraca do parkingu automatycznego; wybór z listy „Moje miejsca”; bez poziomego przewijania przy 390 px | ✅ |
 | Powrót / bez powrotu; odwrócenie kierunku zablokowane dla trasy bez powrotu; × usuwa szczyt z trasy | ✅ |
 | Wybór na dziś zapisany w `localStorage`, wyjście z trybu przywraca pasek dni | ✅ |

@@ -1,8 +1,7 @@
-import type { Peak } from '../types'
 import type { StartPoint } from '../data/startPoints'
 import { profileOf } from './elevation'
 import { route, type LatLon, type RouteLeg } from './trailRouter'
-import { haversine, walkingTime, TERRAIN_FACTOR, ROUGHNESS_M_PER_KM } from './geo'
+import { haversine, walkingTime, TERRAIN_FACTOR, ROUGHNESS_M_PER_KM, type Stop } from './geo'
 
 /**
  * Trasa całego dnia policzona po realnej sieci ścieżek.
@@ -48,16 +47,16 @@ function cachedLeg(from: LatLon, to: LatLon): Promise<RouteLeg | null> {
 }
 
 export async function computeDayRoute(
-  peaks: Peak[],
+  via: Stop[],
   start: StartPoint | undefined,
-  loop: boolean,
+  finish: StartPoint | undefined,
 ): Promise<DayRoute | null> {
-  if (peaks.length === 0) return null
+  if (via.length === 0) return null
 
   const stops: LatLon[] = [
     ...(start ? [{ lat: start.lat, lon: start.lon }] : []),
-    ...peaks.map((p) => ({ lat: p.lat, lon: p.lon })),
-    ...(start && loop ? [{ lat: start.lat, lon: start.lon }] : []),
+    ...via.map((p) => ({ lat: p.lat, lon: p.lon })),
+    ...(finish ? [{ lat: finish.lat, lon: finish.lon }] : []),
   ]
   if (stops.length < 2) return null
 

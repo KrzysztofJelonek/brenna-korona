@@ -74,12 +74,32 @@ export interface CustomParking {
   ele: number
 }
 
-/** Parking trasy „na dziś”: dobrany automatycznie, z listy gminy, jedno z własnych miejsc albo żaden. */
-export type TodayParking =
-  | { kind: 'auto' }
-  | { kind: 'none' }
-  | { kind: 'point'; id: string }
-  | { kind: 'custom'; id: string }
+/**
+ * Punkt pośredni trasy „na dziś” — miejsce, przez które trasa ma przejść
+ * (przełęcz, bacówka, zejście poza szlakiem). Kolejność układamy tak samo
+ * jak dla szczytów, więc punkt wpada tam, gdzie leży.
+ */
+export interface Waypoint {
+  id: string
+  /** Nazwa lub opis; pusty — pokazujemy „Punkt pośredni”. */
+  name: string
+  lat: number
+  lon: number
+  /** Wysokość z siatki SRTM. */
+  ele: number
+}
+
+/** Wskazane miejsce: jeden z parkingów gminy albo własne miejsce z mapy. */
+export type ParkingRef = { kind: 'point'; id: string } | { kind: 'custom'; id: string }
+
+/** Parking trasy „na dziś”: dobrany automatycznie, wskazany wprost albo żaden. */
+export type TodayParking = { kind: 'auto' } | { kind: 'none' } | ParkingRef
+
+/**
+ * Koniec trasy „na dziś”. Zwykle wraca się po auto na start, ale przy dwóch
+ * autach dzień kończy się na innym parkingu — stąd osobny wybór.
+ */
+export type TodayFinish = { kind: 'start' } | { kind: 'none' } | ParkingRef
 
 /**
  * Trasa ułożona na mapie na bieżący dzień. Trzyma tylko wybór użytkownika —
@@ -87,10 +107,13 @@ export type TodayParking =
  */
 export interface TodayPlan {
   peakIds: string[]
+  /** Parking startowy. */
   parking: TodayParking
-  /** Powrót na parking; bez parkingu nie ma znaczenia. */
-  loop: boolean
-  /** Przejście ułożonej kolejności w przeciwnym kierunku. */
+  /** Miejsce zakończenia: powrót na start, inny parking albo ostatni szczyt. */
+  finish: TodayFinish
+  /** Punkty pośrednie, przez które ma przejść trasa. */
+  waypoints: Waypoint[]
+  /** Przejście trasy w przeciwnym kierunku — przy dwóch parkingach zamienia je miejscami. */
   reversed: boolean
 }
 

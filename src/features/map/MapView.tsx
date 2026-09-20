@@ -4,14 +4,14 @@ import {
 } from 'react-leaflet'
 import L from 'leaflet'
 import { PEAKS, peakById } from '../../data/peaks'
-import { estimateDay, formatDistance, formatTime, haversine, plural } from '../../lib/geo'
+import { estimateDay, formatDistance, formatTime, haversine, plural, type Stop } from '../../lib/geo'
 import { START_POINTS, startPointById, type StartPoint } from '../../data/startPoints'
 import { useDayRoute } from '../../lib/useDayRoute'
-import { customParkingName, resolveToday, type ResolvedToday } from '../../lib/todayRoute'
+import { customParkingName, resolveToday, waypointName, waypointStopId, type ResolvedToday } from '../../lib/todayRoute'
 import { elevationAt, loadGrid } from '../../lib/elevation'
-import { useProgress } from '../../store/progress'
-import type { CustomParking, Peak, TrackPoint } from '../../types'
-import { IconLocate, IconMountain, IconRoute, IconTrash } from '../../ui/Icons'
+import { useProgress, type ParkingRole } from '../../store/progress'
+import type { CustomParking, ParkingRef, Peak, TodayPlan, TrackPoint, Waypoint } from '../../types'
+import { IconLocate, IconMountain, IconPin, IconRoute, IconTrash } from '../../ui/Icons'
 
 const BRENNA_CENTER: [number, number] = [49.7175, 18.9265]
 
@@ -78,15 +78,64 @@ function peakIcon(status: string, no: number, opts: MarkerOpts = {}): L.DivIcon 
   })
 }
 
-/** Marker parkingu; `muted` to parking do wyboru, jeszcze nie w trasie. */
-const startIcon = (color: string, muted = false) =>
-  L.divIcon({
+/** Rola parkingu w trasie: start, meta, jedno i drugie (pętla) albo nic. */
+type MarkerRole = ParkingRole | 'loop' | null
+
+/** Co właśnie wskazujemy na mapie. */
+type PlaceMode = ParkingRole | 'via'
+
+const ROLE_LABEL: Record<'start' | 'finish' | 'loop', string> = { start: 'S', finish: 'M', loop: '↻' }
+
+/** Marker parkingu; bez roli to parking do wyboru, jeszcze nie w trasie. */
+const parkingIcon = (color: string, role: MarkerRole = null) => {
+  const muted = role === null
+  return L.divIcon({
     className: '',
-    html: `<div style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#fff;border:3px solid ${muted ? '#8fa596' : color};box-shadow:0 2px 8px rgba(20,49,31,.35);font:800 12px/1 ui-sans-serif,system-ui;color:${muted ? '#5f6c61' : color};opacity:${muted ? 0.85 : 1}">P</div>`,
+    html: `<div style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#fff;border:3px solid ${muted ? '#8fa596' : color};box-shadow:0 2px 8px rgba(20,49,31,.35);font:800 12px/1 ui-sans-serif,system-ui;color:${muted ? '#5f6c61' : color};opacity:${muted ? 0.85 : 1}">${role ? ROLE_LABEL[role] : 'P'}</div>`,
     iconSize: [24, 24],
     iconAnchor: [12, 12],
     popupAnchor: [0, -14],
   })
+}
+
+/** Punkt pośredni — okrąg z numerem kolejności, odróżnialny od szczytu i parkingu. */
+const viaIcon = (color: string, order?: number) =>
+  L.divIcon({
+    className: '',
+    html: `<div style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid ${color};box-shadow:0 2px 8px rgba(20,49,31,.35);font:800 11px/1 ui-sans-serif,system-ui;color:${color}">${order ?? '•'}</div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+    popupAnchor: [0, -13],
+  })
+
+/** Podpis roli pod nazwą parkingu. */
+const roleName = (role: MarkerRole) =>
+  role === 'loop' ? 'start i meta' : role === 'start' ? 'start trasy' : role === 'finish' ? 'meta trasy' : null
+
+/** Wybór końca trasy w dymku parkingu — jedno dotknięcie na każdą rolę. */
+function ParkingRoleButtons({ role, onPick }: { role: MarkerRole; onPick: (role: ParkingRole) => void }) {
+  const isStart = role === 'start' || role === 'loop'
+  const isFinish = role === 'finish' || role === 'loop'
+  return (
+    <div className="mt-2 flex gap-1.5">
+      {/* type="button": dymek własnego miejsca to formularz z nazwą. */}
+      <button
+        type="button"
+        onClick={() => onPick('start')}
+        className={`flex-1 !py-1.5 !text-xs ${isStart ? 'btn-primary' : 'btn-ghost'}`}
+      >
+        Start stąd
+      </button>
+      <button
+        type="button"
+        onClick={() => onPick('finish')}
+        className={`flex-1 !py-1.5 !text-xs ${isFinish ? 'btn-primary' : 'btn-ghost'}`}
+      >
+        Meta tutaj
+      </button>
+    </div>
+  )
+}
 
 const userIcon = L.divIcon({
   className: '',
@@ -193,17 +242,21 @@ export function MapView({
   const today = useProgress((s) => s.today)
   const toggleTodayPeak = useProgress((s) => s.toggleTodayPeak)
   const setTodayParking = useProgress((s) => s.setTodayParking)
+  const setTodayFinish = useProgress((s) => s.setTodayFinish)
   const customParkings = useProgress((s) => s.customParkings)
   const addCustomParking = useProgress((s) => s.addCustomParking)
+  const addTodayWaypoint = useProgress((s) => s.addTodayWaypoint)
+  const updateTodayWaypoint = useProgress((s) => s.updateTodayWaypoint)
   const updateCustomParking = useProgress((s) => s.updateCustomParking)
 
   const [map, setMap] = useState<L.Map | null>(null)
   const todayMode = selectedDayId === TODAY_ID
-  const [placing, setPlacing] = useState(false)
+  /** Wskazywanie miejsca na mapie — i od razu wiadomo, na który koniec trasy. */
+  const [placing, setPlacing] = useState<PlaceMode | null>(null)
   /** Świeżo wskazane miejsce — otwieramy jego dymek, żeby od razu dało się wpisać nazwę. */
-  const [openParkingId, setOpenParkingId] = useState<string | null>(null)
+  const [openSpotId, setOpenSpotId] = useState<string | null>(null)
   useEffect(() => {
-    if (!todayMode) setPlacing(false)
+    if (!todayMode) setPlacing(null)
   }, [todayMode])
 
   const days = useMemo(
@@ -212,11 +265,12 @@ export function MapView({
         id: day.id,
         name: day.name,
         color: DAY_COLORS[i % DAY_COLORS.length],
-        peaks: day.peakIds.map(peakById).filter((p): p is Peak => Boolean(p)),
+        stops: day.peakIds.map(peakById).filter((p): p is Peak => Boolean(p)),
         officialDistanceKm: day.officialDistanceKm,
         officialTime: day.officialTime,
         start: startPointById(day.startPointId),
-        loop: day.loop !== false,
+        // Dni z planu są pętlami albo kończą się na szczycie — osobnej mety nie mają.
+        finish: day.loop !== false ? startPointById(day.startPointId) : undefined,
       })),
     [plans],
   )
@@ -227,9 +281,9 @@ export function MapView({
       id: TODAY_ID,
       name: 'Na dziś',
       color: TODAY_COLOR,
-      peaks: resolved.peaks,
+      stops: resolved.stops,
       start: resolved.start,
-      loop: resolved.loop,
+      finish: resolved.finish,
     }),
     [resolved],
   )
@@ -237,11 +291,12 @@ export function MapView({
   const selected = todayMode ? todayDay : (days.find((d) => d.id === selectedDayId) ?? null)
   const shown = selected ? [selected] : days
 
-  /** Numer kolejności i kolor dnia — tylko gdy patrzymy na jeden dzień. */
-  const orderByPeak = useMemo(() => {
+  /** Numer kolejności i kolor dnia — tylko gdy patrzymy na jeden dzień.
+      Numerujemy wszystkie przystanki, żeby mapa zgadzała się z listą w panelu. */
+  const orderByStop = useMemo(() => {
     const map = new Map<string, { order: number; color: string }>()
     if (selected) {
-      selected.peaks.forEach((p, i) => map.set(p.id, { order: i + 1, color: selected.color }))
+      selected.stops.forEach((p, i) => map.set(p.id, { order: i + 1, color: selected.color }))
     }
     return map
   }, [selected])
@@ -250,7 +305,8 @@ export function MapView({
     () =>
       shown.flatMap((d) => [
         ...(d.start ? [[d.start.lat, d.start.lon] as [number, number]] : []),
-        ...d.peaks.map((p) => [p.lat, p.lon] as [number, number]),
+        ...d.stops.map((p) => [p.lat, p.lon] as [number, number]),
+        ...(d.finish ? [[d.finish.lat, d.finish.lon] as [number, number]] : []),
       ]),
     [shown],
   )
@@ -264,11 +320,24 @@ export function MapView({
     [track],
   )
 
-  const placeParking = (lat: number, lon: number) => {
-    setPlacing(false)
-    loadGrid().then((grid) =>
-      setOpenParkingId(addCustomParking({ lat, lon, ele: Math.round(elevationAt(grid, lat, lon)) })),
-    )
+  /** Wskazane miejsce: parking na start/metę albo punkt pośredni trasy. */
+  const placePoint = (lat: number, lon: number) => {
+    const mode = placing ?? 'start'
+    setPlacing(null)
+    loadGrid().then((grid) => {
+      const spot = { lat, lon, ele: Math.round(elevationAt(grid, lat, lon)) }
+      setOpenSpotId(mode === 'via' ? addTodayWaypoint(spot) : addCustomParking(spot, mode))
+    })
+  }
+
+  const moveWaypoint = (id: string, lat: number, lon: number) =>
+    loadGrid().then((grid) => updateTodayWaypoint(id, { lat, lon, ele: Math.round(elevationAt(grid, lat, lon)) }))
+
+  /** Rola parkingu w dzisiejszej trasie — ten sam punkt może być i startem, i metą. */
+  const roleOf = (isPoint: (id: string) => boolean): MarkerRole => {
+    const start = Boolean(resolved.start && isPoint(resolved.start.id))
+    const finish = Boolean(resolved.finish && isPoint(resolved.finish.id))
+    return start && finish ? 'loop' : start ? 'start' : finish ? 'finish' : null
   }
 
   const moveParking = (id: string, lat: number, lon: number) =>
@@ -315,30 +384,66 @@ export function MapView({
 
         {todayMode ? (
           <>
-            {/* Wszystkie parkingi gminy do wyboru dotknięciem. */}
-            {START_POINTS.map((sp) => (
-              <Marker
-                key={`today-start-${sp.id}`}
-                position={[sp.lat, sp.lon]}
-                icon={startIcon(TODAY_COLOR, resolved.start?.id !== sp.id)}
-                zIndexOffset={300}
-                title={sp.name}
-                eventHandlers={{ click: () => setTodayParking({ kind: 'point', id: sp.id }) }}
-              />
-            ))}
-            {/* Zapisane własne miejsca — dotknięcie wybiera i otwiera dymek z nazwą. */}
+            {/* Wszystkie parkingi gminy — dymek wybiera, czy to start, czy meta. */}
+            {START_POINTS.map((sp) => {
+              const role = roleOf((id) => id === sp.id)
+              return (
+                <Marker
+                  key={`today-start-${sp.id}`}
+                  position={[sp.lat, sp.lon]}
+                  icon={parkingIcon(TODAY_COLOR, role)}
+                  zIndexOffset={role ? 600 : 300}
+                  title={sp.name}
+                >
+                  <Popup>
+                    <div className="min-w-52">
+                      <div className="font-semibold">{sp.name}</div>
+                      <div className="text-xs text-muted">
+                        {sp.ele} m n.p.m.
+                        {roleName(role) && ` · ${roleName(role)}`}
+                      </div>
+                      {sp.detail && <div className="mt-1 text-xs text-muted">{sp.detail}</div>}
+                      <ParkingRoleButtons
+                        role={role}
+                        onPick={(pick) =>
+                          pick === 'start'
+                            ? setTodayParking({ kind: 'point', id: sp.id })
+                            : setTodayFinish({ kind: 'point', id: sp.id })
+                        }
+                      />
+                    </div>
+                  </Popup>
+                </Marker>
+              )
+            })}
+            {/* Zapisane własne miejsca — dotknięcie otwiera dymek z nazwą i wyborem roli. */}
             {customParkings.map((spot) => (
               <CustomParkingMarker
                 key={spot.id}
                 spot={spot}
-                active={resolved.start?.id.startsWith(`custom:${spot.id}:`) ?? false}
-                autoOpen={openParkingId === spot.id}
-                onOpened={() => setOpenParkingId(null)}
-                onSelect={() => setTodayParking({ kind: 'custom', id: spot.id })}
+                role={roleOf((id) => id.startsWith(`custom:${spot.id}:`))}
+                autoOpen={openSpotId === spot.id}
+                onOpened={() => setOpenSpotId(null)}
+                onPick={(pick) =>
+                  pick === 'start'
+                    ? setTodayParking({ kind: 'custom', id: spot.id })
+                    : setTodayFinish({ kind: 'custom', id: spot.id })
+                }
                 onMove={(lat, lon) => moveParking(spot.id, lat, lon)}
               />
             ))}
-            {placing && <PlaceOnClick onPlace={placeParking} />}
+            {/* Punkty pośrednie — trasa musi przez nie przejść. */}
+            {today.waypoints.map((spot) => (
+              <WaypointMarker
+                key={spot.id}
+                spot={spot}
+                order={orderByStop.get(waypointStopId(spot))?.order}
+                autoOpen={openSpotId === spot.id}
+                onOpened={() => setOpenSpotId(null)}
+                onMove={(lat, lon) => moveWaypoint(spot.id, lat, lon)}
+              />
+            ))}
+            {placing && <PlaceOnClick onPlace={placePoint} />}
           </>
         ) : (
           shown.map((day) =>
@@ -346,7 +451,7 @@ export function MapView({
               <Marker
                 key={`start-${day.id}`}
                 position={[day.start.lat, day.start.lon]}
-                icon={startIcon(day.color)}
+                icon={parkingIcon(day.color, day.finish ? 'loop' : 'start')}
                 zIndexOffset={300}
               >
                 <Popup>
@@ -354,7 +459,7 @@ export function MapView({
                     <div className="font-semibold">{day.start.name}</div>
                     <div className="text-xs text-muted">
                       Start {day.name} · {day.start.ele} m n.p.m.
-                      {day.loop ? ' · powrót na to samo miejsce' : ' · bez powrotu na start'}
+                      {day.finish ? ' · powrót na to samo miejsce' : ' · bez powrotu na start'}
                     </div>
                     {day.start.detail && <div className="mt-1 text-xs text-muted">{day.start.detail}</div>}
                   </div>
@@ -365,7 +470,7 @@ export function MapView({
         )}
 
         {PEAKS.map((peak) => {
-          const inRoute = orderByPeak.get(peak.id)
+          const inRoute = orderByStop.get(peak.id)
           const dimmed = Boolean(selected) && !inRoute && !todayMode
           const icon = peakIcon(progress[peak.id]?.status ?? 'todo', peak.no, {
             order: inRoute?.order,
@@ -431,11 +536,26 @@ export function MapView({
                 ← Plan dni
               </button>
               <span className="min-w-0 flex-1 truncate px-1 text-xs text-muted">
-                {placing ? 'Dotknij mapy tam, gdzie zostawiasz auto' : 'Dotknij szczytów, które chcesz dziś zaliczyć'}
+                {placing === 'start'
+                  ? 'Dotknij mapy tam, gdzie zaczynasz'
+                  : placing === 'finish'
+                    ? 'Dotknij mapy tam, gdzie kończysz trasę'
+                    : placing === 'via'
+                      ? 'Dotknij miejsca, przez które chcesz przejść'
+                      : 'Dotknij szczytów, które chcesz dziś zaliczyć'}
               </span>
-              {placing && (
-                <button onClick={() => setPlacing(false)} className="chip shrink-0 !py-1.5 bg-tint text-ink">
+              {placing ? (
+                <button onClick={() => setPlacing(null)} className="chip shrink-0 !py-1.5 bg-tint text-ink">
                   Anuluj
+                </button>
+              ) : (
+                <button
+                  onClick={() => setPlacing('via')}
+                  className="chip shrink-0 border border-brand bg-brand-soft !py-1.5 text-brand"
+                  title="Dołóż miejsce, przez które ma przejść trasa"
+                >
+                  <IconPin className="h-3.5 w-3.5" />
+                  + punkt
                 </button>
               )}
             </>
@@ -471,7 +591,7 @@ export function MapView({
                           style={{ background: active ? '#fff' : day.color }}
                         />
                         {day.name}
-                        <span className={active ? 'opacity-80' : 'text-muted'}>{day.peaks.length}</span>
+                        <span className={active ? 'opacity-80' : 'text-muted'}>{day.stops.length}</span>
                       </button>
                     )
                   })}
@@ -538,17 +658,17 @@ export function MapView({
 interface SummaryDay {
   name: string
   color: string
-  peaks: Peak[]
+  stops: Stop[]
   officialDistanceKm?: number
   officialTime?: string
   start?: StartPoint
-  loop: boolean
+  finish?: StartPoint
 }
 
 /** Pasek pod mapą z podsumowaniem wybranego dnia planu. */
 function DaySummary({ day }: { day: SummaryDay }) {
-  const { route: routed, loading } = useDayRoute(day.peaks, day.start, day.loop)
-  const stats = routed ?? estimateDay(day.peaks, day.start ? { start: day.start, loop: day.loop } : {})
+  const { route: routed, loading } = useDayRoute(day.stops, day.start, day.finish)
+  const stats = routed ?? estimateDay(day.stops, { start: day.start, finish: day.finish })
   const distance = day.officialDistanceKm
     ? `${day.officialDistanceKm.toLocaleString('pl-PL', { minimumFractionDigits: 1 })} km`
     : `${routed ? '' : '~'}${stats.distanceKm.toLocaleString('pl-PL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km`
@@ -560,74 +680,112 @@ function DaySummary({ day }: { day: SummaryDay }) {
       <span className="shrink-0 font-semibold">{day.name}</span>
       {loading && <span className="shrink-0 text-muted">liczę trasę…</span>}
       <span className="shrink-0 text-muted">
-        {day.peaks.length} {plural(day.peaks.length, ['szczyt', 'szczyty', 'szczytów'])}
+        {day.stops.length} {plural(day.stops.length, ['szczyt', 'szczyty', 'szczytów'])}
       </span>
       <span className="shrink-0 tabular-nums">{distance}</span>
       <span className="shrink-0 tabular-nums">{time}</span>
       <span className="shrink-0 tabular-nums text-muted">↑&nbsp;{Math.round(stats.ascentM)}&nbsp;m</span>
       {day.start && (
         <span className="shrink-0 text-muted" title={day.start.name}>
-          {day.loop ? '↻ pętla' : '→ bez powrotu'}
+          {day.finish ? '↻ pętla' : '→ bez powrotu'}
         </span>
       )}
     </div>
   )
 }
 
+/** Parkingi do wyboru — te same na starcie i na mecie. */
+function ParkingOptions({ customParkings }: { customParkings: CustomParking[] }) {
+  return (
+    <>
+      <optgroup label="Parkingi gminy">
+        {START_POINTS.map((sp) => (
+          <option key={sp.id} value={sp.id}>
+            {sp.name}
+          </option>
+        ))}
+      </optgroup>
+      <optgroup label="Moje miejsca">
+        {customParkings.map((spot) => (
+          <option key={spot.id} value={`custom:${spot.id}`}>
+            {customParkingName(spot)} · {spot.ele} m n.p.m.
+          </option>
+        ))}
+        <option value="new">+ Nowe miejsce — wskaż na mapie</option>
+      </optgroup>
+    </>
+  )
+}
+
 interface TodayPanelProps {
   today: ResolvedToday
-  placing: boolean
-  onPlacingChange: (placing: boolean) => void
+  placing: PlaceMode | null
+  onPlacingChange: (placing: PlaceMode | null) => void
   onOpenPeak: (peak: Peak) => void
 }
 
 /**
  * Panel trasy na dziś: podsumowanie liczone po szlakach, kolejność przejścia
- * i ustawienia — parking, powrót, kierunek.
+ * i ustawienia — start, meta, kierunek.
  */
 function TodayPanel({ today, placing, onPlacingChange, onOpenPeak }: TodayPanelProps) {
   const plan = useProgress((s) => s.today)
   const progress = useProgress((s) => s.progress)
   const toggleTodayPeak = useProgress((s) => s.toggleTodayPeak)
   const setTodayParking = useProgress((s) => s.setTodayParking)
-  const toggleTodayLoop = useProgress((s) => s.toggleTodayLoop)
+  const setTodayFinish = useProgress((s) => s.setTodayFinish)
   const toggleTodayReversed = useProgress((s) => s.toggleTodayReversed)
+  const removeTodayWaypoint = useProgress((s) => s.removeTodayWaypoint)
   const clearToday = useProgress((s) => s.clearToday)
   const customParkings = useProgress((s) => s.customParkings)
 
-  const { peaks, start, loop, autoStart, canReverse } = today
-  const { route: routed, loading } = useDayRoute(peaks, start, loop)
-  const stats = routed ?? estimateDay(peaks, start ? { start, loop } : {})
-  // Jeden szczyt bez parkingu to jeszcze nie trasa — nie ma skąd dokąd liczyć.
-  const routable = peaks.length + (start ? 1 : 0) >= 2
+  const { stops, peaks, start, finish, loop, autoStart, canReverse } = today
+  const { route: routed, loading } = useDayRoute(stops, start, finish)
+  const stats = routed ?? estimateDay(stops, { start, finish })
+  // Jeden przystanek bez parkingu to jeszcze nie trasa — nie ma skąd dokąd liczyć.
+  const routable = stops.length + (start ? 1 : 0) + (loop ? 0 : finish ? 1 : 0) >= 2
+  /** Trasa między dwoma autami — kierunek zmienia się zamianą końców. */
+  const twoEnds = Boolean(start && finish && start.id !== finish.id)
 
-  // Wartości listy: id punktu gminy, `custom:<id>` dla własnego miejsca, `new` dla wskazywania nowego.
-  const parkingValue = placing
-    ? 'new'
-    : plan.parking.kind === 'point'
-      ? plan.parking.id
-      : plan.parking.kind === 'custom'
-        ? `custom:${plan.parking.id}`
-        : plan.parking.kind
+  // Wartości list: id punktu gminy, `custom:<id>` dla własnego miejsca, `new` dla wskazywania nowego.
+  const refValue = (ref: TodayPlan['parking'] | TodayPlan['finish']) =>
+    ref.kind === 'point' ? ref.id : ref.kind === 'custom' ? `custom:${ref.id}` : ref.kind
+
+  const pickedRef = (value: string): ParkingRef | null =>
+    value.startsWith('custom:')
+      ? { kind: 'custom', id: value.slice('custom:'.length) }
+      : { kind: 'point', id: value }
+
+  const parkingValue = placing === 'start' ? 'new' : refValue(plan.parking)
   const onParkingChange = (value: string) => {
     if (value === 'new') {
-      onPlacingChange(true)
+      onPlacingChange('start')
       return
     }
-    onPlacingChange(false)
+    onPlacingChange(null)
     if (value === 'auto' || value === 'none') setTodayParking({ kind: value })
-    else if (value.startsWith('custom:')) setTodayParking({ kind: 'custom', id: value.slice('custom:'.length) })
-    else setTodayParking({ kind: 'point', id: value })
+    else setTodayParking(pickedRef(value)!)
+  }
+
+  const finishValue = placing === 'finish' ? 'new' : refValue(plan.finish)
+  const onFinishChange = (value: string) => {
+    if (value === 'new') {
+      onPlacingChange('finish')
+      return
+    }
+    onPlacingChange(null)
+    if (value === 'start' || value === 'none') setTodayFinish({ kind: value })
+    else setTodayFinish(pickedRef(value)!)
   }
 
   return (
     <div className="pointer-events-auto w-full space-y-2 rounded-xl border border-line bg-surface/95 p-2 text-xs shadow-lg backdrop-blur">
-      {peaks.length === 0 ? (
+      {stops.length === 0 ? (
         <p className="px-1 text-muted">
           Wybierz szczyty na mapie — po każdym wyborze ułożę kolejność i policzę trasę po szlakach.
         </p>
       ) : !routable ? (
-        <p className="px-1 text-muted">Dodaj parking albo kolejny szczyt, żeby policzyć trasę.</p>
+        <p className="px-1 text-muted">Dodaj parking albo kolejny przystanek, żeby policzyć trasę.</p>
       ) : (
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-1">
           <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: TODAY_COLOR }} />
@@ -636,6 +794,11 @@ function TodayPanel({ today, placing, onPlacingChange, onOpenPeak }: TodayPanelP
           <span className="shrink-0 text-muted">
             {peaks.length} {plural(peaks.length, ['szczyt', 'szczyty', 'szczytów'])}
           </span>
+          {stops.length > peaks.length && (
+            <span className="shrink-0 text-muted">
+              +{stops.length - peaks.length} {plural(stops.length - peaks.length, ['punkt', 'punkty', 'punktów'])}
+            </span>
+          )}
           <span className="shrink-0 tabular-nums">
             {routed ? '' : '~'}
             {stats.distanceKm.toLocaleString('pl-PL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km
@@ -653,24 +816,31 @@ function TodayPanel({ today, placing, onPlacingChange, onOpenPeak }: TodayPanelP
         </div>
       )}
 
-      {peaks.length > 0 && (
+      {stops.length > 0 && (
         <ol className="flex items-center gap-1 overflow-x-auto no-scrollbar" aria-label="Kolejność przejścia">
-          {start && <li className="chip shrink-0 bg-tint font-bold text-brand">P</li>}
-          {peaks.map((peak, i) => {
-            const done = progress[peak.id]?.status === 'done'
+          {start && (
+            <li className="chip shrink-0 bg-tint font-bold text-brand" title={`Start: ${start.name}`}>
+              S
+            </li>
+          )}
+          {stops.map((stop, i) => {
+            const peak = stop.peak
+            const done = Boolean(peak) && progress[peak!.id]?.status === 'done'
             return (
-              <li key={peak.id} className="flex shrink-0 items-center rounded-full bg-tint">
+              <li key={stop.id} className="flex shrink-0 items-center rounded-full bg-tint">
                 <button
-                  onClick={() => onOpenPeak(peak)}
-                  className="!min-h-0 flex items-center gap-1 py-1.5 pl-2.5 pr-1 font-medium"
+                  onClick={() => peak && onOpenPeak(peak)}
+                  disabled={!peak}
+                  className="!min-h-0 flex items-center gap-1 py-1.5 pl-2.5 pr-1 font-medium disabled:opacity-100"
                 >
                   <span className="tabular-nums text-muted">{i + 1}</span>
-                  <span className={done ? 'text-done' : ''}>{peak.name}</span>
+                  {!peak && <IconPin className="h-3 w-3 text-brand" />}
+                  <span className={done ? 'text-done' : !peak ? 'text-muted' : ''}>{stop.name}</span>
                   {done && <span className="text-done">✓</span>}
                 </button>
                 <button
-                  onClick={() => toggleTodayPeak(peak.id)}
-                  aria-label={`Usuń ${peak.name} z trasy`}
+                  onClick={() => (peak ? toggleTodayPeak(peak.id) : removeTodayWaypoint(stop.via!.id))}
+                  aria-label={`Usuń ${stop.name} z trasy`}
                   className="!min-h-0 py-1.5 pl-1 pr-2.5 text-muted hover:text-red-400"
                 >
                   ×
@@ -678,85 +848,176 @@ function TodayPanel({ today, placing, onPlacingChange, onOpenPeak }: TodayPanelP
               </li>
             )
           })}
-          {loop && <li className="chip shrink-0 bg-tint font-bold text-brand">↻ P</li>}
+          {finish && (
+            <li className="chip shrink-0 bg-tint font-bold text-brand" title={`Meta: ${finish.name}`}>
+              {loop ? '↻ S' : 'M'}
+            </li>
+          )}
         </ol>
       )}
 
-      <div className="flex items-center gap-1.5">
-        <select
-          className="field min-w-0 flex-1 !py-2 !text-xs"
-          value={parkingValue}
-          onChange={(e) => onParkingChange(e.target.value)}
-          aria-label="Parking"
-        >
-          <option value="auto">
-            {autoStart && start ? `Najbliższy: ${start.name}` : 'Najbliższy parking (automatycznie)'}
-          </option>
-          <optgroup label="Parkingi gminy">
-            {START_POINTS.map((sp) => (
-              <option key={sp.id} value={sp.id}>
-                {sp.name}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Moje miejsca">
-            {customParkings.map((spot) => (
-              <option key={spot.id} value={`custom:${spot.id}`}>
-                {customParkingName(spot)} · {spot.ele} m n.p.m.
-              </option>
-            ))}
-            <option value="new">+ Nowe miejsce — wskaż na mapie</option>
-          </optgroup>
-          <option value="none">Bez parkingu</option>
-        </select>
-        <button
-          onClick={toggleTodayLoop}
-          disabled={!start}
-          className={`btn shrink-0 !px-2.5 !py-2 !text-xs ${
-            plan.loop ? 'bg-brand-soft text-brand' : 'border border-line bg-surface text-ink'
-          }`}
-          title={plan.loop ? 'Wracasz na parking' : 'Kończysz na ostatnim szczycie'}
-        >
-          {plan.loop ? '↻ Powrót' : '→ Bez powrotu'}
-        </button>
-        <button
-          onClick={toggleTodayReversed}
-          disabled={!canReverse}
-          className="btn-ghost shrink-0 !px-2.5 !py-2 !text-xs"
-          aria-label="Odwróć kierunek przejścia"
-          title="Odwróć kierunek"
-        >
-          ⇄
-        </button>
-        <button
-          onClick={clearToday}
-          disabled={plan.peakIds.length === 0}
-          className="btn-ghost shrink-0 !px-2.5 !py-2"
-          aria-label="Wyczyść wybrane szczyty"
-        >
-          <IconTrash className="h-4 w-4" />
-        </button>
+      {/* Start i meta osobno — przy dwóch autach dzień kończy się na innym parkingu. */}
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-1.5">
+          <span className="chip shrink-0 bg-tint font-bold text-brand" aria-hidden>
+            S
+          </span>
+          <select
+            className="field min-w-0 flex-1 !py-2 !text-xs"
+            value={parkingValue}
+            onChange={(e) => onParkingChange(e.target.value)}
+            aria-label="Start trasy"
+          >
+            <option value="auto">
+              {autoStart && start ? `Najbliższy: ${start.name}` : 'Najbliższy parking (automatycznie)'}
+            </option>
+            <ParkingOptions customParkings={customParkings} />
+            <option value="none">Bez parkingu</option>
+          </select>
+          <button
+            onClick={toggleTodayReversed}
+            disabled={!canReverse}
+            className={`btn shrink-0 !px-2.5 !py-2 !text-xs ${
+              plan.reversed && canReverse ? 'bg-brand-soft text-brand' : 'border border-line bg-surface text-ink'
+            }`}
+            aria-label={twoEnds ? 'Zamień start z metą' : 'Odwróć kierunek przejścia'}
+            title={twoEnds ? 'Zamień start z metą' : 'Odwróć kierunek'}
+          >
+            ⇄
+          </button>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="chip shrink-0 bg-tint font-bold text-brand" aria-hidden>
+            M
+          </span>
+          <select
+            className="field min-w-0 flex-1 !py-2 !text-xs"
+            value={finishValue}
+            onChange={(e) => onFinishChange(e.target.value)}
+            aria-label="Meta trasy"
+          >
+            <option value="start">{start ? `↻ Powrót na start: ${start.name}` : '↻ Powrót na start'}</option>
+            <ParkingOptions customParkings={customParkings} />
+            <option value="none">Koniec na ostatnim szczycie</option>
+          </select>
+          <button
+            onClick={clearToday}
+            disabled={plan.peakIds.length === 0 && plan.waypoints.length === 0}
+            className="btn-ghost shrink-0 !px-2.5 !py-2"
+            aria-label="Wyczyść trasę"
+          >
+            <IconTrash className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   )
 }
 
-interface CustomParkingMarkerProps {
-  spot: CustomParking
-  /** Miejsce ustawione jako parking na dziś. */
-  active: boolean
-  /** Otwórz dymek od razu po pojawieniu się markera. */
+interface WaypointMarkerProps {
+  spot: Waypoint
+  /** Numer w kolejności przejścia — ten sam, co na liście w panelu. */
+  order?: number
   autoOpen: boolean
   onOpened: () => void
-  onSelect: () => void
   onMove: (lat: number, lon: number) => void
 }
 
 /**
- * Własne miejsce na mapie. Dotknięcie wybiera je jako parking i otwiera dymek,
- * w którym można nadać nazwę albo usunąć miejsce z listy. Marker da się przeciągnąć.
+ * Punkt pośredni na mapie: miejsce, przez które trasa ma przejść, choćby leżało
+ * poza szlakiem. Dymek pozwala je nazwać albo usunąć, marker da się przeciągnąć.
  */
-function CustomParkingMarker({ spot, active, autoOpen, onOpened, onSelect, onMove }: CustomParkingMarkerProps) {
+function WaypointMarker({ spot, order, autoOpen, onOpened, onMove }: WaypointMarkerProps) {
+  const updateTodayWaypoint = useProgress((s) => s.updateTodayWaypoint)
+  const removeTodayWaypoint = useProgress((s) => s.removeTodayWaypoint)
+  const markerRef = useRef<L.Marker | null>(null)
+  const [name, setName] = useState(spot.name)
+  useEffect(() => setName(spot.name), [spot.name])
+
+  useEffect(() => {
+    if (!autoOpen) return
+    markerRef.current?.openPopup()
+    onOpened()
+  }, [autoOpen, onOpened])
+
+  const title = `${waypointName(spot)} — przeciągnij, żeby przesunąć`
+  useEffect(() => {
+    markerRef.current?.getElement()?.setAttribute('title', title)
+  }, [title])
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={[spot.lat, spot.lon]}
+      icon={viaIcon(TODAY_COLOR, order)}
+      zIndexOffset={500}
+      title={title}
+      draggable
+      eventHandlers={{
+        dragend: (e) => {
+          const { lat, lng } = (e.target as L.Marker).getLatLng()
+          onMove(lat, lng)
+        },
+      }}
+    >
+      <Popup>
+        <form
+          className="min-w-52 space-y-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            updateTodayWaypoint(spot.id, { name: name.trim() })
+            markerRef.current?.closePopup()
+          }}
+        >
+          <div>
+            <div className="font-semibold">{waypointName(spot)}</div>
+            <div className="text-xs text-muted">
+              {spot.ele} m n.p.m. · punkt pośredni{order ? ` · ${order}. w kolejności` : ''}
+            </div>
+          </div>
+          <input
+            className="field !py-2"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nazwa lub opis, np. przejście przez potok"
+            aria-label="Nazwa punktu"
+            maxLength={60}
+          />
+          <div className="flex gap-1.5">
+            <button type="submit" disabled={name.trim() === spot.name} className="btn-primary flex-1 !py-1.5 !text-xs">
+              Zapisz
+            </button>
+            <button
+              type="button"
+              onClick={() => removeTodayWaypoint(spot.id)}
+              className="btn-ghost shrink-0 !px-2.5 !py-1.5 !text-xs text-warn"
+            >
+              <IconTrash className="h-4 w-4" />
+              Usuń
+            </button>
+          </div>
+        </form>
+      </Popup>
+    </Marker>
+  )
+}
+
+interface CustomParkingMarkerProps {
+  spot: CustomParking
+  /** Rola miejsca w dzisiejszej trasie. */
+  role: MarkerRole
+  /** Otwórz dymek od razu po pojawieniu się markera. */
+  autoOpen: boolean
+  onOpened: () => void
+  onPick: (role: ParkingRole) => void
+  onMove: (lat: number, lon: number) => void
+}
+
+/**
+ * Własne miejsce na mapie. Dotknięcie otwiera dymek, w którym ustawia się je
+ * jako start albo metę, nadaje nazwę albo usuwa z listy. Marker da się przeciągnąć.
+ */
+function CustomParkingMarker({ spot, role, autoOpen, onOpened, onPick, onMove }: CustomParkingMarkerProps) {
   const updateCustomParking = useProgress((s) => s.updateCustomParking)
   const removeCustomParking = useProgress((s) => s.removeCustomParking)
   const markerRef = useRef<L.Marker | null>(null)
@@ -784,12 +1045,11 @@ function CustomParkingMarker({ spot, active, autoOpen, onOpened, onSelect, onMov
     <Marker
       ref={markerRef}
       position={[spot.lat, spot.lon]}
-      icon={startIcon(TODAY_COLOR, !active)}
-      zIndexOffset={active ? 600 : 350}
+      icon={parkingIcon(TODAY_COLOR, role)}
+      zIndexOffset={role ? 600 : 350}
       title={title}
       draggable
       eventHandlers={{
-        click: onSelect,
         dragend: (e) => {
           const { lat, lng } = (e.target as L.Marker).getLatLng()
           onMove(lat, lng)
@@ -807,9 +1067,10 @@ function CustomParkingMarker({ spot, active, autoOpen, onOpened, onSelect, onMov
           <div>
             <div className="font-semibold">{customParkingName(spot)}</div>
             <div className="text-xs text-muted">
-              {spot.ele} m n.p.m. · {active ? 'parking na dziś' : 'własne miejsce'}
+              {spot.ele} m n.p.m. · {roleName(role) ?? 'własne miejsce'}
             </div>
           </div>
+          <ParkingRoleButtons role={role} onPick={onPick} />
           <input
             className="field !py-2"
             value={name}
@@ -838,10 +1099,11 @@ function CustomParkingMarker({ spot, active, autoOpen, onOpened, onSelect, onMov
 }
 
 interface TrackDay {
-  peaks: Peak[]
+  /** Przystanki w kolejności przejścia: szczyty i punkty pośrednie. */
+  stops: Stop[]
   color: string
   start?: StartPoint
-  loop: boolean
+  finish?: StartPoint
 }
 
 /**
@@ -849,12 +1111,12 @@ interface TrackDay {
  * rysujemy przebieg orientacyjny, żeby mapa nie była pusta.
  */
 function DayTrack({ day }: { day: TrackDay }) {
-  const { route } = useDayRoute(day.peaks, day.start, day.loop)
+  const { route } = useDayRoute(day.stops, day.start, day.finish)
 
   const fallback: [number, number][] = [
     ...(day.start ? [[day.start.lat, day.start.lon] as [number, number]] : []),
-    ...day.peaks.map((p) => [p.lat, p.lon] as [number, number]),
-    ...(day.start && day.loop ? [[day.start.lat, day.start.lon] as [number, number]] : []),
+    ...day.stops.map((p) => [p.lat, p.lon] as [number, number]),
+    ...(day.finish ? [[day.finish.lat, day.finish.lon] as [number, number]] : []),
   ]
   const points = route?.points ?? fallback
   if (points.length < 2) return null

@@ -10,7 +10,8 @@ import { estimateDay, haversine } from './geo'
  * co innego: prawie każdy zostawia samochód na parkingu i musi po niego wrócić,
  * więc dzień jest pętlą. Generator grupuje szczyty geograficznie, dobiera do
  * każdej grupy najbliższy parking z listy gminy i układa kolejność tak, żeby
- * pętla była możliwie krótka.
+ * pętla była możliwie krótka. Planowany zbiór szczytów podaje wywołujący —
+ * po kilku wyjazdach zostają zwykle same niezaliczone.
  *
  * To heurystyka po linii prostej, nie planowanie po szlakach — realny przebieg
  * zawsze weryfikuj na mapie.
@@ -73,9 +74,12 @@ function pickStart(group: Peak[]): StartPoint {
 }
 
 /** Najbliższy sąsiad od punktu `from`. */
-function nearestNeighbour(group: Peak[], from: { lat: number; lon: number }): Peak[] {
+function nearestNeighbour<T extends { lat: number; lon: number }>(
+  group: T[],
+  from: { lat: number; lon: number },
+): T[] {
   const left = [...group]
-  const route: Peak[] = []
+  const route: T[] = []
   let cur = from
   while (left.length) {
     let bi = 0
@@ -96,22 +100,30 @@ function nearestNeighbour(group: Peak[], from: { lat: number; lon: number }): Pe
 /**
  * Kolejność przejścia: najbliższy sąsiad, potem 2-opt.
  *
- * Z parkingiem i powrotem optymalizuje zamkniętą pętlę, z parkingiem bez powrotu —
- * drogę od parkingu do ostatniego szczytu. Bez parkingu nie wiadomo, skąd zacząć,
- * więc najbliższego sąsiada puszczamy od każdego szczytu i bierzemy najkrótszy wynik.
+ * Optymalizuje drogę od `start` przez wszystkie szczyty do `finish` — ten sam
+ * punkt co start daje pętlę, inny parking drogę w jedną stronę między autami,
+ * brak końca drogę urwaną na ostatnim szczycie. Bez parkingu nie wiadomo, skąd
+ * zacząć, więc najbliższego sąsiada puszczamy od każdego szczytu i bierzemy
+ * najkrótszy wynik.
  */
-export function orderPeaks(group: Peak[], start?: { lat: number; lon: number }, loop = true): Peak[] {
+export function orderPeaks<T extends { lat: number; lon: number }>(
+  group: T[],
+  start?: { lat: number; lon: number },
+  finish?: { lat: number; lon: number },
+): T[] {
   if (group.length < 2) return [...group]
 
-  const length = (r: Peak[]) => {
+  const length = (r: T[]) => {
     let total = start ? dist(start, r[0]) : 0
     for (let i = 1; i < r.length; i++) total += dist(r[i - 1], r[i])
-    return start && loop ? total + dist(r[r.length - 1], start) : total
+    return finish ? total + dist(r[r.length - 1], finish) : total
   }
 
   let route = start
     ? nearestNeighbour(group, start)
-    : group.map((p) => nearestNeighbour(group, p)).reduce((a, b) => (length(b) < length(a) ? b : a))
+    : finish
+      ? nearestNeighbour(group, finish).reverse()
+      : group.map((p) => nearestNeighbour(group, p)).reduce((a, b) => (length(b) < length(a) ? b : a))
 
   let improved = true
   let guard = 0
@@ -132,7 +144,7 @@ export function orderPeaks(group: Peak[], start?: { lat: number; lon: number }, 
 
 const timeOf = (group: Peak[]) => {
   const sp = pickStart(group)
-  return estimateDay(orderPeaks(group, sp), { start: sp, loop: true }).timeH
+  return estimateDay(orderPeaks(group, sp, sp), { start: sp, finish: sp }).timeH
 }
 
 /** Przesuwa pojedyncze szczyty z najcięższego dnia do lżejszego, jeśli to skraca najdłuższy dzień. */
@@ -178,9 +190,15 @@ export interface GeneratedPlan {
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
 
-export function generatePlan(dayCount: number): GeneratedPlan {
-  const k = Math.max(1, Math.min(dayCount, PEAKS.length))
-  const groups = balance(cluster([...PEAKS], k))
+/**
+ * Układa plan z podanych szczytów — domyślnie ze wszystkich, ale można podać
+ * same niezaliczone, żeby nie planować drugi raz tego, co już się ma.
+ */
+export function generatePlan(dayCount: number, peaks: Peak[] = PEAKS): GeneratedPlan {
+  if (peaks.length === 0) return { days: [], totalKm: 0, totalAscentM: 0, totalTimeH: 0, longestDayH: 0 }
+
+  const k = Math.max(1, Math.min(dayCount, peaks.length))
+  const groups = balance(cluster([...peaks], k))
 
   // dni od północy na południe, żeby kolejność była przewidywalna
   groups.sort((a, b) => {
@@ -196,8 +214,8 @@ export function generatePlan(dayCount: number): GeneratedPlan {
 
   const days = groups.map((group, i): GeneratedDay => {
     const start = pickStart(group)
-    const peaks = orderPeaks(group, start)
-    const stats = estimateDay(peaks, { start, loop: true })
+    const peaks = orderPeaks(group, start, start)
+    const stats = estimateDay(peaks, { start, finish: start })
     totalKm += stats.distanceKm
     totalAscentM += stats.ascentM
     totalTimeH += stats.timeH

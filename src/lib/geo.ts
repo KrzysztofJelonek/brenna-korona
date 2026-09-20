@@ -1,5 +1,3 @@
-import type { Peak } from '../types'
-
 const R = 6371000
 
 /** Odległość w metrach po wielkim kole. */
@@ -71,33 +69,45 @@ export interface DayStats {
   fromStartPoint: boolean
 }
 
+/**
+ * Przystanek trasy — szczyt, parking albo punkt pośredni. Do liczenia dnia
+ * liczą się tylko współrzędne i wysokość; `id` odróżnia przystanki w cache'u.
+ */
+export interface Stop {
+  id: string
+  lat: number
+  lon: number
+  ele: number
+}
+
 export interface DayShape {
-  /** Punkt startowy dnia — jeśli jest, dojście i powrót są policzone naprawdę. */
+  /** Punkt startowy dnia — jeśli jest, dojście jest policzone naprawdę. */
   start?: { lat: number; lon: number; ele: number }
-  /** Powrót na miejsce startu (pętla albo droga tam i z powrotem). */
-  loop?: boolean
+  /** Miejsce zakończenia: ten sam punkt co start dla pętli, inny przy dwóch autach. */
+  finish?: { lat: number; lon: number; ele: number }
 }
 
 /**
  * Szacunek dystansu, przewyższenia i czasu dnia.
  *
- * Z punktem startowym liczymy realny kształt wycieczki: parking → szczyty →
- * (dla pętli) parking. Bez niego zostaje przybliżenie — dojście z doliny
- * i zejście do niej — bo inaczej dzień z jednym szczytem wyszedłby zerowy.
+ * Z punktami skrajnymi liczymy realny kształt wycieczki: parking → szczyty →
+ * parking (ten sam dla pętli albo inny). Bez nich zostaje przybliżenie —
+ * dojście z doliny i zejście do niej — bo inaczej dzień z jednym szczytem
+ * wyszedłby zerowy.
  *
  * Czas liczy walkingTime — tempo dopasowane do materiałów gminy.
  */
-export function estimateDay(peaks: Peak[], shape: DayShape = {}): DayStats {
-  if (peaks.length === 0) {
+export function estimateDay(stops: Stop[], shape: DayShape = {}): DayStats {
+  if (stops.length === 0) {
     return { distanceKm: 0, ascentM: 0, descentM: 0, timeH: 0, fromStartPoint: false }
   }
 
   const nodes: { lat: number; lon: number; ele: number }[] = []
-  const { start, loop = true } = shape
+  const { start, finish } = shape
 
   if (start) nodes.push(start)
-  for (const p of peaks) nodes.push({ lat: p.lat, lon: p.lon, ele: p.ele })
-  if (start && loop) nodes.push(start)
+  for (const p of stops) nodes.push({ lat: p.lat, lon: p.lon, ele: p.ele })
+  if (finish) nodes.push(finish)
 
   let flat = 0
   let ascent = 0
@@ -109,11 +119,11 @@ export function estimateDay(peaks: Peak[], shape: DayShape = {}): DayStats {
     else descent += -d
   }
 
-  if (!start) {
+  if (!start && !finish) {
     // Bez parkingu doklejamy typowe dojście z doliny i zejście do niej.
     const valley = 450
-    ascent += Math.max(0, peaks[0].ele - valley)
-    descent += Math.max(0, peaks[peaks.length - 1].ele - valley)
+    ascent += Math.max(0, stops[0].ele - valley)
+    descent += Math.max(0, stops[stops.length - 1].ele - valley)
     flat += 2 * 2500
   }
 

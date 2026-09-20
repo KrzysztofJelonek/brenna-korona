@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { AscentMode, CustomParking, DayPlan, PeakProgress, TodayParking, TodayPlan } from '../types'
+import type {
+  AscentMode, CustomParking, DayPlan, PeakProgress, TodayFinish, TodayParking, TodayPlan, Waypoint,
+} from '../types'
 import { PEAKS } from '../data/peaks'
 
 interface ProgressState {
@@ -13,12 +15,17 @@ interface ProgressState {
 
   toggleTodayPeak: (peakId: string) => void
   setTodayParking: (parking: TodayParking) => void
-  toggleTodayLoop: () => void
+  setTodayFinish: (finish: TodayFinish) => void
   toggleTodayReversed: () => void
   clearToday: () => void
 
-  /** Zapisuje nowe własne miejsce i od razu ustawia je jako parking na dziś; zwraca jego id. */
-  addCustomParking: (spot: Omit<CustomParking, 'id' | 'name'>) => string
+  /** Dokłada punkt pośredni dzisiejszej trasy; zwraca jego id. */
+  addTodayWaypoint: (spot: Omit<Waypoint, 'id' | 'name'>) => string
+  updateTodayWaypoint: (id: string, patch: Partial<Omit<Waypoint, 'id'>>) => void
+  removeTodayWaypoint: (id: string) => void
+
+  /** Zapisuje nowe własne miejsce i od razu wstawia je na wskazany koniec trasy; zwraca jego id. */
+  addCustomParking: (spot: Omit<CustomParking, 'id' | 'name'>, role?: ParkingRole) => string
   updateCustomParking: (id: string, patch: Partial<Omit<CustomParking, 'id'>>) => void
   removeCustomParking: (id: string) => void
 
@@ -61,13 +68,25 @@ const withPeak = (
   },
 })
 
-const emptyToday = (): TodayPlan => ({ peakIds: [], parking: { kind: 'auto' }, loop: true, reversed: false })
+/** Który koniec trasy ustawia wskazane miejsce. */
+export type ParkingRole = 'start' | 'finish'
+
+const emptyToday = (): TodayPlan => ({
+  peakIds: [],
+  parking: { kind: 'auto' },
+  finish: { kind: 'start' },
+  waypoints: [],
+  reversed: false,
+})
 
 let dayCounter = 0
 const nextDayId = () => `day-${Date.now()}-${dayCounter++}`
 
 let parkingCounter = 0
 const nextParkingId = () => `parking-${Date.now()}-${parkingCounter++}`
+
+let waypointCounter = 0
+const nextWaypointId = () => `via-${Date.now()}-${waypointCounter++}`
 
 export const useProgress = create<ProgressState>()(
   persist(
@@ -86,20 +105,44 @@ export const useProgress = create<ProgressState>()(
           return { today: { ...s.today, peakIds } }
         }),
 
-      setTodayParking: (parking) => set((s) => ({ today: { ...s.today, parking } })),
+      // Wybór startu kasuje zamianę kierunku — inaczej auto trafiłoby na metę.
+      setTodayParking: (parking) => set((s) => ({ today: { ...s.today, parking, reversed: false } })),
 
-      toggleTodayLoop: () => set((s) => ({ today: { ...s.today, loop: !s.today.loop } })),
+      setTodayFinish: (finish) => set((s) => ({ today: { ...s.today, finish, reversed: false } })),
 
       toggleTodayReversed: () => set((s) => ({ today: { ...s.today, reversed: !s.today.reversed } })),
 
-      // Parking i powrót zostają — to raczej stały zwyczaj niż wybór na jeden dzień.
-      clearToday: () => set((s) => ({ today: { ...s.today, peakIds: [], reversed: false } })),
+      // Parking i koniec trasy zostają — to raczej stały zwyczaj niż wybór na jeden dzień.
+      // Punkty pośrednie należą do konkretnej trasy, więc znikają razem ze szczytami.
+      clearToday: () =>
+        set((s) => ({ today: { ...s.today, peakIds: [], waypoints: [], reversed: false } })),
 
-      addCustomParking: (spot) => {
+      addTodayWaypoint: (spot) => {
+        const id = nextWaypointId()
+        set((s) => ({ today: { ...s.today, waypoints: [...s.today.waypoints, { ...spot, id, name: '' }] } }))
+        return id
+      },
+
+      updateTodayWaypoint: (id, patch) =>
+        set((s) => ({
+          today: {
+            ...s.today,
+            waypoints: s.today.waypoints.map((w) => (w.id === id ? { ...w, ...patch } : w)),
+          },
+        })),
+
+      removeTodayWaypoint: (id) =>
+        set((s) => ({ today: { ...s.today, waypoints: s.today.waypoints.filter((w) => w.id !== id) } })),
+
+      addCustomParking: (spot, role = 'start') => {
         const id = nextParkingId()
         set((s) => ({
           customParkings: [...s.customParkings, { ...spot, id, name: '' }],
-          today: { ...s.today, parking: { kind: 'custom', id } },
+          today: {
+            ...s.today,
+            ...(role === 'start' ? { parking: { kind: 'custom' as const, id } } : { finish: { kind: 'custom' as const, id } }),
+            reversed: false,
+          },
         }))
         return id
       },
@@ -107,15 +150,21 @@ export const useProgress = create<ProgressState>()(
       updateCustomParking: (id, patch) =>
         set((s) => ({ customParkings: s.customParkings.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
 
-      // Usunięcie miejsca wybranego na dziś wraca do automatycznego doboru parkingu.
+      // Usunięcie miejsca wybranego na dziś wraca do automatycznego doboru parkingu
+      // (na starcie) albo do powrotu na start (na mecie).
       removeCustomParking: (id) =>
-        set((s) => ({
-          customParkings: s.customParkings.filter((p) => p.id !== id),
-          today:
-            s.today.parking.kind === 'custom' && s.today.parking.id === id
-              ? { ...s.today, parking: { kind: 'auto' } }
-              : s.today,
-        })),
+        set((s) => {
+          const usedAsStart = s.today.parking.kind === 'custom' && s.today.parking.id === id
+          const usedAsFinish = s.today.finish.kind === 'custom' && s.today.finish.id === id
+          return {
+            customParkings: s.customParkings.filter((p) => p.id !== id),
+            today: {
+              ...s.today,
+              ...(usedAsStart ? { parking: { kind: 'auto' as const } } : {}),
+              ...(usedAsFinish ? { finish: { kind: 'start' as const } } : {}),
+            },
+          }
+        }),
 
       toggleDone: (peakId) =>
         set((s) =>
@@ -267,9 +316,9 @@ export const useProgress = create<ProgressState>()(
     }),
     {
       name: 'kgb-progress',
-      version: 2,
+      version: 3,
       migrate: (persisted, version) => {
-        const state = persisted as ProgressState
+        let state = persisted as ProgressState
         // v1 trzymała jedno własne miejsce wprost w parkingu na dziś — w v2 staje się pierwszym wpisem listy.
         const parking = state.today?.parking as
           | TodayParking
@@ -277,10 +326,19 @@ export const useProgress = create<ProgressState>()(
           | undefined
         if (version < 2 && parking?.kind === 'custom' && 'lat' in parking) {
           const id = nextParkingId()
-          return {
+          state = {
             ...state,
             customParkings: [{ id, name: '', lat: parking.lat, lon: parking.lon, ele: parking.ele }],
             today: { ...state.today, parking: { kind: 'custom', id } },
+          }
+        }
+        // v2 miała tylko „wracam / nie wracam”; w v3 koniec trasy jest osobnym
+        // miejscem, doszły też punkty pośrednie.
+        if (version < 3) {
+          const { loop, ...today } = (state.today ?? emptyToday()) as TodayPlan & { loop?: boolean }
+          state = {
+            ...state,
+            today: { ...today, finish: { kind: loop === false ? 'none' : 'start' }, waypoints: [] },
           }
         }
         return state

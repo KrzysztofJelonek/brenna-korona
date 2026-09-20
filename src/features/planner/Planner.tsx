@@ -25,7 +25,14 @@ export function Planner({ onShowDayOnMap }: Props) {
   const progress = useProgress((s) => s.progress)
   const [pickerDay, setPickerDay] = useState<string | null>(null)
   const [genDays, setGenDays] = useState(3)
-  const generated = useMemo(() => generatePlan(genDays), [genDays])
+  // Po kilku wyjazdach planuje się resztę, nie całą koronę od nowa.
+  const [skipDone, setSkipDone] = useState(true)
+  const todoPeaks = useMemo(() => PEAKS.filter((p) => progress[p.id]?.status !== 'done'), [progress])
+  const doneCount = PEAKS.length - todoPeaks.length
+  const generated = useMemo(
+    () => generatePlan(genDays, skipDone ? todoPeaks : PEAKS),
+    [genDays, skipDone, todoPeaks],
+  )
 
   const dayInputs = useMemo(
     () =>
@@ -33,7 +40,7 @@ export function Planner({ onShowDayOnMap }: Props) {
         id: d.id,
         peaks: d.peakIds.map(peakById).filter((p): p is Peak => Boolean(p)),
         start: startPointById(d.startPointId),
-        loop: d.loop !== false,
+        finish: d.loop !== false ? startPointById(d.startPointId) : undefined,
       })),
     [plans],
   )
@@ -73,8 +80,22 @@ export function Planner({ onShowDayOnMap }: Props) {
         <p className="mt-1 text-xs text-muted">
           Propozycje gminy dzielą szczyty tak, jak wygodnie było je opisać. Ten generator zakłada, że
           zostawiasz samochód na parkingu i musisz po niego wrócić — każdy dzień układa jako pętlę,
-          dobiera najbliższy parking z listy gminy i skraca kolejność przejścia.
+          dobiera najbliższy parking z listy gminy i skraca kolejność przejścia. Zaliczone szczyty
+          domyślnie pomija, więc planuje tylko to, co zostało.
         </p>
+
+        {doneCount > 0 && (
+          <button
+            onClick={() => setSkipDone((v) => !v)}
+            aria-pressed={skipDone}
+            className={`chip mt-2.5 ${
+              skipDone ? 'border border-brand bg-brand-soft text-brand' : 'bg-tint text-ink'
+            }`}
+          >
+            <IconCheck className="h-3.5 w-3.5" />
+            Pomiń zaliczone ({doneCount})
+          </button>
+        )}
 
         <div className="mt-3">
           <div className="mb-1.5 flex items-baseline justify-between">
@@ -116,7 +137,18 @@ export function Planner({ onShowDayOnMap }: Props) {
           })}
         </ol>
 
-        <button onClick={() => loadGenerated(generated.days)} className="btn-primary mt-3 w-full">
+        {generated.days.length === 0 && (
+          <p className="mt-3 rounded-lg bg-tint px-3 py-2 text-xs text-muted">
+            Wszystkie szczyty zaliczone — nie ma czego planować. Wyłącz „Pomiń zaliczone”, żeby ułożyć
+            plan od nowa.
+          </p>
+        )}
+
+        <button
+          onClick={() => loadGenerated(generated.days)}
+          disabled={generated.days.length === 0}
+          className="btn-primary mt-3 w-full"
+        >
           <IconRoute className="h-4 w-4" /> Wczytaj ten plan
         </button>
         <p className="mt-2 text-[10px] text-muted">
@@ -145,7 +177,7 @@ export function Planner({ onShowDayOnMap }: Props) {
               const start = startPointById(day.startPointId)
               const isLoop = day.loop !== false
               const routed = routes.get(day.id) ?? null
-              const stats = routed ?? estimateDay(dayPeaks, start ? { start, loop: isLoop } : {})
+              const stats = routed ?? estimateDay(dayPeaks, { start, finish: isLoop ? start : undefined })
               const color = DAY_COLORS[i % DAY_COLORS.length]
               const donePeaks = dayPeaks.filter((p) => progress[p.id]?.status === 'done').length
 
