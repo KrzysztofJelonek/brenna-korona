@@ -1,12 +1,27 @@
 import { PEAKS } from '../../data/peaks'
 import type { PeakProgress, StoredPhoto } from '../../types'
-import { decodePhoto, describeError, drawCover, type ExportFailure } from './exportPhotos'
+import {
+  decodePhoto,
+  describeError,
+  drawContain,
+  drawCover,
+  type DecodedPhoto,
+  type ExportFailure,
+} from './exportPhotos'
 
-const CELL = 520
+/**
+ * Kadr pionowy 3:4 — tabliczki szczytowe wiszą wysoko i zdjęcia robi się pionowo.
+ * Kwadratowe pole ucinało górę kadru razem z tabliczką, więc zdjęcie wpisujemy
+ * w całości (contain), a resztę pola wypełnia rozmyte tło z tego samego zdjęcia.
+ */
+const CELL_W = 460
+const CELL_H = 614
 const COLS = 4
 const HEADER = 150
 const GAP = 10
 const CAPTION = 74
+/** Zapas na rozmycie tła, żeby blur nie wciągał przezroczystości przy krawędziach. */
+const BLUR_BLEED = 48
 
 export interface CollageOptions {
   progress: Record<string, PeakProgress>
@@ -24,8 +39,8 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
   failed: ExportFailure[]
 }> {
   const rows = Math.ceil(PEAKS.length / COLS)
-  const cellH = CELL + CAPTION
-  const width = COLS * CELL + (COLS + 1) * GAP
+  const cellH = CELL_H + CAPTION
+  const width = COLS * CELL_W + (COLS + 1) * GAP
   const height = HEADER + rows * cellH + (rows + 1) * GAP
 
   const canvas = document.createElement('canvas')
@@ -56,12 +71,13 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
       : ''
   ctx.fillText([participant, `${doneCount}/20 szczytów`, range].filter(Boolean).join('  ·  '), GAP + 24, 110)
 
+  const blurAvailable = supportsFilter(ctx)
   const failed: ExportFailure[] = []
   for (let i = 0; i < PEAKS.length; i++) {
     const peak = PEAKS[i]
     const col = i % COLS
     const row = Math.floor(i / COLS)
-    const x = GAP + col * (CELL + GAP)
+    const x = GAP + col * (CELL_W + GAP)
     const y = HEADER + GAP + row * (cellH + GAP)
 
     const prog = progress[peak.id]
@@ -69,14 +85,15 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
 
     ctx.save()
     ctx.beginPath()
-    ctx.roundRect(x, y, CELL, CELL, 18)
+    ctx.roundRect(x, y, CELL_W, CELL_H, 18)
     ctx.clip()
     let placeholder: string | null = photo ? null : 'brak zdjęcia'
     if (photo) {
       try {
         const img = await decodePhoto(photo.blob)
         try {
-          drawCover(ctx, img, x, y, CELL, CELL)
+          drawBackdrop(ctx, img, x, y, blurAvailable)
+          drawContain(ctx, img, x, y, CELL_W, CELL_H)
         } finally {
           img.close()
         }
@@ -87,11 +104,11 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
     }
     if (placeholder) {
       ctx.fillStyle = photo ? '#f6e6dc' : '#e6f1e0'
-      ctx.fillRect(x, y, CELL, CELL)
+      ctx.fillRect(x, y, CELL_W, CELL_H)
       ctx.fillStyle = photo ? '#b0643a' : '#9bb094'
       ctx.font = '26px ui-sans-serif, system-ui, sans-serif'
       ctx.textAlign = 'center'
-      ctx.fillText(placeholder, x + CELL / 2, y + CELL / 2)
+      ctx.fillText(placeholder, x + CELL_W / 2, y + CELL_H / 2)
       ctx.textAlign = 'left'
     }
     ctx.restore()
@@ -109,17 +126,64 @@ export async function renderCollage({ progress, photos, participant }: CollageOp
 
     // podpis
     ctx.fillStyle = '#20312b'
-    ctx.font = 'bold 30px ui-sans-serif, system-ui, sans-serif'
-    ctx.fillText(peak.name, x + 6, y + CELL + 26)
+    ctx.font = fitFont(ctx, peak.name, CELL_W - 12, 30, 'bold')
+    ctx.fillText(peak.name, x + 6, y + CELL_H + 26)
     ctx.fillStyle = '#5f6c61'
     ctx.font = '25px ui-sans-serif, system-ui, sans-serif'
     const date = prog?.conqueredAt ? new Date(prog.conqueredAt).toLocaleDateString('pl-PL') : '—'
-    ctx.fillText(`${peak.ele} m n.p.m.  ·  ${date}`, x + 6, y + CELL + 58)
+    ctx.fillText(`${peak.ele} m n.p.m.  ·  ${date}`, x + 6, y + CELL_H + 58)
   }
 
   const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/jpeg', 0.9))
   if (!blob) throw new Error('Nie udało się wygenerować kolażu')
   return { blob, failed }
+}
+
+/** Czy canvas tej przeglądarki umie filtry (Safari dostał je dopiero w 17). */
+function supportsFilter(ctx: CanvasRenderingContext2D): boolean {
+  const before = ctx.filter
+  try {
+    ctx.filter = 'blur(2px)'
+    return ctx.filter !== 'none' && ctx.filter !== before
+  } finally {
+    ctx.filter = before
+  }
+}
+
+/** Tło pola: rozmyte zdjęcie rozciągnięte na cały kadr, żeby pasy obok zdjęcia nie były gołe. */
+function drawBackdrop(
+  ctx: CanvasRenderingContext2D,
+  img: DecodedPhoto,
+  x: number,
+  y: number,
+  blur: boolean,
+) {
+  if (!blur) {
+    ctx.fillStyle = '#e9f1e4'
+    ctx.fillRect(x, y, CELL_W, CELL_H)
+    return
+  }
+  ctx.save()
+  ctx.filter = 'blur(28px) brightness(0.86)'
+  // Rysujemy z zapasem poza polem — inaczej rozmycie zassałoby przezroczystość zza krawędzi.
+  drawCover(ctx, img, x - BLUR_BLEED, y - BLUR_BLEED, CELL_W + 2 * BLUR_BLEED, CELL_H + 2 * BLUR_BLEED)
+  ctx.restore()
+}
+
+/** Zmniejsza stopień pisma, dopóki napis nie zmieści się w polu (np. Trzy Kopce Wiślańskie). */
+function fitFont(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  size: number,
+  weight: 'bold' | 'normal' = 'normal',
+): string {
+  for (let s = size; s > 16; s -= 1) {
+    const font = `${weight === 'bold' ? 'bold ' : ''}${s}px ui-sans-serif, system-ui, sans-serif`
+    ctx.font = font
+    if (ctx.measureText(text).width <= maxWidth) return font
+  }
+  return `${weight === 'bold' ? 'bold ' : ''}17px ui-sans-serif, system-ui, sans-serif`
 }
 
 /** Kwadratowa karta podsumowania do udostępnienia. */

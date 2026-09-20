@@ -170,8 +170,8 @@ Odległość i kierunek do najbliższych szczytów, propozycja zaliczenia po wej
 
 Najważniejsza funkcja użytkowa, bo odwzorowuje realny proces weryfikacji:
 
-- **kolaż** — 20 zdjęć w siatce 4×5 z podpisami (nazwa, wysokość, data), JPG gotowy do wklejenia na Facebooka,
-- **PDF** — sześć zdjęć na stronę, jsPDF ładowany dynamicznie,
+- **kolaż** — 20 zdjęć w siatce 4×5 w polach pionowych 3:4, całe kadry bez przycinania, z podpisami (nazwa, wysokość, data), JPG gotowy do wklejenia na Facebooka,
+- **PDF** — cztery zdjęcia na stronę, też w całości, jsPDF ładowany dynamicznie,
 - **karta podsumowania** — kwadrat 1080×1080 z licznikiem, sumą wysokości i zakresem dat, na tle rysowanej sylwetki gór (to grafika, nie mapa), z `navigator.share` gdy dostępne,
 - **backup** — cały stan wraz ze zdjęciami do jednego pliku JSON i import z powrotem.
 
@@ -709,6 +709,8 @@ Pierwsza wersja miała motyw granatowo-fioletowy, „nocny", bo motywem edycji s
 Uwaga o Tailwindzie v4: `@apply` nie działa na klasach z `@layer components`, więc bazowy przycisk musiał trafić do `@utility btn`, a warianty (`btn-primary`, `btn-ghost`) dopiero go składają.
 
 **Kolaż i karta podsumowania zostają jasne niezależnie od motywu.** Trafiają na Facebooka, gdzie kremowo-zielona wersja odpowiada plakatowi — byłoby dziwne, gdyby dowód wyglądał inaczej u kogoś z trybem nocnym.
+
+**Eksporty nie przycinają zdjęć.** Pierwsza wersja kadrowała każde zdjęcie do kwadratu (`object-fit: cover`). W terenie okazało się to błędem: tabliczki szczytowe wiszą wysoko, zdjęcia robi się telefonem pionowo, więc kwadrat ucinał właśnie górę kadru — czyli tabliczkę, czyli dowód wejścia. Pola w kolażu i w PDF są dziś pionowe (3:4), a zdjęcie wpisuje się w nie w całości (`contain`). Pasy obok kadru wypełnia rozmyta, przyciemniona kopia tego samego zdjęcia (`ctx.filter`, z zapasem poza polem, żeby rozmycie nie zassało przezroczystości zza krawędzi); przeglądarki bez filtrów canvasu dostają jednolite tło. W PDF pionowe pole jest wyższe, więc na stronę wchodzą 4 szczyty zamiast 6 — pięć stron zamiast czterech to uczciwa cena za nieucięty dowód.
 
 ---
 

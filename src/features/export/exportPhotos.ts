@@ -128,18 +128,39 @@ export function drawCover(
   ctx.drawImage(img.source, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, x, y, w, h)
 }
 
-/** Kwadratowy JPEG przycięty do środka — do PDF, który nie radzi sobie z WebP. */
-export async function squareJpeg(blob: Blob, size: number): Promise<Uint8Array> {
+/**
+ * Rysuje całe zdjęcie wpisane w prostokąt (object-fit: contain).
+ *
+ * Tabliczki szczytowe wiszą wysoko, a zdjęcia robi się pionowo — kadrowanie do
+ * kwadratu ucinało właśnie tabliczkę, czyli dowód wejścia. Dlatego w eksportach
+ * nic nie przycinamy; puste pasy wypełnia tło.
+ */
+export function drawContain(
+  ctx: CanvasRenderingContext2D,
+  img: DecodedPhoto,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
+  const scale = Math.min(w / img.width, h / img.height)
+  const dw = img.width * scale
+  const dh = img.height * scale
+  ctx.drawImage(img.source, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh)
+}
+
+/** Pionowy JPEG z całym zdjęciem (bez przycinania) — do PDF, który nie radzi sobie z WebP. */
+export async function containJpeg(blob: Blob, w: number, h: number): Promise<Uint8Array> {
   const img = await decodePhoto(blob)
   const canvas = document.createElement('canvas')
   try {
-    canvas.width = size
-    canvas.height = size
+    canvas.width = w
+    canvas.height = h
     const ctx = canvas.getContext('2d')
     if (!ctx) throw new Error('brak kontekstu canvas')
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0, 0, size, size)
-    drawCover(ctx, img, 0, 0, size, size)
+    ctx.fillStyle = '#eef4ea'
+    ctx.fillRect(0, 0, w, h)
+    drawContain(ctx, img, 0, 0, w, h)
     const jpeg = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85))
     if (!jpeg) throw new Error('nie udało się zakodować JPEG')
     return new Uint8Array(await jpeg.arrayBuffer())
