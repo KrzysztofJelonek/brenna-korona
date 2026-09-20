@@ -8,11 +8,54 @@ Bez backendu, bez kont, bez śledzenia. Wszystkie dane użytkownika zostają w j
 
 | | |
 |---|---|
+| Aplikacja | **[krzysztofjelonek.github.io/brenna-korona](https://krzysztofjelonek.github.io/brenna-korona/)** — działa w przeglądarce, można ją zainstalować na telefonie |
 | Stack | Vite · React · TypeScript · Tailwind v4 · Leaflet · zustand · idb · exifr · Framer Motion |
 | Kod | 36 plików źródłowych, ~5 600 linii |
 | Bundle startowy | 104 KB gzip |
 | Pełny payload offline | 2,1 MB (17 plików w precache) + zdjęcia szczytów zapisywane przy obejrzeniu |
 | Autor | Krzysztof Jelonek · sponsor: FaceLove® z Jaworza |
+
+---
+
+## Instalacja
+
+Aplikacja jest już opublikowana i nie wymaga niczego poza przeglądarką:
+
+**https://krzysztofjelonek.github.io/brenna-korona/**
+
+To **PWA** — po instalacji dostaje własną ikonę na ekranie, otwiera się bez paska adresu i działa bez zasięgu. Instalacja nie idzie przez żaden sklep; robi to sama przeglądarka i zajmuje kilka sekund.
+
+### Android (Chrome)
+
+1. Otwórz adres powyżej.
+2. Menu **⋮** → **Dodaj do ekranu głównego** (albo **Zainstaluj aplikację**).
+3. Potwierdź **Zainstaluj**.
+
+Czasem Chrome sam pokazuje na dole pasek z propozycją instalacji — wystarczy go dotknąć.
+
+### iPhone / iPad (Safari)
+
+1. Otwórz adres powyżej **w Safari** (Chrome na iOS nie potrafi instalować stron).
+2. Przycisk **Udostępnij** (kwadrat ze strzałką w górę).
+3. **Do ekranu początkowego** → **Dodaj**.
+
+### Komputer (Chrome, Edge)
+
+Ikona instalacji po prawej stronie paska adresu (monitor ze strzałką) albo menu **⋮** → **Zainstaluj**.
+
+### Co daje instalacja
+
+- **Praca offline** — po pierwszym uruchomieniu cała aplikacja (2,1 MB) siedzi na urządzeniu i działa bez zasięgu: szczyty, opisy, trasy, plan, aparat. Kafelki mapy i zdjęcia szczytów zapisują się dopiero wtedy, gdy raz się je obejrzy — w dolinie bez zasięgu widać te już odwiedzone. W górach nad Brenną zasięgu bywa mało, więc warto przed wyjazdem przejrzeć mapę i szczyty na Wi-Fi.
+- **Pełny ekran** i własna ikona, bez paska przeglądarki.
+- **Dostęp do aparatu i GPS** — tak samo jak w przeglądarce, po zapytaniu o zgodę.
+
+### Aktualizacje
+
+Aplikacja sama sprawdza, czy jest nowsza wersja — przy starcie, po powrocie do niej i co pół godziny. Zwykle podmienia się po cichu; gdy trwa nagrywanie śladu albo włączona jest lokalizacja, pokazuje tylko pasek z przyciskiem **Odśwież** i czeka na decyzję. Nowa wersja potrafi pojawić się z kilkuminutowym opóźnieniem — CDN GitHub Pages trzyma pliki w cache.
+
+### Ważne o danych
+
+Postęp, zdjęcia i plan trzymane są **wyłącznie w tej przeglądarce** — nie ma konta ani synchronizacji. Odinstalowanie aplikacji albo wyczyszczenie danych witryny kasuje je bezpowrotnie, a instalacja na drugim telefonie zaczyna od zera. Przenoszenie i kopia zapasowa idą przez **Dowód → backup** (eksport do pliku JSON i import z powrotem).
 
 ---
 
@@ -700,6 +743,8 @@ Wdrożenie: zawartość `dist/` na dowolny hosting statyczny. Dzięki `base: './
 **Wymagany HTTPS** — geolokalizacja, aparat i Service Worker nie działają po HTTP poza `localhost`.
 
 ### GitHub Pages
+
+Aplikacja stoi pod **https://krzysztofjelonek.github.io/brenna-korona/** — Pages dają HTTPS, więc działają tam geolokalizacja, aparat, Service Worker i instalacja na telefonie ([Instalacja](#instalacja)).
 
 W repo jest [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): przy każdym pushu na `main` buduje projekt i publikuje `dist/`. Wymaga jednorazowego włączenia w **Settings → Pages → Source: `GitHub Actions`**.
 
