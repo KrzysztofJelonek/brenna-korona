@@ -113,6 +113,16 @@ export const FAQ: Faq[] = [
   },
 ]
 
+/**
+ * Publiczny adres aplikacji — to, co pokazuje kod QR w oknie udostępniania.
+ * Celowo stała, a nie `location.href`: z podglądu na localhoście albo spod linku
+ * z parametrami powstałby kod, którego druga osoba nie otworzy.
+ */
+export const APP_URL = 'https://krzysztofjelonek.github.io/brenna-korona/'
+
+/** Adres bez schematu — do pokazania człowiekowi, np. pod kodem QR. */
+export const APP_URL_SHORT = APP_URL.replace(/^https?:\/\//, '').replace(/\/$/, '')
+
 /** Autor aplikacji i sponsor — aplikacja jest nieoficjalna i niekomercyjna. */
 export const AUTHOR = {
   name: 'Krzysztof Jelonek',

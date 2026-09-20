@@ -9,10 +9,10 @@ Bez backendu, bez kont, bez śledzenia. Wszystkie dane użytkownika zostają w j
 | | |
 |---|---|
 | Aplikacja | **[krzysztofjelonek.github.io/brenna-korona](https://krzysztofjelonek.github.io/brenna-korona/)** — działa w przeglądarce, można ją zainstalować na telefonie |
-| Stack | Vite · React · TypeScript · Tailwind v4 · Leaflet · zustand · idb · exifr · Framer Motion |
-| Kod | 36 plików źródłowych, ~5 600 linii |
-| Bundle startowy | 104 KB gzip |
-| Pełny payload offline | 2,1 MB (17 plików w precache) + zdjęcia szczytów zapisywane przy obejrzeniu |
+| Stack | Vite · React · TypeScript · Tailwind v4 · Leaflet · zustand · idb · exifr · Framer Motion · qrcode-generator |
+| Kod | 43 pliki źródłowe, ~6 200 linii |
+| Bundle startowy | 109 KB gzip |
+| Pełny payload offline | 2,2 MB (19 plików w precache) + zdjęcia szczytów zapisywane przy obejrzeniu |
 | Autor | Krzysztof Jelonek · sponsor: FaceLove® z Jaworza |
 
 ---
@@ -42,6 +42,8 @@ Czasem Chrome sam pokazuje na dole pasek z propozycją instalacji — wystarczy 
 ### Komputer (Chrome, Edge)
 
 Ikona instalacji po prawej stronie paska adresu (monitor ze strzałką) albo menu **⋮** → **Zainstaluj**.
+
+Adresu nie trzeba przepisywać: w samej aplikacji przycisk **kodu QR** w nagłówku pokazuje kod do zeskanowania przez drugą osobę ([Udostępnianie](#udostępnianie)).
 
 ### Co daje instalacja
 
@@ -176,6 +178,12 @@ Aplikacja przypomina o backupie po zdobyciu co piątego szczytu, nie częściej 
 ### Info
 
 Zasady, zapowiedź wideo, przegląd wariantów, 10 pytań i odpowiedzi z materiałów organizatora, imprezy towarzyszące, konkursy, komplet kontaktów oraz informacja o autorze i sponsorze.
+
+### Udostępnianie
+
+Przycisk z kodem QR w nagłówku, widoczny z każdej zakładki, i ten sam panel z zakładki Info. Pokazuje kod QR z publicznym adresem aplikacji, adres do przeczytania na głos, przycisk systemowego udostępniania (`navigator.share`, gdy przeglądarka je ma) i kopiowanie do schowka.
+
+Funkcja wzięła się z terenu: pokazanie komuś aplikacji na szlaku kończyło się próbą podyktowania adresu `krzysztofjelonek.github.io/brenna-korona`. Kod liczy się **na urządzeniu** ([`qr.ts`](src/lib/qr.ts)), więc działa bez zasięgu — a odpytywanie cudzego generatora QR byłoby jedynym takim zapytaniem w całej aplikacji.
 
 ### Świadomie poza zakresem
 
@@ -651,17 +659,18 @@ Wpychanie zdjęć do localStorage, choćby jako base64, to najczęstszy błąd w
 
 | Chunk | Rozmiar | gzip | Kiedy się ładuje |
 |---|---|---|---|
-| `index` | 310 KB | **104 KB** | start |
+| `index` | 326 KB | **109 KB** | start |
 | `index.css` | 56 KB | 15 KB | start |
 | `map` (Leaflet) | 299 KB | 91 KB | zakładka Mapa |
 | `trails` | 648 KB | 229 KB | pierwsze liczenie trasy |
 | `elevation` | 112 KB | 39 KB | pierwsze liczenie trasy |
 | `peakInfo` | 30 KB | 8 KB | pierwsze otwarcie panelu szczytu |
+| `qrcode` | 21 KB | 8 KB | otwarcie panelu udostępniania |
 | `jspdf` + `html2canvas` + `purify` | 742 KB | 173 KB | dopiero przy eksporcie PDF |
 
 jsPDF ciągnął 380 KB zależności do bundla startowego, dopóki nie trafił na dynamiczny import. Dane routingu tak samo — statyczny import wpychał je do `index` i podnosił start do 341 KB gzip.
 
-Service Worker precache'uje 17 plików, łącznie **2,1 MB** — czyli po pierwszym uruchomieniu routing i cała aplikacja działają offline. Kafelki OSM mają osobną regułę `CacheFirst` z ważnością 30 dni, zdjęcia szczytów — `CacheFirst` z ważnością 90 dni (w trybie offline widać te, które się już raz obejrzało).
+Service Worker precache'uje 19 plików, łącznie **2,2 MB** — czyli po pierwszym uruchomieniu routing i cała aplikacja działają offline. Kafelki OSM mają osobną regułę `CacheFirst` z ważnością 30 dni, zdjęcia szczytów — `CacheFirst` z ważnością 90 dni (w trybie offline widać te, które się już raz obejrzało).
 
 ---
 
@@ -700,6 +709,7 @@ Deklaracja „zero śledzenia" musi mieć pokrycie w kodzie, nie tylko w opisie:
 - **film z YouTube ładuje się dopiero po kliknięciu.** Zwykły embed odpytuje Google przy samym otwarciu strony; tutaj podgląd to własna grafika SVG, a po kliknięciu ładowany jest `youtube-nocookie.com`. Zweryfikowane w headless: na zakładce Info **nie ma żadnego zasobu z obcej domeny** przed kliknięciem,
 - **logo sponsora leży lokalnie** w `public/`, nie jest wczytywane z `facelove.pl` — inaczej każde otwarcie aplikacji byłoby zapytaniem do serwera firmy. Przy okazji zmniejszone z 1400 px / 56 KB do 600 px / 11 KB i działa offline,
 - **zdjęcia szczytów też leżą lokalnie** w `public/peaks/`. Otwarcie panelu szczytu nie wysyła nic do Wikimedia, a Wikipedia i Commons otwierają się dopiero po kliknięciu w link,
+- **kod QR powstaje na urządzeniu.** Gotowe generatory QR działają jako usługa sieciowa — wysyłanie im adresu (a z nim informacji, że ktoś właśnie udostępnia aplikację) byłoby jedynym takim zapytaniem w projekcie. Biblioteka liczy kod lokalnie i jest w precache, więc działa też bez zasięgu,
 - jedyne zapytania sieciowe w normalnej pracy to **kafelki map** (OpenStreetMap, OpenTopoMap, Waymarked Trails).
 
 Konsekwencja, o której UI mówi wprost: **wyczyszczenie danych przeglądarki kasuje postęp**. Stąd przypomnienia o backupie i eksport całego stanu do pliku.
@@ -789,6 +799,9 @@ Sprawdzone tą drogą:
 | Wybór na dziś zapisany w `localStorage`, wyjście z trybu przywraca pasek dni | ✅ |
 | Panel trasy na dziś przy 390 px: bez poziomego przewijania, kontrolka warstw nie wchodzi pod pasek | ✅ |
 | Logika (jednorazowy skrypt w Node przez esbuild): generator po wydzieleniu `orderPeaks` nadal daje 20 szczytów dla 1–8 dni; automatyczny parking, odwracanie, własny parking; cache odcinków | ✅ |
+| Kod QR: ścieżka SVG zrasteryzowana i odczytana niezależnym dekoderem (jsQR) — wychodzi dokładnie adres aplikacji; 41 modułów z zachowaną białą ramką | ✅ |
+| Panel udostępniania (Chrome w czasie rzeczywistym przez DevTools Protocol): przycisk w nagłówku 44 px, kod 230 px przy ekranie 390 px, białe tło kodu mimo ciemnego motywu, Escape i × zamykają, ponowne otwarcie rysuje kod, bez poziomego przewijania; ten sam panel z zakładki Info | ✅ |
+| Kod QR przy wyłączonej sieci (service worker kontroluje stronę, `Network.emulateNetworkConditions` offline, przeładowanie): aplikacja wstaje i kod się rysuje z precache | ✅ |
 | `tsc -b` bez błędów, `vite build` przechodzi | ✅ |
 
 ### Ograniczenia tej metody
@@ -800,7 +813,7 @@ Sprawdzone tą drogą:
 
 ### Do sprawdzenia ręcznie na urządzeniu
 
-Aparat, EXIF i geolokalizacja na telefonie · instalacja PWA i praca w trybie samolotowym · 20 zdjęć bez `QuotaExceededError` · backup: eksport → tryb prywatny → import → stan identyczny · Lighthouse na mobile.
+Aparat, EXIF i geolokalizacja na telefonie · instalacja PWA i praca w trybie samolotowym · 20 zdjęć bez `QuotaExceededError` · backup: eksport → tryb prywatny → import → stan identyczny · systemowe okno udostępniania (`navigator.share`) i odczyt kodu QR z ekranu innym telefonem · Lighthouse na mobile.
 
 ---
 

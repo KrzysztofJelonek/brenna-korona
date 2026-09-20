@@ -2,14 +2,15 @@ import { useState, type ReactNode } from 'react'
 import { CHALLENGE_END, CHALLENGE_START, FINALE_DATE, PEAKS, daysLeft } from '../../data/peaks'
 import { ROUTE_PRESETS } from '../../data/routes'
 import { AUTHOR, CONTESTS, FAQ, ORGANIZER, PROMO_VIDEO, SIDE_EVENTS, SPONSOR, TOURIST_INFO } from '../../data/event'
-import { IconCalendar, IconLink, IconMail, IconPhone, IconPlay, IconRoute } from '../../ui/Icons'
+import { IconCalendar, IconLink, IconMail, IconPhone, IconPlay, IconQr, IconRoute } from '../../ui/Icons'
 import { plural } from '../../lib/geo'
 
 interface Props {
   onGoToPlanner: () => void
+  onShare: () => void
 }
 
-export function InfoView({ onGoToPlanner }: Props) {
+export function InfoView({ onGoToPlanner, onShare }: Props) {
   const left = daysLeft()
 
   return (
@@ -183,6 +184,14 @@ export function InfoView({ onGoToPlanner }: Props) {
             Wyczyszczenie danych przeglądarki kasuje postęp. Rób kopię w zakładce <strong>Dowód</strong>.
           </Bullet>
         </ul>
+
+        <button onClick={onShare} className="btn-ghost mt-3 w-full">
+          <IconQr className="h-4 w-4" />
+          Poleć aplikację — pokaż kod QR
+        </button>
+        <p className="mt-1.5 text-[11px] text-muted">
+          Kod rysuje się na miejscu, więc zadziała też bez zasięgu — na szlaku wystarczy pokazać ekran.
+        </p>
       </Section>
 
       <Section title="Autor i sponsor">

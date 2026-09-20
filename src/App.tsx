@@ -11,9 +11,10 @@ import { Planner } from './features/planner/Planner'
 import { ExportView } from './features/export/ExportView'
 import { InfoView } from './features/info/InfoView'
 import { FieldView } from './features/field/FieldView'
+import { ShareSheet } from './features/share/ShareSheet'
 import { ProgressRing } from './ui/ProgressRing'
 import type { Peak } from './types'
-import { IconInfo, IconList, IconLocate, IconMap, IconRoute, IconShare } from './ui/Icons'
+import { IconInfo, IconList, IconLocate, IconMap, IconQr, IconRoute, IconShare } from './ui/Icons'
 
 type Tab = 'lista' | 'mapa' | 'plan' | 'teren' | 'dowod' | 'info'
 
@@ -32,6 +33,7 @@ export default function App() {
   const [geoOn, setGeoOn] = useState(false)
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
   const [recording, setRecording] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   const progress = useProgress((s) => s.progress)
   const backupReminderAt = useProgress((s) => s.backupReminderAt)
@@ -67,6 +69,14 @@ export default function App() {
               )}
             </p>
           </div>
+          <button
+            onClick={() => setShareOpen(true)}
+            aria-label="Udostępnij aplikację — kod QR"
+            title="Udostępnij aplikację"
+            className="btn-ghost shrink-0 !px-2.5"
+          >
+            <IconQr className="h-5 w-5" />
+          </button>
         </div>
       </header>
 
@@ -141,7 +151,7 @@ export default function App() {
             />
           )}
           {tab === 'dowod' && <ExportView />}
-          {tab === 'info' && <InfoView onGoToPlanner={() => setTab('plan')} />}
+          {tab === 'info' && <InfoView onGoToPlanner={() => setTab('plan')} onShare={() => setShareOpen(true)} />}
         </motion.div>
       </main>
 
@@ -171,6 +181,7 @@ export default function App() {
       </nav>
 
       <PeakSheet peak={openPeak} onClose={() => setOpenPeak(null)} />
+      <ShareSheet open={shareOpen} onClose={() => setShareOpen(false)} />
     </div>
   )
 }
