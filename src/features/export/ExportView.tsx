@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PEAKS } from '../../data/peaks'
 import { useProgress, countDone, totalAscent } from '../../store/progress'
 import { renderSummaryCard } from './collage'
-import { renderProofBoards } from './proofBoards'
+import { renderProofBoards, type ProofBoard } from './proofBoards'
 import { renderPdf } from './pdf'
 import { photosForExport, type ExportFailure } from './exportPhotos'
 import { exportBackup, importBackup } from './backup'
@@ -12,7 +12,8 @@ import { getAllPhotos } from '../../store/media'
 import { photoUrl } from '../../lib/photo'
 import type { StoredPhoto } from '../../types'
 
-type Busy = null | 'collage' | 'pdf' | 'card' | 'backup' | 'import'
+type Busy = null | 'collage' | 'share' | 'pdf' | 'card' | 'backup' | 'import'
+type ReadyBoard = ProofBoard & { url: string }
 
 const PARTICIPANT_KEY = 'kgb-participant'
 
@@ -22,6 +23,7 @@ export function ExportView() {
   const [busy, setBusy] = useState<Busy>(null)
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
+  const [readyBoards, setReadyBoards] = useState<ReadyBoard[]>([])
   const importRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -29,6 +31,8 @@ export function ExportView() {
   }, [participant])
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
+  useEffect(() => () => { readyBoards.forEach((board) => URL.revokeObjectURL(board.url)) }, [readyBoards])
+  useEffect(() => { setReadyBoards([]) }, [progress, participant])
 
   // Zdjęcia liczymy po bazie, tak jak pokazuje je karta szczytu i jak trafią do eksportu.
   const [storedPhotos, setStoredPhotos] = useState<StoredPhoto[] | null>(null)
@@ -80,16 +84,30 @@ export function ExportView() {
   const makeCollage = () =>
     run('collage', async () => {
       const { boards, failed } = await renderProofBoards({ progress, photos: await photosForExport(progress), participant })
-      const { zipSync } = await import('fflate')
-      const entries = Object.fromEntries(
-        await Promise.all(boards.map(async (board) => [board.name, new Uint8Array(await board.blob.arrayBuffer())] as const)),
-      )
-      const blob = new Blob([zipSync(entries, { level: 0 }) as BlobPart], { type: 'application/zip' })
-      if (preview) URL.revokeObjectURL(preview)
-      setPreview(URL.createObjectURL(boards[0].blob))
-      downloadBlob(blob, 'korona-gor-brennej-2026-plansze-jpg.zip')
-      exportMessage('Pobrano 5 plansz JPG w ZIP. Rozpakuj i dodaj wszystkie do jednego posta na Facebooku.', failed)
+      setReadyBoards(boards.map((board) => ({ ...board, url: URL.createObjectURL(board.blob) })))
+      exportMessage('Plansze gotowe. Udostępnij komplet albo pobierz wybrane zdjęcia poniżej.', failed)
     })
+
+  const boardFiles = readyBoards.map((board) => new File([board.blob], board.name, { type: 'image/jpeg' }))
+  const canShareBoards = boardFiles.length > 0 && navigator.canShare?.({ files: boardFiles })
+
+  const shareBoards = async () => {
+    setBusy('share')
+    try {
+      await navigator.share({
+        files: boardFiles,
+        title: 'Korona Gór Brennej 2026',
+        text: 'Moje zdjęcia z Korony Gór Brennej 2026',
+      })
+      setMsg({ kind: 'ok', text: 'Plansze przekazane do udostępnienia.' })
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) {
+        setMsg({ kind: 'err', text: error instanceof Error ? error.message : 'Nie udało się udostępnić zdjęć.' })
+      }
+    } finally {
+      setBusy(null)
+    }
+  }
 
   const makePdf = () =>
     run('pdf', async () => {
@@ -201,13 +219,42 @@ export function ExportView() {
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <button onClick={makeCollage} disabled={busy !== null} className="btn-primary">
-            <IconDownload className="h-4 w-4" /> {busy === 'collage' ? 'składam…' : 'Plansze JPG (ZIP)'}
+            <IconDownload className="h-4 w-4" /> {busy === 'collage' ? 'składam…' : 'Utwórz plansze JPG'}
           </button>
           <button onClick={makePdf} disabled={busy !== null} className="btn-ghost">
             <IconDownload className="h-4 w-4" /> {busy === 'pdf' ? 'generuję…' : 'PDF'}
           </button>
         </div>
-        <p className="mt-2 text-[11px] text-muted">ZIP zawiera 5 plików JPG (2160 × 3000 px), każdy z adresem aplikacji i kodem QR. Rozpakuj je i dodaj razem do posta. Zdjęcia przesłane wcześniej możesz wgrać ponownie, aby skorzystać z wyższej jakości zapisu.</p>
+        <p className="mt-2 text-[11px] text-muted">Powstanie 5 zdjęć JPG (2160 × 3000 px), każde z adresem aplikacji i kodem QR. Zdjęcia przesłane wcześniej możesz wgrać ponownie, aby skorzystać z wyższej jakości zapisu.</p>
+
+        {readyBoards.length > 0 && (
+          <div className="mt-4 border-t border-line pt-4">
+            <h3 className="text-sm font-semibold">Gotowe plansze ({readyBoards.length})</h3>
+            {canShareBoards && (
+              <button onClick={shareBoards} disabled={busy !== null} className="btn-primary mt-3 w-full">
+                <IconShare className="h-4 w-4" /> {busy === 'share' ? 'udostępniam…' : 'Udostępnij wszystkie zdjęcia'}
+              </button>
+            )}
+            <p className="mt-2 text-xs text-muted">
+              {canShareBoards
+                ? 'Wybierz Facebook w menu udostępniania albo pobierz plansze pojedynczo.'
+                : 'Pobierz plansze pojedynczo i dodaj wszystkie do jednego posta na Facebooku.'}
+              {' '}Jeśli telefon otwiera zdjęcie zamiast je pobrać, przytrzymaj jego podgląd i wybierz zapisanie obrazu.
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              {readyBoards.map((board, index) => (
+                <div key={board.name} className="overflow-hidden rounded-xl border border-line bg-surface">
+                  <a href={board.url} target="_blank" rel="noreferrer" aria-label={`Otwórz planszę ${index + 1}`}>
+                    <img src={board.url} alt={`Plansza ${index + 1} z ${readyBoards.length}`} className="w-full" />
+                  </a>
+                  <button onClick={() => downloadBlob(board.blob, board.name)} className="btn-ghost m-2 w-[calc(100%-1rem)]">
+                    <IconDownload className="h-4 w-4" /> Pobierz JPG {index + 1}/{readyBoards.length}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="card px-4 py-4">

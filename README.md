@@ -170,7 +170,7 @@ Odległość i kierunek do najbliższych szczytów, propozycja zaliczenia po wej
 
 Najważniejsza funkcja użytkowa, bo odwzorowuje realny proces weryfikacji:
 
-- **plansze JPG** — pięć obrazów 2160×3000 px po cztery duże zdjęcia, z całymi kadrami, podpisami i numeracją; na każdej planszy jest adres aplikacji i kod QR; pobierane jako ZIP do jednego posta na Facebooku,
+- **plansze JPG** — pięć obrazów 2160×3000 px po cztery duże zdjęcia, z całymi kadrami, podpisami i numeracją; na każdej planszy jest adres aplikacji i kod QR; można je udostępnić razem przez menu telefonu albo pobrać bezpośrednio, pojedynczo,
 - **PDF** — cztery zdjęcia na stronę, też w całości, jsPDF ładowany dynamicznie,
 - **karta podsumowania** — kwadrat 1080×1080 z licznikiem, sumą wysokości i zakresem dat, na tle rysowanej sylwetki gór (to grafika, nie mapa), z `navigator.share` gdy dostępne,
 - **backup** — cały stan wraz ze zdjęciami do jednego pliku JSON i import z powrotem.
