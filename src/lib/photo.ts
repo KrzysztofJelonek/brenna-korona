@@ -1,8 +1,8 @@
 import exifr from 'exifr'
 import type { StoredPhoto } from '../types'
 
-const MAX_EDGE = 1600
-const QUALITY = 0.82
+const MAX_EDGE = 2200
+const QUALITY = 0.9
 
 /** Zmniejsza i konwertuje zdjęcie do WebP, żeby 20 sztuk zmieściło się w IndexedDB. */
 async function compress(file: File): Promise<Blob> {

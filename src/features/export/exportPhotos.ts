@@ -161,7 +161,7 @@ export async function containJpeg(blob: Blob, w: number, h: number): Promise<Uin
     ctx.fillStyle = '#eef4ea'
     ctx.fillRect(0, 0, w, h)
     drawContain(ctx, img, 0, 0, w, h)
-    const jpeg = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85))
+    const jpeg = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.92))
     if (!jpeg) throw new Error('nie udało się zakodować JPEG')
     return new Uint8Array(await jpeg.arrayBuffer())
   } finally {

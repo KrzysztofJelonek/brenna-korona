@@ -153,7 +153,7 @@ export function PeakSheet({ peak, onClose }: Props) {
       <div className="mt-5">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-xs font-medium text-muted">
-            Zdjęcia ({photos.length}) — na tle tabliczki wysokościowej
+            Zdjęcia ({photos.length}) — wybierz ujęcie z tabliczką do JPG i PDF
           </span>
         </div>
 
@@ -173,7 +173,7 @@ export function PeakSheet({ peak, onClose }: Props) {
                 <div className="absolute inset-x-0 bottom-0 flex justify-between bg-bg/80 px-1 py-1">
                   <button
                     onClick={() => setPrimaryPhoto(peak.id, photo.id)}
-                    title={isPrimary ? 'To zdjęcie trafi do kolażu' : 'Ustaw jako główne'}
+                    title={isPrimary ? 'To zdjęcie trafi do JPG i PDF' : 'Wybierz do JPG i PDF'}
                     className={`!min-h-0 rounded-lg p-1 ${isPrimary ? 'text-done' : 'text-muted'}`}
                   >
                     <IconStar className="h-4 w-4" filled={isPrimary} />

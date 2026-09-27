@@ -120,10 +120,10 @@ Lista 20 wierzchołków ze statusem (`do zdobycia` / `zaplanowany` / `zdobyty`),
 Panel szczytu obsługuje zdjęcia:
 
 - upload z aparatu lub galerii (`capture="environment"`),
-- kompresja w `canvas` → WebP ~300 KB, z fallbackiem na JPEG dla starszego Safari,
+- kompresja w `canvas` → WebP (dłuższa krawędź do 2200 px, jakość 0,9), z fallbackiem na JPEG dla starszego Safari,
 - odczyt EXIF przez `exifr`: **data** uzupełnia datę zdobycia, **GPS** porównywany ze współrzędnymi szczytu (ostrzeżenie powyżej 500 m),
 - ostrzeżenie, gdy data wypada poza terminem wydarzenia,
-- wiele zdjęć na szczyt, jedno oznaczone gwiazdką jako to, które trafi do kolażu.
+- wiele zdjęć na szczyt; jedno wybrane do JPG i PDF gwiazdką w karcie szczytu albo w ekranie eksportu.
 
 Panel pokazuje też **informacje o samej górze**: pasek zdjęć z Wikimedia Commons (dotknięcie otwiera pełny podgląd z podpisem, autorem i licencją), krótki opis zredagowany na podstawie Wikipedii (pasmo, co jest na szczycie, szlaki, historia, ciekawostki) oraz linki do Wikipedii i Mapy.com. Skąd są te treści, opisuje [3.5](#35-opisy-i-zdjęcia-szczytów).
 
@@ -170,7 +170,7 @@ Odległość i kierunek do najbliższych szczytów, propozycja zaliczenia po wej
 
 Najważniejsza funkcja użytkowa, bo odwzorowuje realny proces weryfikacji:
 
-- **kolaż** — 20 zdjęć w siatce 4×5 w polach pionowych 3:4, całe kadry bez przycinania, z podpisami (nazwa, wysokość, data), JPG gotowy do wklejenia na Facebooka,
+- **plansze JPG** — pięć obrazów 2160×3000 px po cztery duże zdjęcia, z całymi kadrami, podpisami i numeracją; na każdej planszy jest adres aplikacji i kod QR; pobierane jako ZIP do jednego posta na Facebooku,
 - **PDF** — cztery zdjęcia na stronę, też w całości, jsPDF ładowany dynamicznie,
 - **karta podsumowania** — kwadrat 1080×1080 z licznikiem, sumą wysokości i zakresem dat, na tle rysowanej sylwetki gór (to grafika, nie mapa), z `navigator.share` gdy dostępne,
 - **backup** — cały stan wraz ze zdjęciami do jednego pliku JSON i import z powrotem.
@@ -609,7 +609,7 @@ interface PeakProgress {      // localStorage
   conqueredAt?: string        // ISO
   ascentMode?: AscentMode
   photoIds: string[]          // klucze w IndexedDB
-  primaryPhotoId?: string     // to zdjęcie idzie do kolażu
+  primaryPhotoId?: string     // to zdjęcie idzie do plansz JPG i PDF
   note?: string
 }
 
@@ -662,7 +662,7 @@ interface StoredPhoto {       // IndexedDB
 | Co | Gdzie | Dlaczego |
 |---|---|---|
 | postęp, plan, trasa na dziś, własne miejsca, ustawienia | **localStorage** (`zustand/persist`, wersja 3 z migracjami) | kilkanaście kB, synchroniczny odczyt przy starcie |
-| zdjęcia | **IndexedDB** (`idb`) | localStorage ma limit ~5 MB i trzyma tylko stringi; 20 zdjęć × ~300 KB ≈ 6 MB |
+| zdjęcia | **IndexedDB** (`idb`) | localStorage ma limit ~5 MB i trzyma tylko stringi; galeria zdjęć potrzebuje więcej miejsca |
 | trasy | **cache w pamięci** | wynik deterministyczny, przeliczalny w każdej chwili |
 
 Wpychanie zdjęć do localStorage, choćby jako base64, to najczęstszy błąd w takich projektach — kończy się cichym `QuotaExceededError`. Zdjęcia idą do IndexedDB jako `Blob`, bez konwersji.
@@ -708,9 +708,9 @@ Pierwsza wersja miała motyw granatowo-fioletowy, „nocny", bo motywem edycji s
 
 Uwaga o Tailwindzie v4: `@apply` nie działa na klasach z `@layer components`, więc bazowy przycisk musiał trafić do `@utility btn`, a warianty (`btn-primary`, `btn-ghost`) dopiero go składają.
 
-**Kolaż i karta podsumowania zostają jasne niezależnie od motywu.** Trafiają na Facebooka, gdzie kremowo-zielona wersja odpowiada plakatowi — byłoby dziwne, gdyby dowód wyglądał inaczej u kogoś z trybem nocnym.
+**Plansze JPG i karta podsumowania mają stałe kolory niezależnie od motywu.** Trafiają na Facebooka i zachowują spójny wygląd.
 
-**Eksporty nie przycinają zdjęć.** Pierwsza wersja kadrowała każde zdjęcie do kwadratu (`object-fit: cover`). W terenie okazało się to błędem: tabliczki szczytowe wiszą wysoko, zdjęcia robi się telefonem pionowo, więc kwadrat ucinał właśnie górę kadru — czyli tabliczkę, czyli dowód wejścia. Pola w kolażu i w PDF są dziś pionowe (3:4), a zdjęcie wpisuje się w nie w całości (`contain`). Pasy obok kadru wypełnia rozmyta, przyciemniona kopia tego samego zdjęcia (`ctx.filter`, z zapasem poza polem, żeby rozmycie nie zassało przezroczystości zza krawędzi); przeglądarki bez filtrów canvasu dostają jednolite tło. W PDF pionowe pole jest wyższe, więc na stronę wchodzą 4 szczyty zamiast 6 — pięć stron zamiast czterech to uczciwa cena za nieucięty dowód.
+**Eksporty nie przycinają zdjęć.** Pierwsza wersja kadrowała każde zdjęcie do kwadratu (`object-fit: cover`). W terenie okazało się to błędem: tabliczki szczytowe wiszą wysoko, zdjęcia robi się telefonem pionowo, więc kwadrat ucinał właśnie górę kadru — czyli tabliczkę, czyli dowód wejścia. Plansze JPG mieszczą po cztery zdjęcia w dużych polach, a zdjęcie wpisuje się w nie w całości (`contain`). Pasy obok kadru wypełnia rozmyta, przyciemniona kopia tego samego zdjęcia (`ctx.filter`); przeglądarki bez filtrów canvasu dostają jednolite tło. PDF także mieści po 4 szczyty na stronie.
 
 ---
 

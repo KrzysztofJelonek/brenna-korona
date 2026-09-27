@@ -1,19 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
 import { PEAKS } from '../../data/peaks'
 import { useProgress, countDone, totalAscent } from '../../store/progress'
-import { renderCollage, renderSummaryCard } from './collage'
+import { renderSummaryCard } from './collage'
+import { renderProofBoards } from './proofBoards'
 import { renderPdf } from './pdf'
 import { photosForExport, type ExportFailure } from './exportPhotos'
 import { exportBackup, importBackup } from './backup'
 import { downloadBlob } from '../../lib/download'
 import { IconDownload, IconShare, IconUpload, IconWarn } from '../../ui/Icons'
+import { getAllPhotos } from '../../store/media'
+import { photoUrl } from '../../lib/photo'
+import type { StoredPhoto } from '../../types'
 
 type Busy = null | 'collage' | 'pdf' | 'card' | 'backup' | 'import'
 
 const PARTICIPANT_KEY = 'kgb-participant'
 
 export function ExportView() {
-  const { progress, plans, replaceState, markBackup } = useProgress()
+  const { progress, plans, replaceState, markBackup, setPrimaryPhoto } = useProgress()
   const [participant, setParticipant] = useState(() => localStorage.getItem(PARTICIPANT_KEY) ?? '')
   const [busy, setBusy] = useState<Busy>(null)
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
@@ -27,22 +31,27 @@ export function ExportView() {
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
   // Zdjęcia liczymy po bazie, tak jak pokazuje je karta szczytu i jak trafią do eksportu.
-  const [photoPeaks, setPhotoPeaks] = useState<Set<string> | null>(null)
+  const [storedPhotos, setStoredPhotos] = useState<StoredPhoto[] | null>(null)
   useEffect(() => {
     let alive = true
-    photosForExport(progress)
-      .then((map) => alive && setPhotoPeaks(new Set(map.keys())))
+    getAllPhotos()
+      .then((photos) => alive && setStoredPhotos(photos))
       .catch(() => {})
     return () => {
       alive = false
     }
   }, [progress])
+  const photoPeaks = storedPhotos ? new Set(storedPhotos.map((photo) => photo.peakId)) : null
   const hasPhoto = (peakId: string) =>
     photoPeaks ? photoPeaks.has(peakId) : (progress[peakId]?.photoIds.length ?? 0) > 0
 
   const done = countDone(progress)
   const withPhoto = PEAKS.filter((p) => hasPhoto(p.id)).length
   const missing = PEAKS.filter((p) => !hasPhoto(p.id))
+  const multiple = PEAKS.map((peak) => ({
+    peak,
+    photos: storedPhotos?.filter((photo) => photo.peakId === peak.id) ?? [],
+  })).filter(({ photos }) => photos.length > 1)
 
   const exportMessage = (ok: string, failed: ExportFailure[]) =>
     setMsg(
@@ -70,11 +79,16 @@ export function ExportView() {
 
   const makeCollage = () =>
     run('collage', async () => {
-      const { blob, failed } = await renderCollage({ progress, photos: await photosForExport(progress), participant })
+      const { boards, failed } = await renderProofBoards({ progress, photos: await photosForExport(progress), participant })
+      const { zipSync } = await import('fflate')
+      const entries = Object.fromEntries(
+        await Promise.all(boards.map(async (board) => [board.name, new Uint8Array(await board.blob.arrayBuffer())] as const)),
+      )
+      const blob = new Blob([zipSync(entries, { level: 0 }) as BlobPart], { type: 'application/zip' })
       if (preview) URL.revokeObjectURL(preview)
-      setPreview(URL.createObjectURL(blob))
-      downloadBlob(blob, 'korona-gor-brennej-2026-komplet.jpg')
-      exportMessage('Kolaż pobrany. Wrzuć go w dyskusję wydarzenia na Facebooku.', failed)
+      setPreview(URL.createObjectURL(boards[0].blob))
+      downloadBlob(blob, 'korona-gor-brennej-2026-plansze-jpg.zip')
+      exportMessage('Pobrano 5 plansz JPG w ZIP. Rozpakuj i dodaj wszystkie do jednego posta na Facebooku.', failed)
     })
 
   const makePdf = () =>
@@ -138,8 +152,42 @@ export function ExportView() {
         <h2 className="text-sm font-semibold">Komplet zdjęć do weryfikacji</h2>
         <p className="mt-1 text-xs text-muted">
           Organizator weryfikuje zgłoszenie na podstawie kompletu zdjęć opublikowanego w dyskusji wydarzenia
-          na Facebooku. Aplikacja składa je w jeden plik.
+          na Facebooku. Pięć plansz po cztery duże zdjęcia tworzy jedną serię do posta.
         </p>
+
+        {multiple.length > 0 && (
+          <div className="mt-4 rounded-xl border border-line bg-tint p-3">
+            <h3 className="text-sm font-semibold">Wybierz zdjęcia do JPG i PDF</h3>
+            <p className="mt-1 text-xs text-muted">Zaznacz jedno zdjęcie dla każdego szczytu. Wybór obowiązuje w obu eksportach.</p>
+            <div className="mt-3 space-y-4">
+              {multiple.map(({ peak, photos }) => {
+                const preferredIds = [progress[peak.id]?.primaryPhotoId, ...(progress[peak.id]?.photoIds ?? [])]
+                const selectedId = preferredIds.find((id) => photos.some((photo) => photo.id === id))
+                  ?? [...photos].sort((a, b) => a.addedAt.localeCompare(b.addedAt))[0].id
+                return (
+                  <fieldset key={peak.id}>
+                    <legend className="mb-2 text-xs font-semibold">{peak.no}. {peak.name}</legend>
+                    <div className="grid grid-cols-3 gap-2">
+                      {photos.map((photo, index) => (
+                        <label key={photo.id} className={`cursor-pointer overflow-hidden rounded-lg border-2 bg-surface focus-within:ring-2 focus-within:ring-brand ${selectedId === photo.id ? 'border-brand' : 'border-line'}`}>
+                          <input
+                            type="radio"
+                            name={`export-photo-${peak.id}`}
+                            checked={selectedId === photo.id}
+                            onChange={() => setPrimaryPhoto(peak.id, photo.id)}
+                            className="sr-only"
+                          />
+                          <img src={photoUrl(photo)} alt={`${peak.name}, zdjęcie ${index + 1}`} className="aspect-square w-full bg-tint object-contain" loading="lazy" />
+                          <span className="block px-1 py-1 text-center text-[10px] font-medium">{selectedId === photo.id ? '✓ Do eksportu' : `Zdjęcie ${index + 1}`}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {missing.length > 0 && (
           <p className="mt-3 flex items-start gap-2 rounded-xl bg-warn-soft px-3 py-2.5 text-xs text-warn">
@@ -153,12 +201,13 @@ export function ExportView() {
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <button onClick={makeCollage} disabled={busy !== null} className="btn-primary">
-            <IconDownload className="h-4 w-4" /> {busy === 'collage' ? 'składam…' : 'Kolaż JPG'}
+            <IconDownload className="h-4 w-4" /> {busy === 'collage' ? 'składam…' : 'Plansze JPG (ZIP)'}
           </button>
           <button onClick={makePdf} disabled={busy !== null} className="btn-ghost">
             <IconDownload className="h-4 w-4" /> {busy === 'pdf' ? 'generuję…' : 'PDF'}
           </button>
         </div>
+        <p className="mt-2 text-[11px] text-muted">ZIP zawiera 5 plików JPG (2160 × 3000 px), każdy z adresem aplikacji i kodem QR. Rozpakuj je i dodaj razem do posta. Zdjęcia przesłane wcześniej możesz wgrać ponownie, aby skorzystać z wyższej jakości zapisu.</p>
       </section>
 
       <section className="card px-4 py-4">
